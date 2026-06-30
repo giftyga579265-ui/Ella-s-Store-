@@ -1,0 +1,183 @@
+{
+  "entities": {
+    "Product": {
+      "title": "Product",
+      "description": "Store products for sale",
+      "type": "object",
+      "properties": {
+        "id": { "type": "integer" },
+        "name": { "type": "string" },
+        "price": { "type": "number" },
+        "category": { "type": "string" },
+        "image": { "type": "string" },
+        "stock": { "type": "integer" },
+        "description": { "type": "string" }
+      },
+      "required": ["id", "name", "price"]
+    },
+    "Customer": {
+      "title": "Customer",
+      "description": "Registered customer profile",
+      "type": "object",
+      "properties": {
+        "id": { "type": "integer" },
+        "name": { "type": "string" },
+        "email": { "type": "string" },
+        "phone": { "type": "string" },
+        "signedUp": { "type": "boolean" },
+        "signUpDate": { "type": "string" }
+      },
+      "required": ["id", "name"]
+    },
+    "Order": {
+      "title": "Order",
+      "description": "Frontend purchase orders",
+      "type": "object",
+      "properties": {
+        "id": { "type": "string" },
+        "customer": { "type": "string" },
+        "customerId": { "type": "integer" },
+        "items": { "type": "string" },
+        "total": { "type": "number" },
+        "status": { "type": "string" },
+        "date": { "type": "string" }
+      },
+      "required": ["id", "customer", "items", "total"]
+    },
+    "Payment": {
+      "title": "Payment",
+      "description": "MoMo or card payment records",
+      "type": "object",
+      "properties": {
+        "id": { "type": "string" },
+        "customer": { "type": "string" },
+        "amount": { "type": "number" },
+        "method": { "type": "string" },
+        "status": { "type": "string" },
+        "date": { "type": "string" }
+      },
+      "required": ["id", "customer", "amount"]
+    },
+    "CustomerLocation": {
+      "title": "CustomerLocation",
+      "description": "Customer delivery coordinates",
+      "type": "object",
+      "properties": {
+        "id": { "type": "integer" },
+        "customerId": { "type": "integer" },
+        "customerName": { "type": "string" },
+        "region": { "type": "string" },
+        "city": { "type": "string" },
+        "address": { "type": "string" }
+      },
+      "required": ["id", "customerId", "customerName"]
+    },
+    "CustomerInquiry": {
+      "title": "CustomerInquiry",
+      "description": "Styling & consultation inquiries",
+      "type": "object",
+      "properties": {
+        "id": { "type": "integer" },
+        "customerName": { "type": "string" },
+        "customerEmail": { "type": "string" },
+        "customerPhone": { "type": "string" },
+        "service": { "type": "string" },
+        "message": { "type": "string" },
+        "date": { "type": "string" },
+        "status": { "type": "string" }
+      },
+      "required": ["id", "customerName"]
+    },
+    "DiscountCode": {
+      "title": "DiscountCode",
+      "description": "Coupon discount codes",
+      "type": "object",
+      "properties": {
+        "id": { "type": "integer" },
+        "code": { "type": "string" },
+        "discount": { "type": "integer" },
+        "type": { "type": "string" },
+        "active": { "type": "boolean" }
+      },
+      "required": ["id", "code", "discount"]
+    },
+    "MediaFile": {
+      "title": "MediaFile",
+      "description": "Gallery images and files",
+      "type": "object",
+      "properties": {
+        "id": { "type": "integer" },
+        "name": { "type": "string" },
+        "url": { "type": "string" },
+        "type": { "type": "string" },
+        "uploadedAt": { "type": "string" }
+      },
+      "required": ["id", "name", "url"]
+    },
+    "HomepageSettings": {
+      "title": "HomepageSettings",
+      "description": "Dynamic homepage style configuration",
+      "type": "object",
+      "properties": {
+        "title": { "type": "string" },
+        "tagline": { "type": "string" },
+        "themeColor": { "type": "string" },
+        "heroImage": { "type": "string" }
+      }
+    },
+    "ActivityLog": {
+      "title": "ActivityLog",
+      "description": "Auditable analytics visitor logs",
+      "type": "object",
+      "properties": {
+        "id": { "type": "string" },
+        "timestamp": { "type": "string" },
+        "description": { "type": "string" },
+        "type": { "type": "string" },
+        "username": { "type": "string" }
+      }
+    }
+  },
+  "firestore": {
+    "/products/{productId}": {
+      "schema": "Product",
+      "description": "Collection of store items"
+    },
+    "/customers/{customerId}": {
+      "schema": "Customer",
+      "description": "List of CRM customer profiles"
+    },
+    "/orders/{orderId}": {
+      "schema": "Order",
+      "description": "Frontend purchase orders"
+    },
+    "/payments/{paymentId}": {
+      "schema": "Payment",
+      "description": "MoMo or card payment history"
+    },
+    "/locations/{locationId}": {
+      "schema": "CustomerLocation",
+      "description": "Delivery shipping address list"
+    },
+    "/inquiries/{inquiryId}": {
+      "schema": "CustomerInquiry",
+      "description": "Style consultation requests"
+    },
+    "/discounts/{discountId}": {
+      "schema": "DiscountCode",
+      "description": "Promotional coupon parameters"
+    },
+    "/media/{mediaId}": {
+      "schema": "MediaFile",
+      "description": "Product gallery media storage assets"
+    },
+    "/settings/homepage": {
+      "schema": "HomepageSettings",
+      "description": "Dynamic theme styling configurations"
+    },
+    "/activity_logs/{logId}": {
+      "schema": "ActivityLog",
+      "description": "Storefront tracking user activity logs"
+    }
+  }
+}

@@ -1,0 +1,6 @@
+{
+  "name": "Ella's Store",
+  "description": "An elegant fashion and accessories boutique in Lapaz, Accra, Ghana, with interactive shopping, MTN Mobile Money checkout, user activity analytics, and a real-time Gemini styling assistant.",
+  "requestFramePermissions": [],
+  "majorCapabilities": ["MAJOR_CAPABILITY_SERVER_SIDE_GEMINI_API"]
+}
