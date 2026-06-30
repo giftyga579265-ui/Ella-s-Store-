@@ -11,9 +11,12 @@ import {
   AlertCircle, 
   ArrowRight,
   PackageCheck,
-  Truck
+  Truck,
+  Printer
 } from "lucide-react";
 import { motion, AnimatePresence } from "motion/react";
+import jsPDF from "jspdf";
+import autoTable from "jspdf-autotable";
 
 interface OrderHistoryProps {
   orders: Order[];
@@ -62,6 +65,26 @@ export default function OrderHistory({
       default:
         return 0; // Cancelled or unknown
     }
+  };
+
+  const generateInvoicePDF = (order: Order) => {
+    const doc = new jsPDF();
+    doc.text(`Invoice - Order #${order.id.slice(-6).toUpperCase()}`, 14, 20);
+    doc.text(`Date: ${order.date}`, 14, 30);
+    doc.text(`Customer: ${order.customer}`, 14, 40);
+    doc.text(`Status: ${order.status.toUpperCase()}`, 14, 50);
+
+    autoTable(doc, {
+      head: [['Item']],
+      body: order.items.map(item => [item]),
+      startY: 60,
+    });
+
+    // @ts-ignore
+    const finalY = (doc as any).lastAutoTable.finalY || 70;
+    doc.text(`Total: GH₵ ${order.total.toLocaleString()}`, 14, finalY + 10);
+    
+    doc.save(`Invoice_${order.id.slice(-6).toUpperCase()}.pdf`);
   };
 
   return (
@@ -161,11 +184,20 @@ export default function OrderHistory({
                             </div>
                           </div>
                           
-                          <div className="text-right">
-                            <span className="text-sm font-black text-black">
-                              GH₵ {order.total.toLocaleString()}
-                            </span>
-                            <p className="text-[9px] text-neutral-400 uppercase tracking-widest font-black">Total Paid</p>
+                          <div className="text-right flex flex-col items-end gap-2">
+                            <div>
+                              <span className="text-sm font-black text-black">
+                                GH₵ {order.total.toLocaleString()}
+                              </span>
+                              <p className="text-[9px] text-neutral-400 uppercase tracking-widest font-black">Total Paid</p>
+                            </div>
+                            <button 
+                              onClick={() => generateInvoicePDF(order)}
+                              className="flex items-center gap-1 text-[10px] bg-neutral-100 hover:bg-neutral-200 text-neutral-600 px-2 py-1 rounded-md transition-colors cursor-pointer"
+                            >
+                              <Printer className="w-3 h-3" />
+                              Print Invoice
+                            </button>
                           </div>
                         </div>
 
