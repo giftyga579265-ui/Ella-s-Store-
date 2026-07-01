@@ -98,9 +98,12 @@ export default function CharityManager({ charityData, onSetCharityData, onShowTo
       <div className="grid gap-4">
         {charityData.map(charity => (
           <div key={charity.id} className="bg-white p-4 rounded-xl border flex items-center justify-between">
-            <div>
-              <h3 className="font-bold">{charity.name}</h3>
-              <p className="text-sm text-neutral-500">{charity.description}</p>
+            <div className="flex gap-4 items-center">
+              {charity.imageUrl && <img src={charity.imageUrl} alt={charity.name} className="w-16 h-16 object-cover rounded-lg" />}
+              <div>
+                <h3 className="font-bold">{charity.name}</h3>
+                <p className="text-sm text-neutral-500">{charity.description}</p>
+              </div>
             </div>
             <div className="flex gap-2">
               <button onClick={() => startEdit(charity)} className="text-blue-500"><Edit /></button>

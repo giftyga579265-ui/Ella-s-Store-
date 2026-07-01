@@ -1539,55 +1539,60 @@ export default function App() {
           >
             <X className="w-5 h-5" />
           </button>
-          <div className="flex flex-col gap-8 text-center text-xl font-bold tracking-wider uppercase text-neutral-800 w-full max-w-sm">
-            <a 
+          <motion.div 
+            variants={{
+              hidden: { opacity: 0 },
+              visible: { opacity: 1, transition: { staggerChildren: 0.05 } }
+            }}
+            initial="hidden"
+            animate="visible"
+            className="flex flex-col gap-4 text-center text-xl font-bold tracking-wider uppercase text-neutral-800 w-full max-w-sm"
+          >
+            <motion.a 
+              variants={{ hidden: { opacity: 0, y: 10 }, visible: { opacity: 1, y: 0 } }}
               href="#collections" 
               onClick={() => setShowMobileMenu(false)}
               className="group flex items-center justify-between py-4 px-6 rounded-2xl hover:bg-neutral-50 transition-all text-neutral-900"
             >
               <span className="text-lg font-medium tracking-tight">Collections</span>
               <span className="text-neutral-300 group-hover:text-indigo-600 transition-colors">→</span>
-            </a>
-            <a 
+            </motion.a>
+            <motion.a 
+              variants={{ hidden: { opacity: 0, y: 10 }, visible: { opacity: 1, y: 0 } }}
               href="#about" 
               onClick={() => setShowMobileMenu(false)}
               className="group flex items-center justify-between py-4 px-6 rounded-2xl hover:bg-neutral-50 transition-all text-neutral-900"
             >
               <span className="text-lg font-medium tracking-tight">About</span>
               <span className="text-neutral-300 group-hover:text-indigo-600 transition-colors">→</span>
-            </a>
-            <a 
+            </motion.a>
+            <motion.a 
+              variants={{ hidden: { opacity: 0, y: 10 }, visible: { opacity: 1, y: 0 } }}
               href="#process" 
               onClick={() => setShowMobileMenu(false)}
               className="group flex items-center justify-between py-4 px-6 rounded-2xl hover:bg-neutral-50 transition-all text-neutral-900"
             >
               <span className="text-lg font-medium tracking-tight">Services</span>
               <span className="text-neutral-300 group-hover:text-indigo-600 transition-colors">→</span>
-            </a>
-            <a 
+            </motion.a>
+            <motion.a 
+              variants={{ hidden: { opacity: 0, y: 10 }, visible: { opacity: 1, y: 0 } }}
               href="#events" 
               onClick={() => setShowMobileMenu(false)}
               className="group flex items-center justify-between py-4 px-6 rounded-2xl hover:bg-neutral-50 transition-all text-neutral-900"
             >
               <span className="text-lg font-medium tracking-tight">Events</span>
               <span className="text-neutral-300 group-hover:text-indigo-600 transition-colors">→</span>
-            </a>
-            <a 
+            </motion.a>
+            <motion.a 
+              variants={{ hidden: { opacity: 0, y: 10 }, visible: { opacity: 1, y: 0 } }}
               href="#shop" 
               onClick={() => setShowMobileMenu(false)}
               className="group flex items-center justify-between py-4 px-6 rounded-2xl hover:bg-neutral-50 transition-all text-neutral-900"
             >
               <span className="text-lg font-medium tracking-tight">Shop</span>
               <span className="text-neutral-300 group-hover:text-indigo-600 transition-colors">→</span>
-            </a>
-            <a 
-              href="#contact" 
-              onClick={() => setShowMobileMenu(false)}
-              className="group flex items-center justify-between py-4 px-6 rounded-2xl hover:bg-neutral-50 transition-all text-neutral-900"
-            >
-              <span className="text-lg font-medium tracking-tight">Contact</span>
-              <span className="text-neutral-300 group-hover:text-indigo-600 transition-colors">→</span>
-            </a>
+            </motion.a>
             <button 
               onClick={() => {
                 setShowMobileMenu(false);
@@ -1605,6 +1610,32 @@ export default function App() {
               <div className="flex items-center gap-3">
                 <Clock className="w-5 h-5 text-indigo-500" />
                 <span className="text-lg font-medium tracking-tight">Chart History</span>
+              </div>
+              <span className="text-neutral-300 group-hover:text-indigo-600 transition-colors">→</span>
+            </button>
+            <button 
+              onClick={() => {
+                setShowMobileMenu(false);
+                setShowCharity(true);
+              }}
+              className="group flex items-center justify-between py-4 px-6 rounded-2xl hover:bg-emerald-50 transition-all text-emerald-900 w-full"
+            >
+              <div className="flex items-center gap-3">
+                <Heart className="w-5 h-5 text-emerald-500" />
+                <span className="text-lg font-medium tracking-tight">Charity Donations</span>
+              </div>
+              <span className="text-emerald-300 group-hover:text-emerald-600 transition-colors">→</span>
+            </button>
+            <button 
+              onClick={() => {
+                setShowMobileMenu(false);
+                document.getElementById('contact')?.scrollIntoView({ behavior: 'smooth' });
+              }}
+              className="group flex items-center justify-between py-4 px-6 rounded-2xl hover:bg-neutral-50 transition-all text-neutral-900 w-full"
+            >
+              <div className="flex items-center gap-3">
+                <Mail className="w-5 h-5 text-neutral-500" />
+                <span className="text-lg font-medium tracking-tight">Contact</span>
               </div>
               <span className="text-neutral-300 group-hover:text-indigo-600 transition-colors">→</span>
             </button>
@@ -1632,20 +1663,7 @@ export default function App() {
             >
               Media Gallery
             </button>
-            <button 
-              onClick={() => {
-                setShowMobileMenu(false);
-                setShowCharity(true);
-              }}
-              className="group flex items-center justify-between py-4 px-6 rounded-2xl hover:bg-emerald-50 transition-all text-emerald-900 w-full"
-            >
-              <div className="flex items-center gap-3">
-                <Heart className="w-5 h-5 text-emerald-500" />
-                <span className="text-lg font-medium tracking-tight">Charity Donations</span>
-              </div>
-              <span className="text-emerald-300 group-hover:text-emerald-600 transition-colors">→</span>
-            </button>
-          </div>
+          </motion.div>
         </div>
       )}
 

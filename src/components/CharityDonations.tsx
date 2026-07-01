@@ -1,6 +1,9 @@
 import React, { useState } from "react";
 import { Charity } from "../types";
 import { Heart, CreditCard, Smartphone } from "lucide-react";
+import { loadStripe } from "@stripe/stripe-js";
+
+const stripePromise = loadStripe(import.meta.env.VITE_STRIPE_PUBLISHABLE_KEY || "");
 
 interface CharityDonationsProps {
   charityData: Charity[];
@@ -10,21 +13,39 @@ interface CharityDonationsProps {
 
 export default function CharityDonations({ charityData, onLogActivity, onShowToast }: CharityDonationsProps) {
   const [selectedCharity, setSelectedCharity] = useState<Charity | null>(null);
+  const [donationAmount, setDonationAmount] = useState<string>("10");
+  const [loading, setLoading] = useState(false);
 
-  const handleDonate = (charity: Charity) => {
+  const handleDonateInit = (charity: Charity) => {
     setSelectedCharity(charity);
     onLogActivity(`Selected charity for donation: ${charity.name}`, "user_action");
   };
 
-  const handlePayment = (method: 'MTN' | 'GooglePay') => {
+  const handlePayment = async (method: 'MTN' | 'GooglePay') => {
     if (!selectedCharity) return;
     
+    setLoading(true);
     onLogActivity(`Initiated payment for ${selectedCharity.name} via ${method}`, "user_action");
-    onShowToast("Payment Initiated", `Processing donation of ${selectedCharity.name} via ${method}...`, "success");
     
-    // In a real implementation, this would trigger an API call to a payment gateway
-    // and redirect the user.
-    setSelectedCharity(null);
+    try {
+      const response = await fetch("/api/create-checkout-session", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ amount: parseFloat(donationAmount), charityName: selectedCharity.name }),
+      });
+
+      const { url } = await response.json();
+      if (url) {
+        window.location.href = url;
+      } else {
+        onShowToast("Payment Error", "Failed to initiate payment.", "error");
+      }
+    } catch (error) {
+      onShowToast("Payment Error", "An error occurred.", "error");
+    } finally {
+      setLoading(false);
+      setSelectedCharity(null);
+    }
   };
 
   return (
@@ -44,7 +65,7 @@ export default function CharityDonations({ charityData, onLogActivity, onShowToa
               <div className="flex justify-between items-center pt-2">
                 <span className="font-bold">₵{charity.currentAmount} / ₵{charity.targetAmount}</span>
                 <button 
-                  onClick={() => handleDonate(charity)}
+                  onClick={() => handleDonateInit(charity)}
                   className="bg-indigo-600 text-white px-6 py-2 rounded-full text-xs font-bold hover:bg-indigo-500 cursor-pointer"
                 >
                   Donate
@@ -59,20 +80,27 @@ export default function CharityDonations({ charityData, onLogActivity, onShowToa
         <div className="fixed inset-0 bg-black/50 backdrop-blur-sm z-50 flex items-center justify-center p-6">
           <div className="bg-white p-8 rounded-3xl max-w-md w-full space-y-6">
             <h3 className="font-sans text-lg font-bold">Donate to {selectedCharity.name}</h3>
+            <input 
+              type="number" 
+              value={donationAmount} 
+              onChange={e => setDonationAmount(e.target.value)} 
+              className="w-full p-2 border rounded"
+              placeholder="Amount"
+            />
             <div className="space-y-4">
-              <button onClick={() => handlePayment('MTN')} className="w-full p-4 border rounded-xl flex items-center gap-3 hover:bg-neutral-50 cursor-pointer">
+              <button disabled={loading} onClick={() => handlePayment('MTN')} className="w-full p-4 border rounded-xl flex items-center gap-3 hover:bg-neutral-50 cursor-pointer disabled:opacity-50">
                 <Smartphone className="text-emerald-600" />
                 <div>
                   <p className="font-bold">MTN Mobile Money</p>
-                  <p className="text-xs text-neutral-500">0248899637</p>
+                  <p className="text-xs text-neutral-500">{loading ? "Processing..." : "0248899637"}</p>
                 </div>
               </button>
-              <button onClick={() => handlePayment('GooglePay')} className="w-full p-4 border rounded-xl flex items-center gap-3 hover:bg-neutral-50 cursor-pointer">
+              <button disabled={loading} onClick={() => handlePayment('GooglePay')} className="w-full p-4 border rounded-xl flex items-center gap-3 hover:bg-neutral-50 cursor-pointer disabled:opacity-50">
                 <CreditCard className="text-blue-600" />
-                <p className="font-bold">Google Pay</p>
+                <p className="font-bold">{loading ? "Processing..." : "Google Pay"}</p>
               </button>
             </div>
-            <button onClick={() => setSelectedCharity(null)} className="text-neutral-500 text-xs hover:underline cursor-pointer">Cancel</button>
+            <button disabled={loading} onClick={() => setSelectedCharity(null)} className="text-neutral-500 text-xs hover:underline cursor-pointer disabled:opacity-50">Cancel</button>
           </div>
         </div>
       )}
