@@ -9,8 +9,11 @@ import {
   MapPin, HelpCircle, Activity, Tag, Mail, Image as ImageIcon, Paintbrush, 
   LogOut, Plus, Trash2, Edit, Eye, Check, CheckCircle, TrendingUp, DollarSign,
   Download, Search, Sparkles, MessageCircle, AlertTriangle, Maximize2, Minimize2, X,
-  Database, Utensils, Calendar, Star, Truck
+  Database, Utensils, Calendar, Star, Truck, Printer
 } from "lucide-react";
+import jsPDF from "jspdf";
+import autoTable from "jspdf-autotable";
+import { LineChart, Line, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer } from "recharts";
 
 interface AdminDashboardProps {
   products: Product[];
@@ -118,6 +121,8 @@ export default function AdminDashboard({
 
   // 6. Homepage Customization
   const [homeHeroBg, setHomeHeroBg] = useState(homepageSettings.heroBackground);
+  const [homeHeroTitle, setHomeHeroTitle] = useState(homepageSettings.heroTitle || "Welcome to Ella's");
+  const [homeHeroDescription, setHomeHeroDescription] = useState(homepageSettings.heroDescription || "Discover the latest fashion");
   const [homeLayout, setHomeLayout] = useState(homepageSettings.productLayout);
   const [homePrimary, setHomePrimary] = useState(homepageSettings.primaryColor);
   const [homeSecondary, setHomeSecondary] = useState(homepageSettings.secondaryColor);
@@ -144,6 +149,38 @@ export default function AdminDashboard({
   const revenue = useMemo(() => orders.reduce((sum, o) => sum + o.total, 0), [orders]);
   const activeCustomers = useMemo(() => customers.filter(c => c.signedUp).length, [customers]);
   const pendingInquiries = useMemo(() => inquiries.filter(i => i.status === 'new').length, [inquiries]);
+
+  const economicData = useMemo(() => {
+    const data = orders.reduce((acc, order) => {
+        if (!acc[order.customer]) {
+            acc[order.customer] = 0;
+        }
+        acc[order.customer] += order.total;
+        return acc;
+    }, {} as Record<string, number>);
+    return Object.entries(data);
+  }, [orders]);
+
+  const dailyData = useMemo(() => {
+    const data: Record<string, number> = {};
+    orders.forEach(o => {
+      const date = o.date.split('T')[0];
+      data[date] = (data[date] || 0) + o.total;
+    });
+    return Object.entries(data).map(([date, amount]) => ({ date, amount })).sort((a,b) => a.date.localeCompare(b.date));
+  }, [orders]);
+
+  const handlePrintEconomicReport = () => {
+    const csvContent = "data:text/csv;charset=utf-8," 
+      + ["Date,Total"].concat(dailyData.map(d => `${d.date},${d.amount}`)).join("\n");
+    const encodedUri = encodeURI(csvContent);
+    const link = document.createElement("a");
+    link.setAttribute("href", encodedUri);
+    link.setAttribute("download", "economic_report.csv");
+    document.body.appendChild(link);
+    link.click();
+    document.body.removeChild(link);
+  };
 
   // Food Metrics
   const foodProducts = useMemo(() => products.filter(p => p.category === 'food'), [products]);
@@ -559,6 +596,8 @@ export default function AdminDashboard({
   const handleSaveHomepageCustomization = () => {
     const updated: HomepageSettings = {
       heroBackground: homeHeroBg || homepageSettings.heroBackground,
+      heroTitle: homeHeroTitle,
+      heroDescription: homeHeroDescription,
       productLayout: homeLayout,
       primaryColor: homePrimary,
       secondaryColor: homeSecondary,
@@ -569,7 +608,7 @@ export default function AdminDashboard({
     };
 
     onSetHomepageSettings(updated);
-    onShowToast("Design & MoMo Configurations Active", "Homepage colors, assets, and MTN MoMo payment options saved permanently.", "success");
+    onShowToast("Design & MoMo Configurations Active", "Homepage colors, assets, MTN MoMo payment options, and hero text saved permanently.", "success");
     onLogActivity("Updated homepage template and custom MTN Mobile Money payment settings", "admin_action");
   };
 
@@ -583,6 +622,28 @@ export default function AdminDashboard({
     downloadAnchor.click();
     downloadAnchor.remove();
     onShowToast("Logs Exported", "Activity tracker logs downloaded successfully.", "success");
+  };
+
+  const generateOrderReportPDF = (order: Order, customer: Customer | undefined) => {
+    const doc = new jsPDF();
+    doc.text(`Order Report - #${order.id}`, 14, 20);
+    doc.text(`Customer: ${order.customer}`, 14, 30);
+    doc.text(`Phone: ${customer?.phone || 'N/A'}`, 14, 40);
+    doc.text(`Date: ${order.date}`, 14, 50);
+    doc.text(`Status: ${order.status.toUpperCase()}`, 14, 60);
+
+    autoTable(doc, {
+      head: [['Item']],
+      body: order.items.map(item => [item]),
+      startY: 70,
+    });
+
+    // @ts-ignore
+    const finalY = (doc as any).lastAutoTable.finalY || 80;
+    doc.text(`Total: ₵${order.total.toFixed(2)}`, 14, finalY + 10);
+    
+    doc.save(`Order_Report_${order.id}.pdf`);
+    onShowToast("Report Generated", `Order report for ${order.id} downloaded.`, "success");
   };
 
   const PageToggleBtn = () => (
@@ -739,6 +800,7 @@ export default function AdminDashboard({
                 { id: "events", label: "Store Events", icon: Calendar, count: events?.length || 0 },
                 { id: "reviews", label: "Customer Reviews", icon: Star, count: reviews?.length || 0 },
                 { id: "delivery", label: "Delivery Tracker", icon: Truck, count: deliveries?.filter(d=>d.status!=='delivered' && d.status!=='failed').length || 0 },
+                { id: "economics", label: "Economic State", icon: TrendingUp },
                 { id: "customize", label: "Homepage Design", icon: Paintbrush },
               ].map(tab => {
                 const Icon = tab.icon;
@@ -950,6 +1012,16 @@ export default function AdminDashboard({
                                     className="bg-green-600 text-white px-2.5 py-1 rounded-lg font-bold text-[10px]"
                                   >
                                     Fulfill
+                                  </button>
+                                  <button
+                                    onClick={() => {
+                                      const cust = customers.find(c => c.name === order.customer);
+                                      generateOrderReportPDF(order, cust);
+                                    }}
+                                    className="bg-neutral-100 text-neutral-600 p-1.5 rounded-lg hover:bg-neutral-200"
+                                    title="Print Invoice"
+                                  >
+                                    <Printer className="w-4 h-4" />
                                   </button>
                                 </>
                               )}
@@ -1178,6 +1250,65 @@ export default function AdminDashboard({
                     </tbody>
                   </table>
                 </div>
+              </div>
+            </div>
+          )}
+
+          {/* TAB: Economic State */}
+          {activeTab === "economics" && (
+            <div className="space-y-6 animate-in fade-in duration-300">
+              <div className="flex items-center justify-between border-b border-neutral-250 pb-4">
+                <div>
+                  <h2 className="font-serif text-2xl text-neutral-900 font-medium">Economic State</h2>
+                  <p className="text-xs text-neutral-500">Overview of collections and performance.</p>
+                </div>
+                <button
+                  onClick={handlePrintEconomicReport}
+                  className="px-4 py-2 bg-neutral-900 text-white rounded-lg text-xs font-bold flex items-center gap-2 hover:bg-neutral-800 transition-colors"
+                >
+                  <Printer className="w-4 h-4" />
+                  Print Economic Report
+                </button>
+              </div>
+
+              <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
+                <div className="bg-indigo-50 p-6 rounded-2xl border border-indigo-100 shadow-sm">
+                  <h3 className="text-xs font-bold text-indigo-900 uppercase tracking-wider">Total Collected</h3>
+                  <p className="text-4xl font-black text-indigo-950 mt-2">₵{revenue.toFixed(2)}</p>
+                </div>
+                <div className="col-span-2 bg-white p-6 rounded-2xl border border-neutral-200/60 shadow-sm">
+                  <h3 className="text-xs font-bold text-neutral-900 uppercase tracking-wider mb-4">Daily Performance</h3>
+                  <div className="h-48">
+                    <ResponsiveContainer width="100%" height="100%">
+                      <LineChart data={dailyData}>
+                        <CartesianGrid strokeDasharray="3 3" />
+                        <XAxis dataKey="date" fontSize={10} />
+                        <YAxis fontSize={10} />
+                        <Tooltip />
+                        <Line type="monotone" dataKey="amount" stroke="#4f46e5" strokeWidth={2} />
+                      </LineChart>
+                    </ResponsiveContainer>
+                  </div>
+                </div>
+              </div>
+
+              <div className="bg-white rounded-2xl border border-neutral-200/60 overflow-hidden shadow-sm">
+                  <table className="w-full border-collapse text-left text-xs">
+                    <thead>
+                      <tr className="bg-neutral-950 text-white font-serif uppercase tracking-wider">
+                        <th className="p-4">Customer Name</th>
+                        <th className="p-4">Total Collected</th>
+                      </tr>
+                    </thead>
+                    <tbody>
+                      {economicData.map(([name, total]) => (
+                        <tr key={name} className="hover:bg-neutral-50/50">
+                          <td className="p-4 font-semibold text-neutral-800">{name}</td>
+                          <td className="p-4 font-black font-mono text-neutral-900">₵{total.toFixed(2)}</td>
+                        </tr>
+                      ))}
+                    </tbody>
+                  </table>
               </div>
             </div>
           )}
@@ -2338,6 +2469,30 @@ export default function AdminDashboard({
                   </div>
                 </div>
 
+                {/* 3.5 Hero Text Content */}
+                <div className="space-y-3">
+                  <h3 className="font-serif text-base text-neutral-900 border-b border-neutral-100 pb-1.5">3.5 Hero Text Content</h3>
+                  <div className="space-y-4">
+                    <div className="space-y-1">
+                      <label className="text-xs font-semibold text-neutral-600 block">Hero Title</label>
+                      <input
+                        type="text"
+                        value={homeHeroTitle}
+                        onChange={e => setHomeHeroTitle(e.target.value)}
+                        className="w-full px-4 py-2 border border-neutral-200 rounded-xl text-xs font-bold focus:outline-none"
+                      />
+                    </div>
+                    <div className="space-y-1">
+                      <label className="text-xs font-semibold text-neutral-600 block">Hero Description</label>
+                      <textarea
+                        value={homeHeroDescription}
+                        onChange={e => setHomeHeroDescription(e.target.value)}
+                        className="w-full px-4 py-2 border border-neutral-200 rounded-xl text-xs font-bold focus:outline-none h-20"
+                      />
+                    </div>
+                  </div>
+                </div>
+
                 {/* 4. MTN Mobile Money Gateway Setup */}
                 <div className="space-y-4 pt-2 border-t border-neutral-100">
                   <h3 className="font-serif text-base text-neutral-900 pb-1.5 flex items-center gap-1.5 border-b border-neutral-100">
@@ -2773,6 +2928,59 @@ export default function AdminDashboard({
                       ))}
                   </div>
                 )}
+              </div>
+            </div>
+          )}
+
+          {/* TAB 16: Direct Logistics */}
+          {activeTab === "direct" && (
+            <div className="flex flex-col h-[calc(100vh-100px)] animate-in fade-in duration-300">
+              <div className="border-b border-neutral-250 pb-4 flex justify-between items-center mb-6">
+                <div>
+                  <h2 className="font-serif text-2xl text-neutral-900 font-medium">Direct Customer Logistics</h2>
+                  <p className="text-xs text-neutral-500">View real-time customer locations and adjust dynamic delivery pricing.</p>
+                </div>
+                <PageToggleBtn />
+              </div>
+              
+              <div className="flex flex-col lg:flex-row gap-6 flex-1 overflow-hidden">
+                <div className="flex-1 bg-white p-4 rounded-2xl border border-neutral-200/60 shadow-sm flex flex-col">
+                  <div className="flex justify-between items-center mb-4">
+                    <h3 className="font-serif text-lg font-medium text-neutral-900">Map & Location View</h3>
+                    <button
+                      onClick={() => {
+                        onShowToast("Geolocation", "Geolocation is disabled.", "info");
+                      }}
+                      className="bg-neutral-600 text-white px-4 py-2 rounded-xl text-xs font-bold cursor-pointer"
+                    >
+                      Location Unavailable
+                    </button>
+                  </div>
+                  <div className="flex-1 rounded-xl overflow-hidden border border-neutral-200">
+                    <CustomerLiveMap locations={locations} onShowToast={onShowToast} />
+                  </div>
+                </div>
+                
+                <div className="w-full lg:w-96 bg-neutral-50 p-6 rounded-2xl border border-neutral-200 space-y-4">
+                  <h3 className="font-serif text-lg font-medium text-neutral-900">Dynamic Delivery Price Editor</h3>
+                  <div className="grid grid-cols-1 gap-4">
+                    <div>
+                      <label className="block text-xs font-bold text-neutral-600 uppercase mb-1">Base Price (₵)</label>
+                      <input type="number" className="w-full px-4 py-2 rounded-xl border border-neutral-200 text-xs" />
+                    </div>
+                    <div>
+                      <label className="block text-xs font-bold text-neutral-600 uppercase mb-1">Fuel Surcharge (₵/km)</label>
+                      <input type="number" className="w-full px-4 py-2 rounded-xl border border-neutral-200 text-xs" />
+                    </div>
+                    <div>
+                      <label className="block text-xs font-bold text-neutral-600 uppercase mb-1">Workmanship Fee (₵)</label>
+                      <input type="number" className="w-full px-4 py-2 rounded-xl border border-neutral-200 text-xs" />
+                    </div>
+                  </div>
+                  <button className="w-full bg-neutral-900 hover:bg-neutral-800 text-white px-6 py-3 rounded-xl text-xs font-bold cursor-pointer">
+                    Update Pricing Configuration
+                  </button>
+                </div>
               </div>
             </div>
           )}
@@ -3229,6 +3437,18 @@ export default function AdminDashboard({
               </div>
             </div>
           )}
+          
+          {/* Persistent Footer - Clear All Data */}
+          <div className="mt-12 pt-6 border-t border-neutral-200 flex justify-end">
+            <button
+              type="button"
+              onClick={onClearAllData}
+              className="px-6 py-3 rounded-xl text-xs font-bold bg-rose-600 text-white hover:bg-rose-700 transition-colors cursor-pointer shadow-sm flex items-center gap-2"
+            >
+              <Trash2 className="w-4 h-4" />
+              Clear All Collected Data
+            </button>
+          </div>
 
         </main>
       </div>

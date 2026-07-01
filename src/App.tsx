@@ -1,5 +1,5 @@
 import React, { useState, useEffect, useMemo } from "react";
-import { motion } from "motion/react";
+import { motion, AnimatePresence } from "motion/react";
 import { 
   Product, Order, Customer, Payment, CustomerLocation, 
   CustomerInquiry, ActivityLog, DiscountCode, MediaFile, HomepageSettings, ChatMessage, NotificationItem, StoreEvent, CustomerReview, DeliveryItem
@@ -17,7 +17,7 @@ import AdminDashboard from "./components/AdminDashboard";
 import ProductCard from "./components/ProductCard";
 import NotificationInbox from "./components/NotificationInbox";
 import OrderHistory from "./components/OrderHistory";
-import ReviewModal from "./components/ReviewModal";
+import Logo from "./assets/images/ellas_store_logo_1782860468627.jpg";
 
 import { db, auth, googleProvider } from "./lib/firebase";
 import { signInWithPopup } from "firebase/auth";
@@ -1185,14 +1185,8 @@ export default function App() {
 
   const ProfessionalLogo = () => (
     <div className="flex items-center gap-2.5 group">
-      <div className="relative w-10 h-10 rounded-full bg-black flex items-center justify-center shadow-md border border-neutral-200 transition-transform duration-300 group-hover:scale-105">
-        <svg className="w-6 h-6 animate-pulse" viewBox="0 0 100 100" fill="none" xmlns="http://www.w3.org/2000/svg">
-          <circle cx="50" cy="50" r="45" stroke="#6366f1" strokeWidth="3" strokeDasharray="4 4" />
-          <path d="M38 30H62V36H46V46H58V52H46V64H62V70H38V30Z" fill="white" />
-          <path d="M68 25L72 45L65 50" stroke="#f59e0b" strokeWidth="3" strokeLinecap="round" strokeLinejoin="round" />
-          <circle cx="68" cy="25" r="2" fill="#f59e0b" />
-        </svg>
-        <span className="absolute -bottom-1 -right-1 w-4.5 h-4.5 bg-indigo-600 rounded-full border border-black flex items-center justify-center text-[9px] font-black text-white">E</span>
+      <div className="relative w-10 h-10 rounded-full flex items-center justify-center overflow-hidden shadow-md border border-neutral-200 transition-transform duration-300 group-hover:scale-105">
+        <img src="/src/assets/images/ellas_store_logo_1782860468627.jpg" alt="Ella's Store Logo" className="w-full h-full object-cover" />
       </div>
       <div className="text-left">
         <span className="block font-sans text-sm font-black tracking-widest text-black uppercase group-hover:text-indigo-600 transition-colors">ELLA'S STORE</span>
@@ -1334,9 +1328,15 @@ export default function App() {
       )}
 
       {/* ADMIN CONSOLE CODE AUTHENTICATION DIALOG */}
-      {showAdminAuthModal && (
-        <div className="fixed inset-0 bg-slate-950/85 backdrop-blur-md z-50 flex items-center justify-center p-4 animate-in fade-in">
-          <form onSubmit={handleAdminAuth} className="bg-slate-900 rounded-3xl p-6.5 max-w-sm w-full border border-slate-800 shadow-2xl space-y-5 text-center">
+      <AnimatePresence>
+        {showAdminAuthModal && (
+          <motion.div 
+            initial={{ opacity: 0 }}
+            animate={{ opacity: 1 }}
+            exit={{ opacity: 0 }}
+            className="fixed inset-0 bg-slate-950/85 backdrop-blur-md z-50 flex items-center justify-center p-4"
+          >
+            <form onSubmit={handleAdminAuth} className="bg-slate-900 rounded-3xl p-6.5 max-w-sm w-full border border-slate-800 shadow-2xl space-y-5 text-center">
             <div className="w-12 h-12 bg-indigo-950 text-indigo-400 border border-indigo-800/50 rounded-full flex items-center justify-center mx-auto text-xl">
               <Lock className="w-5 h-5" />
             </div>
@@ -1403,14 +1403,15 @@ export default function App() {
               </button>
             </div>
           </form>
-        </div>
+        </motion.div>
       )}
+    </AnimatePresence>
 
-      {/* HEADER NAV */}
+    {/* HEADER NAV */}
       <nav className="sticky top-0 bg-slate-950/95 backdrop-blur-md border-b border-slate-900 z-30 transition-all duration-300 shadow-md px-6 py-4.5">
         <div className="max-w-7xl mx-auto flex justify-between items-center w-full">
           <a href="#" className="font-sans text-xl tracking-widest text-slate-100 hover:text-indigo-400 transition-colors font-black">
-            ELLA'S STORE
+            <ProfessionalLogo className="text-white" />
           </a>
 
           <div className="hidden lg:flex items-center gap-8 text-xs font-semibold tracking-wider uppercase text-slate-400">
@@ -1630,8 +1631,8 @@ export default function App() {
           <span className="bg-indigo-50 text-indigo-600 text-[10px] px-3.5 py-1.5 rounded-full font-bold tracking-widest font-mono uppercase shadow-sm border border-indigo-200">
             Operational Showroom Live
           </span>
-          <h1 className="font-sans text-5xl md:text-6xl tracking-tight uppercase font-black text-black">ELLA'S STORE</h1>
-          <p className="text-sm md:text-base font-sans tracking-wide text-neutral-800 max-w-lg mx-auto">Premium African Couture, Bespoke dressmaking & Tailoring in Lapaz, Accra</p>
+          <h1 className="font-sans text-5xl md:text-6xl tracking-tight uppercase font-black text-black">{homepageSettings.heroTitle}</h1>
+          <p className="text-sm md:text-base font-sans tracking-wide text-neutral-800 max-w-lg mx-auto">{homepageSettings.heroDescription}</p>
           <div className="pt-4">
             <a
               href="#shop"

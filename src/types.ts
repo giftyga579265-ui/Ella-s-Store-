@@ -8,6 +8,32 @@ export interface Product {
   image: string;
 }
 
+export enum OperationType {
+  CREATE = 'create',
+  UPDATE = 'update',
+  DELETE = 'delete',
+  LIST = 'list',
+  GET = 'get',
+  WRITE = 'write',
+}
+
+export interface FirestoreErrorInfo {
+  error: string;
+  operationType: OperationType;
+  path: string | null;
+  authInfo: {
+    userId?: string | null;
+    email?: string | null;
+    emailVerified?: boolean | null;
+    isAnonymous?: boolean | null;
+    tenantId?: string | null;
+    providerInfo?: {
+      providerId?: string | null;
+      email?: string | null;
+    }[];
+  }
+}
+
 export interface Customer {
   id: number;
   name: string;
@@ -111,6 +137,8 @@ export interface HomepageSettings {
   momoMerchantName?: string;
   momoMerchantNumber?: string;
   momoChargeRate?: number;
+  heroTitle?: string;
+  heroDescription?: string;
 }
 
 export interface ChatMessage {
