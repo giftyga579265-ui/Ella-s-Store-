@@ -184,3 +184,13 @@ export interface DeliveryItem {
   lastUpdated: string;
 }
 
+export interface Charity {
+  id: string;
+  name: string;
+  description: string;
+  targetAmount: number;
+  currentAmount: number;
+  imageUrl?: string;
+  active: boolean;
+}
+

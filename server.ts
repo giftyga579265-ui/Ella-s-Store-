@@ -68,7 +68,7 @@ Feel free to use appropriate bullet points for clarity. Keep responses engaging,
       });
 
       const response = await ai.models.generateContent({
-        model: "gemini-3.5-flash",
+        model: "gemini-2.0-flash",
         contents: contentsList,
         config: {
           systemInstruction: systemInstruction

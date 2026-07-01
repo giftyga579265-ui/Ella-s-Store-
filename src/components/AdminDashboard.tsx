@@ -1,15 +1,16 @@
 import React, { useState, useMemo } from "react";
 import { 
   Product, Order, Customer, Payment, CustomerLocation, 
-  CustomerInquiry, ActivityLog, DiscountCode, MediaFile, HomepageSettings, StoreEvent, CustomerReview, DeliveryItem 
+  CustomerInquiry, ActivityLog, DiscountCode, Charity, MediaFile, HomepageSettings, StoreEvent, CustomerReview, DeliveryItem 
 } from "../types";
 import CustomerLiveMap from "./CustomerLiveMap";
+import CharityManager from "./CharityManager";
 import { 
   LayoutDashboard, ShoppingCart, Shirt, Users, CreditCard, 
   MapPin, HelpCircle, Activity, Tag, Mail, Image as ImageIcon, Paintbrush, 
   LogOut, Plus, Trash2, Edit, Eye, Check, CheckCircle, TrendingUp, DollarSign,
   Download, Search, Sparkles, MessageCircle, AlertTriangle, Maximize2, Minimize2, X,
-  Database, Utensils, Calendar, Star, Truck, Printer
+  Database, Utensils, Calendar, Star, Truck, Printer, Menu, Heart
 } from "lucide-react";
 import jsPDF from "jspdf";
 import autoTable from "jspdf-autotable";
@@ -24,6 +25,7 @@ interface AdminDashboardProps {
   inquiries: CustomerInquiry[];
   activityLogs: ActivityLog[];
   discountCodes: DiscountCode[];
+  charityData: Charity[];
   mediaFiles: MediaFile[];
   homepageSettings: HomepageSettings;
   adminMessages: any[];
@@ -40,6 +42,7 @@ interface AdminDashboardProps {
   onSetLocations: (locations: CustomerLocation[]) => void;
   onSetInquiries: (inquiries: CustomerInquiry[]) => void;
   onSetDiscountCodes: (codes: DiscountCode[]) => void;
+  onSetCharityData: (data: Charity[]) => void;
   onSetMediaFiles: (files: MediaFile[]) => void;
   onSetHomepageSettings: (settings: HomepageSettings) => void;
   onSetAdminMessages: (messages: any[]) => void;
@@ -54,9 +57,9 @@ interface AdminDashboardProps {
 
 export default function AdminDashboard({
   products, orders, customers, payments, locations, inquiries, 
-  activityLogs, discountCodes, mediaFiles, homepageSettings, adminMessages, events, reviews, deliveries, onDeleteReview, onUpdateDelivery, onCreateDelivery,
+  activityLogs, discountCodes, charityData, mediaFiles, homepageSettings, adminMessages, events, reviews, deliveries, onDeleteReview, onUpdateDelivery, onCreateDelivery,
   onClose, onSetProducts, onSetOrders, onSetLocations, onSetInquiries, 
-  onSetDiscountCodes, onSetMediaFiles, onSetHomepageSettings, onSetAdminMessages,
+  onSetDiscountCodes, onSetCharityData, onSetMediaFiles, onSetHomepageSettings, onSetAdminMessages,
   onSetActivityLogs, onSetEvents, onShowToast, onLogActivity, onAddNotification, onSeedDemoData, onClearAllData
 }: AdminDashboardProps) {
   
@@ -65,6 +68,7 @@ export default function AdminDashboard({
   const [maximized, setMaximized] = useState(false);
   const [minimized, setMinimized] = useState(false);
   const [isPageMaximized, setIsPageMaximized] = useState(false);
+  const [showSidebar, setShowSidebar] = useState(false); // Mobile sidebar toggle
   const [reviewSearch, setReviewSearch] = useState("");
 
   // Delivery Tracker Form & Filter States
@@ -348,6 +352,10 @@ export default function AdminDashboard({
   const handleImageUpload = (e: React.ChangeEvent<HTMLInputElement>, setter: (val: string) => void) => {
     const file = e.target.files?.[0];
     if (file) {
+      if (file.size > 500 * 1024) {
+        onShowToast("Image Too Large", "Please select an image smaller than 500KB to ensure smooth performance.", "error");
+        return;
+      }
       const reader = new FileReader();
       reader.onload = (event) => {
         if (event.target?.result) {
@@ -709,17 +717,22 @@ export default function AdminDashboard({
         {/* Header */}
         <header className="bg-neutral-950 text-white px-6 py-4.5 flex justify-between items-center shadow-md">
           <div className="flex items-center gap-3">
+            <button
+              onClick={() => setShowSidebar(!showSidebar)}
+              className="md:hidden p-2 text-neutral-400 hover:text-white"
+            >
+              <Menu className="w-5 h-5" />
+            </button>
             <div className="w-10 h-10 rounded-xl bg-amber-500 flex items-center justify-center text-neutral-900 font-serif font-black text-xl shadow">
               E
             </div>
             <div>
-              <h1 className="font-serif text-lg tracking-wider">Ella's Store operations console</h1>
-              <p className="text-[10px] font-mono text-amber-500 tracking-widest uppercase">Admin Terminal Connected</p>
+              <h1 className="font-serif text-lg tracking-wider">Ella's Store</h1>
+              <p className="text-[10px] font-mono text-amber-500 tracking-widest uppercase">Admin</p>
             </div>
           </div>
           
           <div className="flex items-center gap-3">
-            {/* Minimize Button */}
             <button 
               onClick={() => {
                 setMinimized(true);
@@ -732,7 +745,6 @@ export default function AdminDashboard({
               <span className="hidden sm:inline">Minimize</span>
             </button>
 
-            {/* Maximize Button */}
             <button 
               onClick={() => {
                 setMaximized(!maximized);
@@ -745,35 +757,13 @@ export default function AdminDashboard({
               <span className="hidden sm:inline">{maximized ? "Restore" : "Maximize"}</span>
             </button>
 
-            {/* Page Layout Maximize/Minimize Button */}
-            <button 
-              onClick={() => {
-                setIsPageMaximized(!isPageMaximized);
-                onLogActivity(isPageMaximized ? "Restored admin dashboard sidebar" : "Maximized admin dashboard page panel", "user_action");
-                onShowToast(
-                  isPageMaximized ? "Page Restored" : "Page Maximized",
-                  isPageMaximized ? "Sidebar navigation is now visible." : "Dashboard page maximized to full width.",
-                  "info"
-                );
-              }} 
-              className={`text-xs px-3 py-1.5 rounded-xl transition-all font-medium flex items-center gap-1.5 cursor-pointer ${
-                isPageMaximized 
-                  ? "bg-amber-500 hover:bg-amber-400 text-neutral-900 font-bold" 
-                  : "text-neutral-400 hover:text-white border border-neutral-800 bg-neutral-900 hover:bg-neutral-850"
-              }`}
-              title={isPageMaximized ? "Minimize active page area (Show Sidebar)" : "Maximize active page area (Hide Sidebar)"}
-            >
-              {isPageMaximized ? <Minimize2 className="w-3.5 h-3.5" /> : <Maximize2 className="w-3.5 h-3.5" />}
-              <span className="hidden sm:inline">{isPageMaximized ? "Minimize Page" : "Maximize Page"}</span>
-            </button>
-            
             <button
               onClick={onClose}
               className="bg-amber-500 hover:bg-amber-600 text-neutral-900 px-4 py-2 rounded-xl text-xs font-bold tracking-wide transition-all duration-300 shadow flex items-center gap-1.5 cursor-pointer"
               id="admin-logout-btn"
             >
               <LogOut className="w-3.5 h-3.5" />
-              Logout operations
+              Logout
             </button>
           </div>
         </header>
@@ -783,7 +773,7 @@ export default function AdminDashboard({
         
         {/* Sidebar */}
         {!isPageMaximized && (
-          <aside className="w-64 bg-neutral-900 text-neutral-300 border-r border-neutral-800 flex flex-col justify-between overflow-y-auto shrink-0 py-6">
+          <aside className={`${showSidebar ? 'fixed inset-y-0 left-0 z-50 w-64' : 'hidden'} md:static md:block w-64 bg-neutral-900 text-neutral-300 border-r border-neutral-800 flex flex-col justify-between overflow-y-auto shrink-0 py-6`}>
             <ul className="space-y-1.5 px-3">
               {[
                 { id: "dashboard", label: "Operations Dashboard", icon: LayoutDashboard },
@@ -800,6 +790,7 @@ export default function AdminDashboard({
                 { id: "events", label: "Store Events", icon: Calendar, count: events?.length || 0 },
                 { id: "reviews", label: "Customer Reviews", icon: Star, count: reviews?.length || 0 },
                 { id: "delivery", label: "Delivery Tracker", icon: Truck, count: deliveries?.filter(d=>d.status!=='delivered' && d.status!=='failed').length || 0 },
+                { id: "charity", label: "Charity Management", icon: Heart },
                 { id: "economics", label: "Economic State", icon: TrendingUp },
                 { id: "customize", label: "Homepage Design", icon: Paintbrush },
               ].map(tab => {
@@ -807,7 +798,10 @@ export default function AdminDashboard({
                 return (
                   <li key={tab.id}>
                     <button
-                      onClick={() => setActiveTab(tab.id)}
+                      onClick={() => {
+                        setActiveTab(tab.id);
+                        setShowSidebar(false); // Close sidebar on mobile
+                      }}
                       className={`w-full flex items-center justify-between px-4 py-3 rounded-xl text-xs font-semibold tracking-wide transition-all duration-300 group ${
                         activeTab === tab.id
                           ? "bg-amber-500 text-neutral-900 shadow-md font-bold"
@@ -1254,6 +1248,35 @@ export default function AdminDashboard({
             </div>
           )}
 
+          {/* TAB: Charity Management */}
+          {activeTab === "charity" && (
+            <div className="space-y-6 animate-in fade-in duration-300">
+              <div className="flex items-center justify-between border-b border-neutral-250 pb-4">
+                <div>
+                  <h2 className="font-serif text-2xl text-neutral-900 font-medium">Charity Management</h2>
+                  <p className="text-xs text-neutral-500">Create and manage charity projects.</p>
+                </div>
+              </div>
+              
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                <div className="bg-white p-6 rounded-2xl border border-neutral-200 shadow-sm">
+                  <h3 className="text-sm font-bold text-neutral-900 mb-4">Charity List</h3>
+                  <div className="space-y-2">
+                    {charityData.map(c => (
+                      <div key={c.id} className="p-4 border border-neutral-100 rounded-lg flex justify-between items-center">
+                        <div>
+                          <p className="font-bold">{c.name}</p>
+                          <p className="text-xs text-neutral-500">{c.description}</p>
+                        </div>
+                        <p className="font-bold">₵{c.currentAmount} / ₵{c.targetAmount}</p>
+                      </div>
+                    ))}
+                  </div>
+                </div>
+              </div>
+            </div>
+          )}
+
           {/* TAB: Economic State */}
           {activeTab === "economics" && (
             <div className="space-y-6 animate-in fade-in duration-300">
@@ -1293,6 +1316,7 @@ export default function AdminDashboard({
               </div>
 
               <div className="bg-white rounded-2xl border border-neutral-200/60 overflow-hidden shadow-sm">
+                <div className="overflow-x-auto">
                   <table className="w-full border-collapse text-left text-xs">
                     <thead>
                       <tr className="bg-neutral-950 text-white font-serif uppercase tracking-wider">
@@ -1309,6 +1333,7 @@ export default function AdminDashboard({
                       ))}
                     </tbody>
                   </table>
+                </div>
               </div>
             </div>
           )}
@@ -2986,6 +3011,17 @@ export default function AdminDashboard({
           )}
 
           {/* TAB 15: Delivery Tracker */}
+          {activeTab === "charity" && (
+            <div className="space-y-8 animate-in fade-in duration-300">
+              <CharityManager 
+                charityData={charityData} 
+                onSetCharityData={onSetCharityData} 
+                onShowToast={onShowToast} 
+                onLogActivity={(activity, type) => onLogActivity(activity, type)} 
+              />
+            </div>
+          )}
+
           {activeTab === "delivery" && (
             <div className="space-y-6 animate-in fade-in duration-300">
               <div className="border-b border-neutral-250 pb-4 flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4">

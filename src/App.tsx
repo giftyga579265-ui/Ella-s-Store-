@@ -2,7 +2,7 @@ import React, { useState, useEffect, useMemo } from "react";
 import { motion, AnimatePresence } from "motion/react";
 import { 
   Product, Order, Customer, Payment, CustomerLocation, 
-  CustomerInquiry, ActivityLog, DiscountCode, MediaFile, HomepageSettings, ChatMessage, NotificationItem, StoreEvent, CustomerReview, DeliveryItem
+  CustomerInquiry, ActivityLog, DiscountCode, Charity, MediaFile, HomepageSettings, ChatMessage, NotificationItem, StoreEvent, CustomerReview, DeliveryItem
 } from "./types";
 import { 
   ShoppingBag, Phone, MapPin, Mail, Clock, HelpCircle, 
@@ -11,12 +11,14 @@ import {
 
 import SmsWidget from "./components/SmsWidget";
 import MediaGallery from "./components/MediaGallery";
+import CharityDonations from "./components/CharityDonations";
 import CheckoutModal from "./components/CheckoutModal";
 import HaiasiChatbot from "./components/HaiasiChatbot";
 import AdminDashboard from "./components/AdminDashboard";
 import ProductCard from "./components/ProductCard";
 import NotificationInbox from "./components/NotificationInbox";
 import OrderHistory from "./components/OrderHistory";
+import ReviewModal from "./components/ReviewModal";
 import Logo from "./assets/images/ellas_store_logo_1782860468627.jpg";
 
 import { db, auth, googleProvider } from "./lib/firebase";
@@ -358,6 +360,7 @@ export default function App() {
   const [locations, setLocations] = useState<CustomerLocation[]>(INITIAL_LOCATIONS);
   const [inquiries, setInquiries] = useState<CustomerInquiry[]>(INITIAL_INQUIRIES);
   const [discountCodes, setDiscountCodes] = useState<DiscountCode[]>(INITIAL_DISCOUNTS);
+  const [charityData, setCharityData] = useState<Charity[]>([]);
   const [mediaFiles, setMediaFiles] = useState<MediaFile[]>(INITIAL_MEDIA);
   const [events, setEvents] = useState<StoreEvent[]>([]);
   const [activityLogs, setActivityLogs] = useState<ActivityLog[]>([]);
@@ -408,6 +411,7 @@ export default function App() {
   // Modal displays
   const [showCheckout, setShowCheckout] = useState(false);
   const [showMedia, setShowMedia] = useState(false);
+  const [showCharity, setShowCharity] = useState(false);
   const [showAdminConsole, setShowAdminConsole] = useState(false);
   const [showMobileMenu, setShowMobileMenu] = useState(false);
   
@@ -432,6 +436,15 @@ export default function App() {
       for (const item of newItems) {
         const docId = String(item.id);
         newIds.add(docId);
+        
+        // Defensive check: Firestore document limit is ~1MB. 
+        // We check size roughly (JSON string length * 2 bytes/char is an upper bound).
+        const itemSize = new Blob([JSON.stringify(item)]).size;
+        if (itemSize > 1000000) {
+          console.error(`Item ${docId} in ${collectionName} is too large (${itemSize} bytes), skipping write to Firestore!`);
+          continue;
+        }
+        
         await setDoc(doc(db, collectionName, docId), item);
       }
       
@@ -587,6 +600,16 @@ export default function App() {
       }
     });
 
+    // CHARITY
+    const unsubscribeCharity = onSnapshot(collection(db, "charity"), (snapshot) => {
+      if (snapshot.empty) {
+        setCharityData([]);
+      } else {
+        const items = snapshot.docs.map(doc => doc.data() as Charity);
+        setCharityData(items);
+      }
+    });
+
     // 8. MEDIA FILES
     const unsubscribeMedia = onSnapshot(collection(db, "media"), (snapshot) => {
       if (snapshot.empty) {
@@ -689,6 +712,7 @@ export default function App() {
       unsubscribeEvents();
       unsubscribeReviews();
       unsubscribeDeliveries();
+      unsubscribeCharity();
     };
   }, []);
 
@@ -1408,19 +1432,18 @@ export default function App() {
     </AnimatePresence>
 
     {/* HEADER NAV */}
-      <nav className="sticky top-0 bg-slate-950/95 backdrop-blur-md border-b border-slate-900 z-30 transition-all duration-300 shadow-md px-6 py-4.5">
+      <nav className="sticky top-0 bg-white/90 backdrop-blur-md border-b border-neutral-100 z-30 transition-all duration-300 shadow-sm px-6 py-4">
         <div className="max-w-7xl mx-auto flex justify-between items-center w-full">
-          <a href="#" className="font-sans text-xl tracking-widest text-slate-100 hover:text-indigo-400 transition-colors font-black">
-            <ProfessionalLogo className="text-white" />
+          <a href="#" className="font-sans text-xl tracking-tight text-neutral-900 transition-colors font-bold">
+            <span className="text-indigo-600">Ella's</span> Store
           </a>
 
-          <div className="hidden lg:flex items-center gap-8 text-xs font-semibold tracking-wider uppercase text-slate-400">
-            <a href="#collections" className="hover:text-indigo-400 transition-colors">Collections</a>
-            <a href="#about" className="hover:text-indigo-400 transition-colors">About</a>
-            <a href="#process" className="hover:text-indigo-400 transition-colors">Services</a>
-            <a href="#events" className="hover:text-indigo-400 transition-colors">Events</a>
-            <a href="#shop" className="hover:text-indigo-400 transition-colors">Shop</a>
-            <a href="#contact" className="hover:text-indigo-400 transition-colors">Contact</a>
+          <div className="hidden lg:flex items-center gap-6 text-xs font-medium tracking-wide uppercase text-neutral-600">
+            <a href="#collections" className="hover:text-indigo-600 transition-colors">Collections</a>
+            <a href="#about" className="hover:text-indigo-600 transition-colors">About</a>
+            <a href="#process" className="hover:text-indigo-600 transition-colors">Services</a>
+            <a href="#events" className="hover:text-indigo-600 transition-colors">Events</a>
+            <a href="#shop" className="hover:text-indigo-600 transition-colors">Shop</a>
             <button 
               onClick={() => {
                 if (isLoggedIn) {
@@ -1431,92 +1454,74 @@ export default function App() {
                   showToast("Sign In Required", "Please sign in to view your personalized chart history & payments.", "info");
                 }
               }}
-              className="hover:text-indigo-400 transition-colors uppercase tracking-wider text-xs font-semibold cursor-pointer flex items-center gap-1.5"
-              id="desktop-chart-history-btn"
+              className="hover:text-indigo-600 transition-colors uppercase tracking-wide text-xs font-medium cursor-pointer flex items-center gap-1.5"
             >
               <Clock className="w-3.5 h-3.5 text-indigo-500" />
-              Chart History
-            </button>
-            <button 
-              onClick={() => {
-                setShowReviewModal(true);
-                logActivity("Opened showroom review modal", "user_action");
-              }}
-              className="hover:text-indigo-400 transition-colors uppercase tracking-wider text-xs font-semibold cursor-pointer flex items-center gap-1.5"
-              id="desktop-reviews-btn"
-            >
-              <Star className="w-3.5 h-3.5 text-amber-500" />
-              Rate Site
+              History
             </button>
             <button 
               onClick={() => setShowMedia(true)}
-              className="bg-indigo-600 text-white px-4.5 py-2 rounded-full font-bold shadow hover:bg-indigo-500 transition-all cursor-pointer inline-flex items-center gap-1.5"
+              className="text-neutral-900 hover:text-indigo-600 transition-colors uppercase tracking-wide text-xs font-medium cursor-pointer"
             >
-              Media Gallery
+              Gallery
+            </button>
+            <button 
+              onClick={() => setShowCharity(true)}
+              className="bg-emerald-50 text-emerald-700 px-4 py-2 rounded-full font-bold text-xs hover:bg-emerald-100 transition-all cursor-pointer inline-flex items-center gap-1.5"
+            >
+              Charity
             </button>
           </div>
 
-          <div className="flex items-center gap-4">
+          <div className="flex items-center gap-3">
             {isLoggedIn && (
               <div className="flex items-center gap-2">
-                <div className="flex items-center gap-1 text-xs text-slate-300 font-semibold bg-slate-900 px-3 py-1.5 rounded-full border border-slate-850">
-                  <User className="w-3.5 h-3.5 text-indigo-400" />
-                  <span className="max-w-[80px] truncate">{currentUser}</span>
+                <div className="flex items-center gap-1.5 text-xs text-neutral-700 font-medium bg-neutral-100 px-3 py-1.5 rounded-full border border-neutral-200">
+                  <User className="w-3.5 h-3.5 text-indigo-500" />
+                  <span className="max-w-[70px] truncate">{currentUser}</span>
                 </div>
                 <button
                   onClick={handleLogout}
-                  className="text-slate-400 hover:text-rose-400 text-[10px] font-mono tracking-wider uppercase cursor-pointer"
-                  title="Logout"
+                  className="text-neutral-500 hover:text-rose-600 text-[10px] font-bold tracking-widest uppercase cursor-pointer"
                 >
                   Logout
                 </button>
               </div>
             )}
             
-            {/* NOTIFICATION BELL BUTTON */}
             <button
               onClick={() => {
                 setShowNotifications(true);
                 logActivity("Opened customer notifications panel", "user_action");
               }}
-              className="relative w-10 h-10 rounded-full border border-slate-800 flex items-center justify-center text-slate-300 hover:border-indigo-500 hover:text-indigo-400 bg-slate-900 transition-colors group cursor-pointer"
-              title="Notifications"
-              id="notification-bell-btn"
+              className="w-9 h-9 rounded-full border border-neutral-200 flex items-center justify-center text-neutral-600 hover:border-indigo-500 hover:text-indigo-600 bg-white transition-colors cursor-pointer"
             >
-              <Bell className="w-4 h-4 group-hover:scale-110 transition-transform text-slate-300 group-hover:text-indigo-400" />
-              {unreadNotificationsCount > 0 && (
-                <span className="absolute -top-1 -right-1 w-5 h-5 bg-amber-500 text-slate-950 font-black rounded-full flex items-center justify-center text-[10px] shadow border border-slate-950 animate-pulse">
-                  {unreadNotificationsCount}
-                </span>
-              )}
+              <Bell className="w-4 h-4" />
             </button>
 
             <button
               onClick={() => {
                 if (cart.length === 0) {
-                  showToast("Empty Bag", "Your shopping bag is empty. Please add styles first.", "info");
+                  showToast("Empty Bag", "Your shopping bag is empty.", "info");
                   return;
                 }
                 setShowCheckout(true);
               }}
-              className="relative w-10 h-10 rounded-full border border-slate-800 flex items-center justify-center text-slate-300 hover:border-indigo-500 hover:text-indigo-400 bg-slate-900 transition-colors group cursor-pointer"
+              className="relative w-9 h-9 rounded-full border border-neutral-200 flex items-center justify-center text-neutral-600 hover:border-indigo-500 hover:text-indigo-600 bg-white transition-colors cursor-pointer"
             >
-              <ShoppingBag className="w-4 h-4 group-hover:scale-110 transition-transform" />
+              <ShoppingBag className="w-4 h-4" />
               {cart.length > 0 && (
-                <span className="absolute -top-1 -right-1 w-5 h-5 bg-indigo-600 text-white font-black rounded-full flex items-center justify-center text-[10px] shadow border border-slate-950">
+                <span className="absolute -top-1 -right-1 w-4 h-4 bg-indigo-600 text-white font-bold rounded-full flex items-center justify-center text-[9px]">
                   {cart.reduce((sum, item) => sum + item.quantity, 0)}
                 </span>
               )}
             </button>
-
-            {/* CUSTOMER DASHBOARD MENU BUTTON */}
             <button
               onClick={() => {
                 setShowMobileMenu(!showMobileMenu);
                 logActivity("Opened customer navigation menu", "user_action");
               }}
-              className="lg:hidden w-10 h-10 rounded-full border border-slate-800 flex items-center justify-center text-slate-300 hover:border-indigo-500 hover:text-indigo-400 bg-slate-900 transition-colors cursor-pointer"
-              title="Toggle Menu"
+              className="lg:hidden w-9 h-9 rounded-full border border-neutral-200 flex items-center justify-center text-neutral-600 hover:border-indigo-500 hover:text-indigo-600 bg-white transition-colors cursor-pointer"
             >
               <Menu className="w-4 h-4" />
             </button>
@@ -1538,44 +1543,50 @@ export default function App() {
             <a 
               href="#collections" 
               onClick={() => setShowMobileMenu(false)}
-              className="hover:text-indigo-600 transition-colors py-3 border-b border-neutral-150"
+              className="group flex items-center justify-between py-4 px-6 rounded-2xl hover:bg-neutral-50 transition-all text-neutral-900"
             >
-              Collections
+              <span className="text-lg font-medium tracking-tight">Collections</span>
+              <span className="text-neutral-300 group-hover:text-indigo-600 transition-colors">→</span>
             </a>
             <a 
               href="#about" 
               onClick={() => setShowMobileMenu(false)}
-              className="hover:text-indigo-600 transition-colors py-3 border-b border-neutral-150"
+              className="group flex items-center justify-between py-4 px-6 rounded-2xl hover:bg-neutral-50 transition-all text-neutral-900"
             >
-              About
+              <span className="text-lg font-medium tracking-tight">About</span>
+              <span className="text-neutral-300 group-hover:text-indigo-600 transition-colors">→</span>
             </a>
             <a 
               href="#process" 
               onClick={() => setShowMobileMenu(false)}
-              className="hover:text-indigo-600 transition-colors py-3 border-b border-neutral-150"
+              className="group flex items-center justify-between py-4 px-6 rounded-2xl hover:bg-neutral-50 transition-all text-neutral-900"
             >
-              Services
+              <span className="text-lg font-medium tracking-tight">Services</span>
+              <span className="text-neutral-300 group-hover:text-indigo-600 transition-colors">→</span>
             </a>
             <a 
               href="#events" 
               onClick={() => setShowMobileMenu(false)}
-              className="hover:text-indigo-600 transition-colors py-3 border-b border-neutral-150"
+              className="group flex items-center justify-between py-4 px-6 rounded-2xl hover:bg-neutral-50 transition-all text-neutral-900"
             >
-              Events
+              <span className="text-lg font-medium tracking-tight">Events</span>
+              <span className="text-neutral-300 group-hover:text-indigo-600 transition-colors">→</span>
             </a>
             <a 
               href="#shop" 
               onClick={() => setShowMobileMenu(false)}
-              className="hover:text-indigo-600 transition-colors py-3 border-b border-neutral-150"
+              className="group flex items-center justify-between py-4 px-6 rounded-2xl hover:bg-neutral-50 transition-all text-neutral-900"
             >
-              Shop
+              <span className="text-lg font-medium tracking-tight">Shop</span>
+              <span className="text-neutral-300 group-hover:text-indigo-600 transition-colors">→</span>
             </a>
             <a 
               href="#contact" 
               onClick={() => setShowMobileMenu(false)}
-              className="hover:text-indigo-600 transition-colors py-3 border-b border-neutral-150"
+              className="group flex items-center justify-between py-4 px-6 rounded-2xl hover:bg-neutral-50 transition-all text-neutral-900"
             >
-              Contact
+              <span className="text-lg font-medium tracking-tight">Contact</span>
+              <span className="text-neutral-300 group-hover:text-indigo-600 transition-colors">→</span>
             </a>
             <button 
               onClick={() => {
@@ -1588,11 +1599,14 @@ export default function App() {
                   showToast("Sign In Required", "Please sign in to view your personalized chart history & payments.", "info");
                 }
               }}
-              className="hover:text-indigo-600 text-left uppercase py-3 border-b border-neutral-150 font-bold transition-colors cursor-pointer w-full flex items-center gap-2"
+              className="group flex items-center justify-between py-4 px-6 rounded-2xl hover:bg-neutral-50 transition-all text-neutral-900 w-full"
               id="mobile-chart-history-btn"
             >
-              <Clock className="w-4 h-4 text-indigo-500" />
-              Chart History
+              <div className="flex items-center gap-3">
+                <Clock className="w-5 h-5 text-indigo-500" />
+                <span className="text-lg font-medium tracking-tight">Chart History</span>
+              </div>
+              <span className="text-neutral-300 group-hover:text-indigo-600 transition-colors">→</span>
             </button>
             <button 
               onClick={() => {
@@ -1600,11 +1614,14 @@ export default function App() {
                 setShowReviewModal(true);
                 logActivity("Opened showroom review modal", "user_action");
               }}
-              className="hover:text-indigo-600 text-left uppercase py-3 border-b border-neutral-150 font-bold transition-colors cursor-pointer w-full flex items-center gap-2"
+              className="group flex items-center justify-between py-4 px-6 rounded-2xl hover:bg-neutral-50 transition-all text-neutral-900 w-full"
               id="mobile-reviews-btn"
             >
-              <Star className="w-4 h-4 text-amber-500" />
-              Rate Site & Reviews
+              <div className="flex items-center gap-3">
+                <Star className="w-5 h-5 text-amber-500" />
+                <span className="text-lg font-medium tracking-tight">Rate Site</span>
+              </div>
+              <span className="text-neutral-300 group-hover:text-indigo-600 transition-colors">→</span>
             </button>
             <button 
               onClick={() => {
@@ -1614,6 +1631,15 @@ export default function App() {
               className="mt-4 bg-indigo-600 text-white px-6 py-4 rounded-full font-bold shadow-lg hover:bg-indigo-500 transition-all cursor-pointer inline-flex items-center justify-center gap-1.5"
             >
               Media Gallery
+            </button>
+            <button 
+              onClick={() => {
+                setShowMobileMenu(false);
+                setShowCharity(true);
+              }}
+              className="bg-emerald-600 text-white px-6 py-4 rounded-full font-bold shadow-lg hover:bg-emerald-500 transition-all cursor-pointer inline-flex items-center justify-center gap-1.5"
+            >
+              Charity Donations
             </button>
           </div>
         </div>
@@ -2142,6 +2168,18 @@ export default function App() {
         onLogActivity={logActivity} 
         username={currentUser} 
       />
+      
+      {showCharity && (
+        <div className="fixed inset-0 bg-white z-50 overflow-y-auto">
+          <button onClick={() => setShowCharity(false)} className="absolute top-6 right-6 p-2 rounded-full bg-neutral-100"><X /></button>
+          <CharityDonations 
+            charityData={charityData} 
+            onLogActivity={logActivity} 
+            onShowToast={showToast} 
+          />
+        </div>
+      )
+      }
 
       {/* 4. Stepped MoMo Checkout Modal */}
       {showCheckout && (
@@ -2196,6 +2234,7 @@ export default function App() {
           inquiries={inquiries}
           activityLogs={activityLogs}
           discountCodes={discountCodes}
+          charityData={charityData}
           mediaFiles={mediaFiles}
           homepageSettings={homepageSettings}
           adminMessages={adminMessages}
@@ -2214,6 +2253,7 @@ export default function App() {
           onSetLocations={updated => syncCollection("locations", updated)}
           onSetInquiries={updated => syncCollection("inquiries", updated)}
           onSetDiscountCodes={updated => syncCollection("discounts", updated)}
+          onSetCharityData={updated => syncCollection("charity", updated)}
           onSetMediaFiles={updated => syncCollection("media", updated)}
           onSetHomepageSettings={updated => setDoc(doc(db, "settings", "homepage"), updated)}
           onSetAdminMessages={updated => syncCollection("admin_messages", updated)}
