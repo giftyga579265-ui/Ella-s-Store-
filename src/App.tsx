@@ -6,7 +6,7 @@ import {
 } from "./types";
 import { 
   ShoppingBag, Phone, MapPin, Mail, Clock, HelpCircle, 
-  Settings, User, Check, Sparkles, Star, ChevronDown, Lock, Bell, Trash2, X, Menu
+  Settings, User, Check, Sparkles, Star, ChevronDown, Lock, Bell, Trash2, X, Menu, Heart
 } from "lucide-react";
 
 import SmsWidget from "./components/SmsWidget";
@@ -1637,9 +1637,13 @@ export default function App() {
                 setShowMobileMenu(false);
                 setShowCharity(true);
               }}
-              className="bg-emerald-600 text-white px-6 py-4 rounded-full font-bold shadow-lg hover:bg-emerald-500 transition-all cursor-pointer inline-flex items-center justify-center gap-1.5"
+              className="group flex items-center justify-between py-4 px-6 rounded-2xl hover:bg-emerald-50 transition-all text-emerald-900 w-full"
             >
-              Charity Donations
+              <div className="flex items-center gap-3">
+                <Heart className="w-5 h-5 text-emerald-500" />
+                <span className="text-lg font-medium tracking-tight">Charity Donations</span>
+              </div>
+              <span className="text-emerald-300 group-hover:text-emerald-600 transition-colors">→</span>
             </button>
           </div>
         </div>
