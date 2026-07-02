@@ -24,6 +24,7 @@ interface OrderHistoryProps {
   currentUser: string;
   currentUserEmail: string;
   onClose: () => void;
+  isCustomerOnly?: boolean;
 }
 
 export default function OrderHistory({ 
@@ -31,7 +32,8 @@ export default function OrderHistory({
   payments, 
   currentUser, 
   currentUserEmail, 
-  onClose 
+  onClose,
+  isCustomerOnly = true
 }: OrderHistoryProps) {
   const [activeTab, setActiveTab] = useState<"orders" | "payments">("orders");
 
@@ -85,6 +87,35 @@ export default function OrderHistory({
     doc.text(`Total: GH₵ ${order.total.toLocaleString()}`, 14, finalY + 10);
     
     doc.save(`Invoice_${order.id.slice(-6).toUpperCase()}.pdf`);
+  };
+
+  const generatePaymentInvoicePDF = (payment: Payment) => {
+    const doc = new jsPDF();
+    doc.text(`Payment Invoice - Ref #${payment.id.slice(-6).toUpperCase()}`, 14, 20);
+    doc.text(`Date: ${payment.date}`, 14, 30);
+    doc.text(`Customer: ${payment.customer}`, 14, 40);
+    doc.text(`Payment Method: ${payment.method.toUpperCase()}`, 14, 50);
+    doc.text(`Status: ${payment.status.toUpperCase()}`, 14, 60);
+
+    autoTable(doc, {
+      head: [['Payment Transaction Detail', 'Value']],
+      body: [
+        ['Transaction ID', payment.id],
+        ['Reference Order ID', payment.orderId || 'N/A'],
+        ['Customer Account', payment.customer],
+        ['Payment Method', payment.method.toUpperCase()],
+        ['Transaction Date', payment.date],
+        ['Transaction Status', payment.status.toUpperCase()],
+        ['Total Paid Amount', `GH₵ ${payment.amount.toLocaleString()}`],
+      ],
+      startY: 70,
+    });
+
+    // @ts-ignore
+    const finalY = (doc as any).lastAutoTable.finalY || 130;
+    doc.text(`Total Charged Amount: GH₵ ${payment.amount.toLocaleString()}`, 14, finalY + 10);
+    
+    doc.save(`Payment_Invoice_${payment.id.slice(-6).toUpperCase()}.pdf`);
   };
 
   return (
@@ -191,13 +222,15 @@ export default function OrderHistory({
                               </span>
                               <p className="text-[9px] text-neutral-400 uppercase tracking-widest font-black">Total Paid</p>
                             </div>
-                            <button 
-                              onClick={() => generateInvoicePDF(order)}
-                              className="flex items-center gap-1 text-[10px] bg-neutral-100 hover:bg-neutral-200 text-neutral-600 px-2 py-1 rounded-md transition-colors cursor-pointer"
-                            >
-                              <Printer className="w-3 h-3" />
-                              Print Invoice
-                            </button>
+                            {isCustomerOnly && (
+                              <button 
+                                onClick={() => generateInvoicePDF(order)}
+                                className="flex items-center gap-1 text-[10px] bg-neutral-100 hover:bg-neutral-200 text-neutral-600 px-2 py-1 rounded-md transition-colors cursor-pointer"
+                              >
+                                <Printer className="w-3 h-3" />
+                                Print Invoice
+                              </button>
+                            )}
                           </div>
                         </div>
 
@@ -343,6 +376,15 @@ export default function OrderHistory({
                         }`}>
                           {payment.status}
                         </span>
+                        {isCustomerOnly && (
+                          <button 
+                            onClick={() => generatePaymentInvoicePDF(payment)}
+                            className="mt-2 flex items-center gap-1 text-[9px] bg-white hover:bg-neutral-100 text-neutral-600 border border-neutral-200 px-2.5 py-1 rounded-md transition-colors cursor-pointer ml-auto justify-end shadow-sm"
+                          >
+                            <Printer className="w-2.5 h-2.5 text-neutral-500" />
+                            <span>Print Receipt</span>
+                          </button>
+                        )}
                       </div>
                     </div>
                   ))

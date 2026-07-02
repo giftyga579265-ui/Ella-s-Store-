@@ -6,7 +6,7 @@ import {
 } from "./types";
 import { 
   ShoppingBag, Phone, MapPin, Mail, Clock, HelpCircle, 
-  Settings, User, Check, Sparkles, Star, ChevronDown, Lock, Bell, Trash2, X, Menu, Heart
+  Settings, User, Check, Sparkles, Star, ChevronDown, Lock, Bell, Trash2, X, Menu, Heart, Search
 } from "lucide-react";
 
 import SmsWidget from "./components/SmsWidget";
@@ -19,6 +19,7 @@ import ProductCard from "./components/ProductCard";
 import NotificationInbox from "./components/NotificationInbox";
 import OrderHistory from "./components/OrderHistory";
 import ReviewModal from "./components/ReviewModal";
+// @ts-ignore
 import Logo from "./assets/images/ellas_store_logo_1782860468627.jpg";
 
 import { db, auth, googleProvider } from "./lib/firebase";
@@ -342,6 +343,74 @@ const INITIAL_EVENTS: StoreEvent[] = [
   }
 ];
 
+const INITIAL_CHARITIES: Charity[] = [
+  {
+    id: "charity-1",
+    name: "Accra Children's Education Initiative",
+    description: "Providing desks, books, uniforms and solar study lamps to school kids in needy communities across Accra.",
+    targetAmount: 20000,
+    currentAmount: 3000,
+    imageUrl: "https://images.unsplash.com/photo-1488521787991-ed7bbaae773c?w=600",
+    active: true
+  },
+  {
+    id: "charity-2",
+    name: "Ghana Healthcare Clinic Sponsorship",
+    description: "Sponsoring prenatal vitamins, pediatric checkups, and clean water filtration systems for rural clinics.",
+    targetAmount: 35000,
+    currentAmount: 3100,
+    imageUrl: "https://images.unsplash.com/photo-1584515906247-4b4c40af709f?w=600",
+    active: true
+  }
+];
+
+const INITIAL_CHARITY_DONATIONS = [
+  {
+    id: "DON-2026-1001",
+    charityId: "charity-1",
+    charityName: "Accra Children's Education Initiative",
+    customerName: "Kofi Asante",
+    customerEmail: "kofi.asante@example.com",
+    amount: 500,
+    date: "2026-06-15",
+    method: "momo",
+    status: "completed"
+  },
+  {
+    id: "DON-2026-1002",
+    charityId: "charity-1",
+    charityName: "Accra Children's Education Initiative",
+    customerName: "Gifty Ga",
+    customerEmail: "gifty.ga579265@gmail.com",
+    amount: 1200,
+    date: "2026-06-18",
+    method: "googlepay",
+    status: "completed"
+  },
+  {
+    id: "DON-2026-1003",
+    charityId: "charity-2",
+    charityName: "Ghana Healthcare Clinic Sponsorship",
+    customerName: "Ella Accra",
+    customerEmail: "ella.accra.admin@gmail.com",
+    amount: 1500,
+    date: "2026-06-20",
+    method: "googlepay",
+    status: "completed"
+  },
+  {
+    id: "DON-2026-1004",
+    charityId: "charity-2",
+    charityName: "Ghana Healthcare Clinic Sponsorship",
+    customerName: "Asante Isaiah",
+    customerEmail: "asante@example.com",
+    amount: 800,
+    date: "2026-06-25",
+    method: "momo",
+    status: "completed"
+  }
+];
+
 const AUTHORIZED_ADMIN_USERS = ['Asante Isaiah', 'Kofi Asante', 'Etnasa Haiasi', 'gifty.ga579265@gmail.com', 'ella.accra.admin@gmail.com'];
 
 interface Toast {
@@ -361,6 +430,7 @@ export default function App() {
   const [inquiries, setInquiries] = useState<CustomerInquiry[]>(INITIAL_INQUIRIES);
   const [discountCodes, setDiscountCodes] = useState<DiscountCode[]>(INITIAL_DISCOUNTS);
   const [charityData, setCharityData] = useState<Charity[]>([]);
+  const [charityDonations, setCharityDonations] = useState<any[]>([]);
   const [mediaFiles, setMediaFiles] = useState<MediaFile[]>(INITIAL_MEDIA);
   const [events, setEvents] = useState<StoreEvent[]>([]);
   const [activityLogs, setActivityLogs] = useState<ActivityLog[]>([]);
@@ -381,6 +451,7 @@ export default function App() {
   // Client session state
   const [cart, setCart] = useState<any[]>([]);
   const [activeCategory, setActiveCategory] = useState<string>("all");
+  const [searchQuery, setSearchQuery] = useState<string>("");
   const [isLoggedIn, setIsLoggedIn] = useState(() => {
     return localStorage.getItem("isLoggedIn") === "true";
   });
@@ -422,6 +493,7 @@ export default function App() {
   const [deliveries, setDeliveries] = useState<DeliveryItem[]>([]);
   const [showOrderHistory, setShowOrderHistory] = useState(false);
   const [showReviewModal, setShowReviewModal] = useState(false);
+  const [showSearchDialog, setShowSearchDialog] = useState(false);
 
   // Toasts
   const [toasts, setToasts] = useState<Toast[]>([]);
@@ -610,6 +682,17 @@ export default function App() {
       }
     });
 
+    // CHARITY DONATIONS
+    const unsubscribeCharityDonations = onSnapshot(collection(db, "charity_donations"), (snapshot) => {
+      if (snapshot.empty) {
+        setCharityDonations([]);
+      } else {
+        const items = snapshot.docs.map(doc => doc.data());
+        items.sort((a, b) => new Date(b.date).getTime() - new Date(a.date).getTime());
+        setCharityDonations(items);
+      }
+    });
+
     // 8. MEDIA FILES
     const unsubscribeMedia = onSnapshot(collection(db, "media"), (snapshot) => {
       if (snapshot.empty) {
@@ -713,6 +796,7 @@ export default function App() {
       unsubscribeReviews();
       unsubscribeDeliveries();
       unsubscribeCharity();
+      unsubscribeCharityDonations();
     };
   }, []);
 
@@ -887,6 +971,12 @@ export default function App() {
       for (const item of INITIAL_EVENTS) {
         await setDoc(doc(db, "events", String(item.id)), item);
       }
+      for (const item of INITIAL_CHARITIES) {
+        await setDoc(doc(db, "charity", String(item.id)), item);
+      }
+      for (const item of INITIAL_CHARITY_DONATIONS) {
+        await setDoc(doc(db, "charity_donations", String(item.id)), item);
+      }
 
       showToast("Showroom Seeded", "Ella's Boutique sample listings loaded successfully.", "success");
       logActivity("Seeded showroom collections with initial sample data", "admin_action");
@@ -916,6 +1006,8 @@ export default function App() {
       await purgeCollection("discounts");
       await purgeCollection("media");
       await purgeCollection("events");
+      await purgeCollection("charity");
+      await purgeCollection("charity_donations");
 
       showToast("Database Purged", "All store catalog items, customers, and transactions removed successfully.", "success");
       logActivity("Purged database collections for a clean setup", "admin_action");
@@ -1207,6 +1299,128 @@ export default function App() {
     );
   }, [currentUser, currentUserEmail]);
 
+  const storeFeatures = useMemo(() => [
+    {
+      name: "Charity Donations & Sponsorships",
+      category: "Community Support",
+      description: "Support child education, healthcare clinics, and community development initiatives in Accra and across Ghana.",
+      tags: ["charity", "donation", "giving", "community", "support", "sponsorship", "help", "poor", "ngo"],
+      icon: "💝",
+      action: () => {
+        setShowCharity(true);
+        setShowSearchDialog(false);
+      }
+    },
+    {
+      name: "Couture Custom Sizing & Bespoke Clothing",
+      category: "Tailoring & Services",
+      description: "Submit custom sizing measurements, dress codes, fabric choices, and personalized styling instructions.",
+      tags: ["couture", "tailor", "size", "custom", "fitting", "bridal", "measurement", "alteration", "dressmaker", "sewing"],
+      icon: "📐",
+      action: () => {
+        const el = document.querySelector("textarea[placeholder*='sizing']") || document.getElementById("couture-customization-section");
+        if (el) {
+          el.scrollIntoView({ behavior: "smooth", block: "center" });
+        }
+        setShowSearchDialog(false);
+      }
+    },
+    {
+      name: "Customer Reviews & Showroom Feedback",
+      category: "Social Feedback",
+      description: "Read verified feedback or submit your rating and review for Ella's bespoke alterations and catalog.",
+      tags: ["review", "feedback", "rating", "star", "comment", "testimonial", "opinion"],
+      icon: "⭐",
+      action: () => {
+        setShowReviewModal(true);
+        setShowSearchDialog(false);
+      }
+    },
+    {
+      name: "Customer Order History & MoMo Tracking",
+      category: "My Account",
+      description: "Track live MoMo deliveries, view past orders, and print digital receipts / invoices.",
+      tags: ["order", "history", "tracking", "invoice", "receipt", "purchase", "account", "delivery"],
+      icon: "📦",
+      action: () => {
+        if (isLoggedIn) {
+          setShowOrderHistory(true);
+        } else {
+          setShowLogin(true);
+          showToast("Sign In Required", "Please sign in to view your order history.", "info");
+        }
+        setShowSearchDialog(false);
+      }
+    },
+    {
+      name: "Interactive AI Styling & Chat Companion",
+      category: "AI Styling Assistant",
+      description: "Chat with Hai-asi, our real-time Gemini AI, to get custom sizing recommendations, outfit pairings, and style suggestions.",
+      tags: ["chat", "bot", "ai", "gemini", "stylist", "recommendation", "help", "support", "conversation"],
+      icon: "🤖",
+      action: () => {
+        const el = document.getElementById("haiasi-chatbot-trigger") || document.querySelector("button[id*='chatbot']");
+        if (el && el instanceof HTMLElement) {
+          el.click();
+        } else {
+          showToast("AI Chat Activated", "Click the chatbot launcher in the bottom right of the screen to consult with Hai-asi.", "success");
+        }
+        setShowSearchDialog(false);
+      }
+    },
+    {
+      name: "Premium Lapaz Showroom & Events Hub",
+      category: "Exhibitions & trunk shows",
+      description: "Read about our upcoming live product trunk shows, fashion design exhibitions, and cultural runway runway showcases.",
+      tags: ["event", "showroom", "exhibition", "trunk show", "lapaz", "accra", "runway", "dates", "tickets"],
+      icon: "🎟️",
+      action: () => {
+        const el = document.getElementById("events-section") || document.getElementById("events");
+        if (el) {
+          el.scrollIntoView({ behavior: "smooth" });
+        } else {
+          showToast("Showroom Events", "Scroll down to see our exciting schedule of physical store exhibitions and popups.", "info");
+        }
+        setShowSearchDialog(false);
+      }
+    },
+    {
+      name: "Contact & Location details",
+      category: "Showroom Info",
+      description: "Get physical directions to our Lapaz market showroom, operating hours, direct phone numbers, and WhatsApp channels.",
+      tags: ["contact", "location", "showroom", "phone", "email", "hours", "address", "map", "whatsapp"],
+      icon: "📍",
+      action: () => {
+        const el = document.querySelector("footer");
+        if (el) {
+          el.scrollIntoView({ behavior: "smooth" });
+        }
+        setShowSearchDialog(false);
+      }
+    }
+  ], [isLoggedIn]);
+
+  const filteredFeatures = useMemo(() => {
+    if (!searchQuery.trim()) return storeFeatures;
+    const q = searchQuery.toLowerCase();
+    return storeFeatures.filter(f => 
+      f.name.toLowerCase().includes(q) ||
+      f.category.toLowerCase().includes(q) ||
+      f.description.toLowerCase().includes(q) ||
+      f.tags.some(t => t.toLowerCase().includes(q))
+    );
+  }, [searchQuery, storeFeatures]);
+
+  const filteredProducts = useMemo(() => {
+    if (!searchQuery.trim()) return products.slice(0, 4); // show first 4 featured items
+    const q = searchQuery.toLowerCase();
+    return products.filter(p => 
+      p.name.toLowerCase().includes(q) ||
+      p.category.toLowerCase().includes(q) ||
+      p.description.toLowerCase().includes(q)
+    );
+  }, [searchQuery, products]);
+
   const ProfessionalLogo = () => (
     <div className="flex items-center gap-2.5 group">
       <div className="relative w-10 h-10 rounded-full flex items-center justify-center overflow-hidden shadow-md border border-neutral-200 transition-transform duration-300 group-hover:scale-105">
@@ -1433,10 +1647,50 @@ export default function App() {
 
     {/* HEADER NAV */}
       <nav className="sticky top-0 bg-white/90 backdrop-blur-md border-b border-neutral-100 z-30 transition-all duration-300 shadow-sm px-6 py-4">
-        <div className="max-w-7xl mx-auto flex justify-between items-center w-full">
-          <a href="#" className="font-sans text-xl tracking-tight text-neutral-900 transition-colors font-bold">
-            <span className="text-indigo-600">Ella's</span> Store
-          </a>
+        <div className="max-w-7xl mx-auto flex flex-col gap-4">
+          <div className="flex items-center justify-between gap-4 w-full">
+            <div className="flex-1 max-w-lg flex items-center gap-2">
+              <div className="relative flex-1">
+                <input 
+                  type="text" 
+                  placeholder="Search products & store features..." 
+                  value={searchQuery}
+                  onChange={(e) => setSearchQuery(e.target.value)}
+                  onKeyDown={(e) => {
+                    if (e.key === "Enter") {
+                      setShowSearchDialog(true);
+                      logActivity(`Searched for "${searchQuery}" in search dialog`, "user_action");
+                    }
+                  }}
+                  className="w-full pl-4 pr-10 py-2 rounded-full border border-neutral-200 text-xs focus:outline-none focus:ring-2 focus:ring-indigo-500 bg-white"
+                />
+                <Search className="absolute right-3.5 top-2.5 w-3.5 h-3.5 text-neutral-400 pointer-events-none" />
+              </div>
+              <button
+                onClick={() => {
+                  setShowSearchDialog(true);
+                  logActivity(`Clicked search button for "${searchQuery}"`, "user_action");
+                }}
+                className="bg-indigo-600 hover:bg-indigo-500 text-white px-4 py-2 rounded-full text-xs font-bold tracking-wider uppercase transition-all flex items-center gap-1.5 cursor-pointer shrink-0 shadow-sm active:scale-95"
+              >
+                <Search className="w-3.5 h-3.5" />
+                <span>Search</span>
+              </button>
+            </div>
+            {isLoggedIn && (
+              <div className="flex items-center gap-1.5 text-xs text-neutral-700 font-medium bg-neutral-100 px-3 py-1.5 rounded-full border border-neutral-200 shrink-0">
+                <User className="w-3.5 h-3.5 text-indigo-500" />
+                <span className="max-w-[120px] truncate">{currentUser}</span>
+              </div>
+            )}
+          </div>
+
+          <div className="flex justify-between items-center w-full">
+            <div className="flex items-center gap-4">
+              <a href="#" className="font-sans text-xl tracking-tight text-neutral-900 transition-colors font-bold">
+                <span className="text-indigo-600">Ella's</span> Store
+              </a>
+            </div>
 
           <div className="hidden lg:flex items-center gap-6 text-xs font-medium tracking-wide uppercase text-neutral-600">
             <a href="#collections" className="hover:text-indigo-600 transition-colors">Collections</a>
@@ -1475,18 +1729,12 @@ export default function App() {
 
           <div className="flex items-center gap-3">
             {isLoggedIn && (
-              <div className="flex items-center gap-2">
-                <div className="flex items-center gap-1.5 text-xs text-neutral-700 font-medium bg-neutral-100 px-3 py-1.5 rounded-full border border-neutral-200">
-                  <User className="w-3.5 h-3.5 text-indigo-500" />
-                  <span className="max-w-[70px] truncate">{currentUser}</span>
-                </div>
                 <button
                   onClick={handleLogout}
                   className="text-neutral-500 hover:text-rose-600 text-[10px] font-bold tracking-widest uppercase cursor-pointer"
                 >
                   Logout
                 </button>
-              </div>
             )}
             
             <button
@@ -1527,7 +1775,8 @@ export default function App() {
             </button>
           </div>
         </div>
-      </nav>
+      </div>
+    </nav>
 
       {/* MOBILE MENU OVERLAY */}
       {showMobileMenu && (
@@ -1667,26 +1916,219 @@ export default function App() {
         </div>
       )}
 
-      {/* HERO CANVAS */}
-      <section 
-        className="h-[80vh] bg-cover bg-center flex items-center justify-center relative text-black"
-        style={{ backgroundImage: `linear-gradient(to bottom, rgba(255,255,255,0.65), rgba(255,255,255,0.95)), url(${homepageSettings.heroBackground})` }}
-      >
-        <div className="text-center px-6 space-y-6 max-w-2xl animate-in fade-in slide-in-from-bottom-6 duration-700">
-          <div className="flex justify-center mb-2 scale-110">
-            <ProfessionalLogo />
+      {/* HERO CANVAS WITH ANIMATED BACKGROUND AND PROFESSIONAL LOGO */}
+      <section className="h-[85vh] flex items-center justify-center relative overflow-hidden text-black bg-neutral-50 border-b border-neutral-100">
+        
+        {/* Underlay: Animated Zoom/Scale Hero Background Image */}
+        <motion.div 
+          className="absolute inset-0 bg-cover bg-center"
+          style={{ 
+            backgroundImage: `linear-gradient(to bottom, rgba(255,255,255,0.72), rgba(255,255,255,0.95)), url(${homepageSettings.heroBackground})`,
+          }}
+          animate={{
+            scale: [1, 1.05, 1],
+          }}
+          transition={{
+            duration: 20,
+            repeat: Infinity,
+            ease: "easeInOut",
+          }}
+        />
+
+        {/* Ambient Animated Blurred Blobs Layer (Fashion/Luxury Mood) */}
+        <div className="absolute inset-0 overflow-hidden pointer-events-none opacity-40 mix-blend-multiply">
+          <motion.div
+            className="absolute w-[350px] h-[350px] rounded-full bg-indigo-300/40 blur-[80px]"
+            animate={{
+              x: [-40, 60, -40],
+              y: [-20, 40, -20],
+              scale: [1, 1.15, 1],
+            }}
+            transition={{
+              duration: 12,
+              repeat: Infinity,
+              ease: "easeInOut",
+            }}
+            style={{ top: "10%", left: "15%" }}
+          />
+          <motion.div
+            className="absolute w-[300px] h-[300px] rounded-full bg-amber-200/35 blur-[80px]"
+            animate={{
+              x: [50, -30, 50],
+              y: [60, -20, 60],
+              scale: [1.1, 0.9, 1.1],
+            }}
+            transition={{
+              duration: 15,
+              repeat: Infinity,
+              ease: "easeInOut",
+            }}
+            style={{ bottom: "15%", right: "20%" }}
+          />
+          <motion.div
+            className="absolute w-[280px] h-[280px] rounded-full bg-rose-200/30 blur-[70px]"
+            animate={{
+              x: [20, -40, 20],
+              y: [-50, 30, -50],
+              scale: [0.95, 1.1, 0.95],
+            }}
+            transition={{
+              duration: 10,
+              repeat: Infinity,
+              ease: "easeInOut",
+            }}
+            style={{ top: "40%", right: "10%" }}
+          />
+        </div>
+
+        {/* Fine Couture Wave Lines (Animated SVG Thread Trails) */}
+        <div className="absolute inset-0 pointer-events-none opacity-15">
+          <svg className="w-full h-full" xmlns="http://www.w3.org/2000/svg">
+            <motion.path
+              d="M -100 200 C 300 100, 600 500, 1500 200"
+              fill="none"
+              stroke="url(#indigoGoldGradient)"
+              strokeWidth="2"
+              strokeDasharray="8 4"
+              animate={{
+                strokeDashoffset: [0, -40],
+              }}
+              transition={{
+                duration: 12,
+                repeat: Infinity,
+                ease: "linear",
+              }}
+            />
+            <motion.path
+              d="M -100 350 C 400 500, 700 100, 1600 450"
+              fill="none"
+              stroke="url(#goldIndigoGradient)"
+              strokeWidth="1.5"
+              animate={{
+                d: [
+                  "M -100 350 C 400 500, 700 100, 1600 450",
+                  "M -100 380 C 420 440, 680 160, 1600 420",
+                  "M -100 350 C 400 500, 700 100, 1600 450"
+                ]
+              }}
+              transition={{
+                duration: 18,
+                repeat: Infinity,
+                ease: "easeInOut",
+              }}
+            />
+            <defs>
+              <linearGradient id="indigoGoldGradient" x1="0%" y1="0%" x2="100%" y2="100%">
+                <stop offset="0%" stopColor="#4f46e5" />
+                <stop offset="50%" stopColor="#ec4899" />
+                <stop offset="100%" stopColor="#eab308" />
+              </linearGradient>
+              <linearGradient id="goldIndigoGradient" x1="0%" y1="0%" x2="100%" y2="100%">
+                <stop offset="0%" stopColor="#eab308" />
+                <stop offset="100%" stopColor="#6366f1" />
+              </linearGradient>
+            </defs>
+          </svg>
+        </div>
+
+        {/* Delicate Golden Sparkles Floating Gently (Couture Magic Dust) */}
+        <div className="absolute inset-0 pointer-events-none overflow-hidden">
+          {[...Array(12)].map((_, i) => {
+            const randomSize = Math.random() * 4 + 2;
+            const randomX = Math.random() * 100;
+            const randomDelay = Math.random() * 8;
+            const randomDuration = Math.random() * 10 + 8;
+            return (
+              <motion.div
+                key={i}
+                className="absolute rounded-full bg-amber-400/55"
+                style={{
+                  width: randomSize,
+                  height: randomSize,
+                  left: `${randomX}%`,
+                  bottom: "-5%",
+                }}
+                animate={{
+                  y: ["0vh", "-100vh"],
+                  x: ["0px", `${(Math.random() - 0.5) * 60}px`],
+                  opacity: [0, 0.7, 0.7, 0],
+                }}
+                transition={{
+                  duration: randomDuration,
+                  repeat: Infinity,
+                  delay: randomDelay,
+                  ease: "easeInOut",
+                }}
+              />
+            );
+          })}
+        </div>
+
+        {/* Foreground Content Card with Elevated Logo */}
+        <div className="relative z-10 text-center px-6 max-w-2xl mx-auto space-y-6">
+          
+          {/* Elevated Professional Logo Badge */}
+          <motion.div 
+            className="inline-flex flex-col items-center p-6 rounded-[2.5rem] bg-white/60 backdrop-blur-md border border-white/80 shadow-2xl space-y-3 max-w-sm mx-auto relative group overflow-hidden"
+            initial={{ opacity: 0, y: 20 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ duration: 0.8, cubicBezier: [0.16, 1, 0.3, 1] }}
+          >
+            {/* Shimmer overlay effect */}
+            <div className="absolute inset-0 bg-gradient-to-r from-transparent via-white/30 to-transparent -translate-x-full group-hover:translate-x-full transition-transform duration-1000 ease-in-out pointer-events-none" />
+            
+            {/* Logo Circular Frame with Gold Ring */}
+            <div className="relative w-28 h-28 md:w-32 md:h-32 rounded-full flex items-center justify-center p-1 bg-gradient-to-tr from-amber-400 via-pink-400 to-indigo-500 shadow-xl">
+              <div className="absolute inset-0.5 rounded-full bg-white flex items-center justify-center overflow-hidden">
+                <img 
+                  src={Logo} 
+                  alt="Ella's Store Logo" 
+                  referrerPolicy="no-referrer"
+                  className="w-full h-full object-cover rounded-full transform transition-transform duration-700 group-hover:scale-110" 
+                />
+              </div>
+              
+              {/* Rotating Dashed Outer Ring (Tape Measure Style) */}
+              <svg className="absolute -inset-1 w-[calc(100%+8px)] h-[calc(100%+8px)] animate-[spin_20s_linear_infinite]" viewBox="0 0 100 100">
+                <circle cx="50" cy="50" r="48" fill="none" stroke="#eab308" strokeWidth="1" strokeDasharray="6 3" strokeOpacity="0.75" />
+              </svg>
+            </div>
+
+            {/* Typography */}
+            <div className="text-center space-y-1">
+              <div className="flex items-center justify-center gap-1">
+                <Sparkles className="w-3.5 h-3.5 text-amber-500 animate-pulse" />
+                <h2 className="font-sans text-lg font-black tracking-[0.2em] text-neutral-900 uppercase">ELLA'S STORE</h2>
+                <Sparkles className="w-3.5 h-3.5 text-indigo-500 animate-pulse" />
+              </div>
+              <p className="text-[9px] font-mono tracking-widest text-indigo-600 font-bold uppercase">COUTURE & LUXURY ALTERATIONS</p>
+              <div className="flex items-center justify-center gap-1.5 pt-1">
+                <span className="w-1.5 h-1.5 rounded-full bg-emerald-500 animate-ping" />
+                <span className="text-[8px] font-sans font-bold text-neutral-500 uppercase tracking-wider">Premium Lapaz Showroom</span>
+              </div>
+            </div>
+          </motion.div>
+
+          {/* Slogan & Banner Info */}
+          <div className="space-y-4 pt-2">
+            <span className="bg-indigo-50 text-indigo-600 text-[10px] px-4 py-2 rounded-full font-black tracking-widest font-mono uppercase shadow-sm border border-indigo-100">
+              Operational Showroom Live
+            </span>
+            <h1 className="font-sans text-4xl md:text-5xl lg:text-6xl tracking-tight uppercase font-black text-black leading-none drop-shadow-sm">
+              {homepageSettings.heroTitle}
+            </h1>
+            <p className="text-xs md:text-sm font-sans tracking-wide text-neutral-800 max-w-lg mx-auto leading-relaxed">
+              {homepageSettings.heroDescription}
+            </p>
           </div>
-          <span className="bg-indigo-50 text-indigo-600 text-[10px] px-3.5 py-1.5 rounded-full font-bold tracking-widest font-mono uppercase shadow-sm border border-indigo-200">
-            Operational Showroom Live
-          </span>
-          <h1 className="font-sans text-5xl md:text-6xl tracking-tight uppercase font-black text-black">{homepageSettings.heroTitle}</h1>
-          <p className="text-sm md:text-base font-sans tracking-wide text-neutral-800 max-w-lg mx-auto">{homepageSettings.heroDescription}</p>
+
           <div className="pt-4">
             <a
               href="#shop"
-              className="bg-indigo-600 hover:bg-indigo-500 text-white px-8 py-3.5 rounded-full text-xs font-black tracking-widest uppercase transition-all duration-300 shadow-md hover:shadow-lg"
+              className="bg-indigo-600 hover:bg-indigo-500 text-white px-8 py-4 rounded-full text-xs font-black tracking-widest uppercase transition-all duration-300 shadow-md hover:shadow-lg inline-flex items-center gap-2 group"
             >
               Discover Collection
+              <span className="group-hover:translate-x-1 transition-transform">&rarr;</span>
             </a>
           </div>
         </div>
@@ -1891,18 +2333,24 @@ export default function App() {
           </div>
 
           {/* Dynamic grid wrapping with empty states */}
-          {products.filter(p => activeCategory === 'all' || p.category === activeCategory).length === 0 ? (
+          {products.filter(p => 
+            (activeCategory === 'all' || p.category === activeCategory) &&
+            (p.name.toLowerCase().includes(searchQuery.toLowerCase()) || p.category.toLowerCase().includes(searchQuery.toLowerCase()))
+          ).length === 0 ? (
             <div className="text-center py-16 bg-white rounded-3xl border border-neutral-200 shadow-sm max-w-md mx-auto space-y-3 animate-in fade-in">
               <span className="text-4xl">🍽️</span>
-              <h4 className="font-sans text-base font-bold text-neutral-800">Fresh Menu Coming Soon</h4>
+              <h4 className="font-sans text-base font-bold text-neutral-800">No Products Found</h4>
               <p className="text-xs text-neutral-500 max-w-xs mx-auto leading-relaxed">
-                Ella's kitchen is crafting new gourmet dishes right now. Check back shortly!
+                Try a different search term or category.
               </p>
             </div>
           ) : (
             <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
               {products
-                .filter(p => activeCategory === 'all' || p.category === activeCategory)
+                .filter(p => 
+                  (activeCategory === 'all' || p.category === activeCategory) &&
+                  (p.name.toLowerCase().includes(searchQuery.toLowerCase()) || p.category.toLowerCase().includes(searchQuery.toLowerCase()))
+                )
                 .map(prod => (
                   <ProductCard
                     key={prod.id}
@@ -2198,6 +2646,8 @@ export default function App() {
             charityData={charityData} 
             onLogActivity={logActivity} 
             onShowToast={showToast} 
+            currentUser={currentUser}
+            currentUserEmail={currentUserEmail}
           />
         </div>
       )
@@ -2257,6 +2707,7 @@ export default function App() {
           activityLogs={activityLogs}
           discountCodes={discountCodes}
           charityData={charityData}
+          charityDonations={charityDonations}
           mediaFiles={mediaFiles}
           homepageSettings={homepageSettings}
           adminMessages={adminMessages}
@@ -2307,6 +2758,7 @@ export default function App() {
           currentUser={currentUser}
           currentUserEmail={currentUserEmail}
           onClose={() => setShowOrderHistory(false)}
+          isCustomerOnly={!isAuthorizedAdmin}
         />
       )}
 
@@ -2319,6 +2771,179 @@ export default function App() {
           onSubmitReview={handleAddReview}
         />
       )}
+
+      {/* 10. INTERACTIVE SEARCH DIALOG / RESULTS MODAL */}
+      <AnimatePresence>
+        {showSearchDialog && (
+          <div 
+            className="fixed inset-0 bg-neutral-900/60 backdrop-blur-md z-50 flex items-center justify-center p-4"
+            onClick={() => setShowSearchDialog(false)}
+          >
+            <motion.div
+              initial={{ opacity: 0, scale: 0.95, y: 20 }}
+              animate={{ opacity: 1, scale: 1, y: 0 }}
+              exit={{ opacity: 0, scale: 0.95, y: 20 }}
+              transition={{ duration: 0.3, cubicBezier: [0.16, 1, 0.3, 1] }}
+              onClick={(e) => e.stopPropagation()}
+              className="bg-white rounded-[2.5rem] shadow-2xl max-w-3xl w-full max-h-[85vh] flex flex-col overflow-hidden border border-neutral-100"
+            >
+              {/* Modal Header */}
+              <div className="p-6 border-b border-neutral-100 flex items-center justify-between gap-4 bg-neutral-50">
+                <div className="flex items-center gap-2.5">
+                  <span className="p-2.5 bg-indigo-50 rounded-full text-indigo-600 text-xs font-black">🔍</span>
+                  <div>
+                    <h3 className="text-sm font-black text-slate-900 uppercase tracking-wider">Boutique Search & Intelligence</h3>
+                    <p className="text-[10px] text-neutral-500 font-mono">Real-time matching of premium products & custom services</p>
+                  </div>
+                </div>
+                <button
+                  onClick={() => setShowSearchDialog(false)}
+                  className="p-2 text-neutral-400 hover:text-rose-600 hover:bg-neutral-100 rounded-full transition-all cursor-pointer"
+                  title="Close Search Dialog"
+                >
+                  <X className="w-4 h-4" />
+                </button>
+              </div>
+
+              {/* Live Filter Bar inside Modal */}
+              <div className="p-5 border-b border-neutral-100 bg-white">
+                <div className="relative">
+                  <input
+                    type="text"
+                    value={searchQuery}
+                    onChange={(e) => setSearchQuery(e.target.value)}
+                    placeholder="Type to filter products, custom measurements, charity initiatives, or chatbot styling support..."
+                    className="w-full pl-10 pr-10 py-3 rounded-2xl border border-neutral-200 text-xs focus:outline-none focus:ring-2 focus:ring-indigo-500 bg-neutral-50/50"
+                    autoFocus
+                  />
+                  <Search className="absolute left-3.5 top-3.5 w-4 h-4 text-neutral-400" />
+                  {searchQuery && (
+                    <button
+                      onClick={() => setSearchQuery("")}
+                      className="absolute right-3.5 top-3 p-1 text-neutral-400 hover:text-slate-800 transition-colors rounded-full"
+                    >
+                      <X className="w-3.5 h-3.5" />
+                    </button>
+                  )}
+                </div>
+              </div>
+
+              {/* Scrollable Results Area */}
+              <div className="flex-1 overflow-y-auto p-6 space-y-8 bg-neutral-50/30">
+                
+                {/* 1. APP FEATURES AND STORE SERVICES */}
+                <div className="space-y-4">
+                  <div className="flex items-center justify-between">
+                    <span className="text-[10px] font-mono tracking-widest text-indigo-600 font-black uppercase bg-indigo-50 px-3 py-1 rounded-full">
+                      Store Features & Specialities ({filteredFeatures.length})
+                    </span>
+                    {searchQuery && <span className="text-[9px] text-neutral-400 font-mono">Matched by keywords</span>}
+                  </div>
+
+                  {filteredFeatures.length === 0 ? (
+                    <div className="p-4 bg-white rounded-2xl border border-dashed border-neutral-200 text-center text-xs text-neutral-500 font-medium">
+                      No matching services found. Try typing "charity", "sizing", or "reviews".
+                    </div>
+                  ) : (
+                    <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                      {filteredFeatures.map((feat) => (
+                        <div
+                          key={feat.name}
+                          className="bg-white p-4.5 rounded-2xl border border-neutral-100 shadow-sm hover:shadow-md hover:border-indigo-100 transition-all duration-300 flex flex-col justify-between group"
+                        >
+                          <div className="space-y-2">
+                            <div className="flex items-center gap-2">
+                              <span className="text-xl">{feat.icon}</span>
+                              <div>
+                                <span className="text-[9px] font-mono font-bold uppercase tracking-wider text-neutral-400 block leading-none">{feat.category}</span>
+                                <h4 className="text-xs font-black text-neutral-900 group-hover:text-indigo-600 transition-colors uppercase tracking-tight">{feat.name}</h4>
+                              </div>
+                            </div>
+                            <p className="text-[11px] text-neutral-600 leading-relaxed font-medium font-sans">{feat.description}</p>
+                          </div>
+                          <div className="pt-3 border-t border-neutral-50 mt-3 flex justify-end">
+                            <button
+                              onClick={feat.action}
+                              className="text-[10px] font-bold text-indigo-600 hover:text-indigo-500 flex items-center gap-1 group-hover:translate-x-0.5 transition-transform cursor-pointer"
+                            >
+                              <span>Launch Feature</span>
+                              <span>&rarr;</span>
+                            </button>
+                          </div>
+                        </div>
+                      ))}
+                    </div>
+                  )}
+                </div>
+
+                {/* 2. MATCHING CATALOG PRODUCTS */}
+                <div className="space-y-4">
+                  <div className="flex items-center justify-between">
+                    <span className="text-[10px] font-mono tracking-widest text-pink-600 font-black uppercase bg-pink-50 px-3 py-1 rounded-full">
+                      Showroom Catalog ({filteredProducts.length})
+                    </span>
+                    {!searchQuery && <span className="text-[9px] text-neutral-400 font-mono">Popular items displayed</span>}
+                  </div>
+
+                  {filteredProducts.length === 0 ? (
+                    <div className="p-8 bg-white rounded-2xl border border-dashed border-neutral-200 text-center space-y-2 max-w-sm mx-auto">
+                      <span className="text-2xl block">🧥</span>
+                      <h4 className="text-xs font-black text-slate-800 uppercase">No Product Matches</h4>
+                      <p className="text-[10px] text-neutral-500 font-medium">Try filtering by other categories like "food", "dresses", "accessories", or "shoes".</p>
+                    </div>
+                  ) : (
+                    <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                      {filteredProducts.map((prod) => (
+                        <div
+                          key={prod.id}
+                          className="bg-white p-3.5 rounded-2xl border border-neutral-100 hover:border-pink-100 shadow-sm hover:shadow-md transition-all duration-300 flex items-center gap-4 group"
+                        >
+                          <div className="w-16 h-16 rounded-xl overflow-hidden bg-neutral-100 shrink-0 border border-neutral-200">
+                            <img
+                              src={prod.image}
+                              alt={prod.name}
+                              referrerPolicy="no-referrer"
+                              className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500"
+                            />
+                          </div>
+                          
+                          <div className="flex-1 min-w-0 space-y-1">
+                            <div className="flex items-center gap-1.5">
+                              <span className="px-2 py-0.5 bg-neutral-100 text-neutral-600 rounded-full font-mono font-bold text-[8px] uppercase tracking-wider">{prod.category}</span>
+                              {prod.stock <= 5 && (
+                                <span className="px-1.5 py-0.5 bg-rose-50 text-rose-600 rounded-full font-sans font-bold text-[8px] uppercase tracking-wider">Low Stock</span>
+                              )}
+                            </div>
+                            <h4 className="text-xs font-black text-neutral-900 uppercase tracking-tight truncate">{prod.name}</h4>
+                            <div className="text-xs font-black text-indigo-600 font-mono">${prod.price}</div>
+                          </div>
+
+                          <div className="text-right shrink-0">
+                            <button
+                              onClick={() => addToCart(prod)}
+                              className="bg-indigo-600 hover:bg-indigo-500 text-white text-[9px] font-bold px-3 py-2 rounded-xl uppercase tracking-wider transition-colors shadow-sm block cursor-pointer"
+                            >
+                              Add to Bag
+                            </button>
+                          </div>
+                        </div>
+                      ))}
+                    </div>
+                  )}
+                </div>
+
+              </div>
+
+              {/* Modal Footer */}
+              <div className="p-4 border-t border-neutral-100 bg-neutral-50 text-center">
+                <p className="text-[9px] text-neutral-400 font-mono">
+                  Press <kbd className="bg-white border px-1 rounded shadow-sm">Esc</kbd> or click backdrop to dismiss. Matches update instantly as you type.
+                </p>
+              </div>
+            </motion.div>
+          </div>
+        )}
+      </AnimatePresence>
 
     </div>
   );

@@ -26,6 +26,7 @@ interface AdminDashboardProps {
   activityLogs: ActivityLog[];
   discountCodes: DiscountCode[];
   charityData: Charity[];
+  charityDonations?: any[];
   mediaFiles: MediaFile[];
   homepageSettings: HomepageSettings;
   adminMessages: any[];
@@ -57,7 +58,7 @@ interface AdminDashboardProps {
 
 export default function AdminDashboard({
   products, orders, customers, payments, locations, inquiries, 
-  activityLogs, discountCodes, charityData, mediaFiles, homepageSettings, adminMessages, events, reviews, deliveries, onDeleteReview, onUpdateDelivery, onCreateDelivery,
+  activityLogs, discountCodes, charityData, charityDonations = [], mediaFiles, homepageSettings, adminMessages, events, reviews, deliveries, onDeleteReview, onUpdateDelivery, onCreateDelivery,
   onClose, onSetProducts, onSetOrders, onSetLocations, onSetInquiries, 
   onSetDiscountCodes, onSetCharityData, onSetMediaFiles, onSetHomepageSettings, onSetAdminMessages,
   onSetActivityLogs, onSetEvents, onShowToast, onLogActivity, onAddNotification, onSeedDemoData, onClearAllData
@@ -184,6 +185,41 @@ export default function AdminDashboard({
     document.body.appendChild(link);
     link.click();
     document.body.removeChild(link);
+  };
+
+  const handleDownloadPaymentsSpreadsheet = () => {
+    if (payments.length === 0) {
+      onShowToast("No Data", "There is no payment data available to export.", "error");
+      return;
+    }
+
+    const headers = ["Transaction ID", "Order Reference ID", "Customer Name", "Payment Gateway", "Amount Paid (GH₵)", "Verification Date", "Transaction Status"];
+    const rows = payments.map(p => [
+      p.id,
+      p.orderId || "N/A",
+      `"${p.customer.replace(/"/g, '""')}"`,
+      p.method.toUpperCase(),
+      p.amount,
+      p.date,
+      p.status.toUpperCase()
+    ]);
+
+    const csvContent = [
+      headers.join(","),
+      ...rows.map(e => e.join(","))
+    ].join("\n");
+
+    const blob = new Blob([csvContent], { type: 'text/csv;charset=utf-8;' });
+    const url = URL.createObjectURL(blob);
+    const link = document.createElement("a");
+    link.setAttribute("href", url);
+    link.setAttribute("download", `payment_ledger_report_${new Date().toISOString().slice(0, 10)}.csv`);
+    document.body.appendChild(link);
+    link.click();
+    document.body.removeChild(link);
+
+    onShowToast("Spreadsheet Exported", "Successfully exported payment ledger as CSV spreadsheet.", "success");
+    onLogActivity("Exported general payment transaction spreadsheet reports", "admin_action");
   };
 
   // Food Metrics
@@ -1560,7 +1596,16 @@ export default function AdminDashboard({
                   <h2 className="font-serif text-2xl text-neutral-900 font-medium">Payment Logs and Invoicing</h2>
                   <p className="text-xs text-neutral-500">Live operational ledger logs for checking and verifying MTN Mobile Money transactions.</p>
                 </div>
-                <PageToggleBtn />
+                <div className="flex items-center gap-2">
+                  <button
+                    onClick={handleDownloadPaymentsSpreadsheet}
+                    className="bg-indigo-600 hover:bg-indigo-500 text-white px-4 py-2.5 rounded-xl text-xs font-bold transition-all shadow-md flex items-center gap-1.5 cursor-pointer"
+                  >
+                    <Download className="w-3.5 h-3.5" />
+                    <span>Export Ledger Spreadsheet</span>
+                  </button>
+                  <PageToggleBtn />
+                </div>
               </div>
 
               {/* Payments Stats Grid */}
@@ -3015,6 +3060,7 @@ export default function AdminDashboard({
             <div className="space-y-8 animate-in fade-in duration-300">
               <CharityManager 
                 charityData={charityData} 
+                charityDonations={charityDonations}
                 onSetCharityData={onSetCharityData} 
                 onShowToast={onShowToast} 
                 onLogActivity={(activity, type) => onLogActivity(activity, type)} 
