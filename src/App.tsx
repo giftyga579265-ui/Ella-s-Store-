@@ -1,4 +1,4 @@
-import React, { useState, useEffect, useMemo } from "react";
+import React, { useState, useEffect, useMemo, useRef } from "react";
 import { motion, AnimatePresence } from "motion/react";
 import { 
   Product, Order, Customer, Payment, CustomerLocation, 
@@ -6,7 +6,8 @@ import {
 } from "./types";
 import { 
   ShoppingBag, Phone, MapPin, Mail, Clock, HelpCircle, 
-  Settings, User, Check, Sparkles, Star, ChevronDown, Lock, Bell, Trash2, X, Menu, Heart, Search
+  Settings, User, Check, Sparkles, Star, ChevronDown, Lock, Bell, Trash2, X, Menu, Heart, Search,
+  Mic, Video, Film
 } from "lucide-react";
 
 import SmsWidget from "./components/SmsWidget";
@@ -19,6 +20,7 @@ import ProductCard from "./components/ProductCard";
 import NotificationInbox from "./components/NotificationInbox";
 import OrderHistory from "./components/OrderHistory";
 import ReviewModal from "./components/ReviewModal";
+import ConferenceRoom from "./components/ConferenceRoom";
 // @ts-ignore
 import Logo from "./assets/images/ellas_store_logo_1782860468627.jpg";
 
@@ -483,8 +485,15 @@ export default function App() {
   const [showCheckout, setShowCheckout] = useState(false);
   const [showMedia, setShowMedia] = useState(false);
   const [showCharity, setShowCharity] = useState(false);
+  const [showConference, setShowConference] = useState(false);
+  const [initialConfRoomId, setInitialConfRoomId] = useState<string | null>(null);
   const [showAdminConsole, setShowAdminConsole] = useState(false);
   const [showMobileMenu, setShowMobileMenu] = useState(false);
+  
+  // Custom states for styling inquiry and SpeechRecognition
+  const [isListening, setIsListening] = useState(false);
+  const [inquiryMessage, setInquiryMessage] = useState("");
+  const recognitionRef = useRef<any>(null);
   
   // Custom dialogs
   const [showAdminAuthModal, setShowAdminAuthModal] = useState(false);
@@ -568,6 +577,101 @@ export default function App() {
       }
     } catch (err) {
       console.error("Error auto-seeding database:", err);
+    }
+  };
+
+  // Check URL query parameters for conference room redirect
+  useEffect(() => {
+    const params = new URLSearchParams(window.location.search);
+    const roomId = params.get("room");
+    if (roomId) {
+      setInitialConfRoomId(roomId);
+      setShowConference(true);
+      // Clean query parameter from URL bar without reload
+      window.history.replaceState({}, document.title, window.location.pathname);
+    }
+  }, []);
+
+  const startSpeechRecognition = () => {
+    const SpeechRecognition = (window as any).SpeechRecognition || (window as any).webkitSpeechRecognition;
+    if (!SpeechRecognition) {
+      showToast(
+        "API Unsupported",
+        "The browser's Speech Recognition API is not supported in this environment. Try Google Chrome.",
+        "error"
+      );
+      return;
+    }
+
+    // Toggle logic: If already listening, stop the current instance gracefully
+    if (isListening) {
+      if (recognitionRef.current) {
+        try {
+          recognitionRef.current.stop();
+        } catch (err) {
+          console.error("Error stopping speech recognition:", err);
+        }
+      }
+      setIsListening(false);
+      return;
+    }
+
+    try {
+      const recognition = new SpeechRecognition();
+      recognitionRef.current = recognition;
+      recognition.continuous = false;
+      recognition.interimResults = false;
+      recognition.lang = "en-US";
+
+      recognition.onstart = () => {
+        setIsListening(true);
+        showToast("Voice Dictation Live", "Listening to your inquiry... Speak now.", "info");
+      };
+
+      recognition.onresult = (event: any) => {
+        const transcript = event.results[0][0].transcript;
+        setInquiryMessage(prev => prev ? prev + " " + transcript : transcript);
+        showToast("Speech Recorded", "Appended transcribed speech text successfully.", "success");
+      };
+
+      recognition.onerror = (event: any) => {
+        const err = event.error;
+        console.error("Speech recognition error:", err);
+        setIsListening(false);
+        
+        // Handle normal transitions or aborts gracefully without showing disruptive toasts
+        if (err === "aborted") {
+          console.log("Speech recognition was aborted normally.");
+          return;
+        }
+        
+        if (err === "no-speech") {
+          showToast("No Speech Detected", "We didn't hear anything. Try speaking again.", "info");
+          return;
+        }
+
+        if (err === "not-allowed") {
+          showToast(
+            "Access Denied",
+            "Microphone access was denied. Please allow microphone permissions or open in a new tab.",
+            "error"
+          );
+          return;
+        }
+
+        showToast("Dictation Suspended", `Speech recognition stopped: ${err}`, "info");
+      };
+
+      recognition.onend = () => {
+        setIsListening(false);
+        recognitionRef.current = null;
+      };
+
+      recognition.start();
+    } catch (err) {
+      console.error("Speech initialization error:", err);
+      setIsListening(false);
+      recognitionRef.current = null;
     }
   };
 
@@ -1289,6 +1393,7 @@ export default function App() {
     });
     showToast("Inquiry Forwarded", "Thank you for reaching out! Ella will consult you shortly.", "success");
     logActivity(`Forwarded digital styling inquiry: "${inqMessage.substring(0, 30)}..."`, "inquiry");
+    setInquiryMessage("");
     e.currentTarget.reset();
   };
 
@@ -1725,6 +1830,13 @@ export default function App() {
             >
               Charity
             </button>
+            <button 
+              onClick={() => setShowConference(true)}
+              className="bg-indigo-50 text-indigo-700 px-4 py-2 rounded-full font-bold text-xs hover:bg-indigo-100 transition-all cursor-pointer inline-flex items-center gap-1.5"
+            >
+              <Video className="w-3.5 h-3.5 text-indigo-500 animate-pulse" />
+              <span>Conference</span>
+            </button>
           </div>
 
           <div className="flex items-center gap-3">
@@ -1874,6 +1986,19 @@ export default function App() {
                 <span className="text-lg font-medium tracking-tight">Charity Donations</span>
               </div>
               <span className="text-emerald-300 group-hover:text-emerald-600 transition-colors">→</span>
+            </button>
+            <button 
+              onClick={() => {
+                setShowMobileMenu(false);
+                setShowConference(true);
+              }}
+              className="group flex items-center justify-between py-4 px-6 rounded-2xl hover:bg-indigo-50 transition-all text-indigo-900 w-full"
+            >
+              <div className="flex items-center gap-3">
+                <Video className="w-5 h-5 text-indigo-500 animate-pulse" />
+                <span className="text-lg font-medium tracking-tight">Couture Conference</span>
+              </div>
+              <span className="text-indigo-300 group-hover:text-indigo-600 transition-colors">→</span>
             </button>
             <button 
               onClick={() => {
@@ -2474,14 +2599,28 @@ export default function App() {
             </select>
           </div>
 
-          <div className="space-y-1.5">
+          <div className="space-y-1.5 relative">
             <textarea
               name="message"
+              value={inquiryMessage}
+              onChange={(e) => setInquiryMessage(e.target.value)}
               placeholder="Draft your sizing details, customization requirements, or dress codes..."
               rows={4}
-              className="w-full px-4 py-3 border border-neutral-200 rounded-xl text-xs focus:outline-none focus:border-indigo-500 bg-neutral-50 text-black placeholder-neutral-400"
+              className="w-full pl-4 pr-12 py-3 border border-neutral-200 rounded-xl text-xs focus:outline-none focus:border-indigo-500 bg-neutral-50 text-black placeholder-neutral-400"
               required
             />
+            <button
+              type="button"
+              onClick={startSpeechRecognition}
+              title="Dictate styling inquiry using voice"
+              className={`absolute right-3.5 bottom-3.5 p-2 rounded-xl border transition-all flex items-center justify-center cursor-pointer shadow-sm ${
+                isListening 
+                  ? "bg-rose-500 border-rose-500 text-white animate-pulse shadow-md shadow-rose-500/20" 
+                  : "bg-white border-neutral-200 text-neutral-400 hover:text-indigo-650 hover:border-indigo-200 hover:shadow-md"
+              }`}
+            >
+              <Mic className="w-3.5 h-3.5" />
+            </button>
           </div>
 
           <button
@@ -2650,8 +2789,23 @@ export default function App() {
             currentUserEmail={currentUserEmail}
           />
         </div>
-      )
-      }
+      )}
+
+      {showConference && (
+        <div className="fixed inset-0 bg-neutral-900 text-white z-50 overflow-y-auto">
+          <ConferenceRoom 
+            onClose={() => {
+              setShowConference(false);
+              setInitialConfRoomId(null);
+            }} 
+            onShowToast={showToast} 
+            onLogActivity={logActivity} 
+            currentUser={currentUser || "Anonymous Designer"}
+            currentUserEmail={currentUserEmail || "anonymous@example.com"}
+            initialRoomId={initialConfRoomId || undefined}
+          />
+        </div>
+      )}
 
       {/* 4. Stepped MoMo Checkout Modal */}
       {showCheckout && (

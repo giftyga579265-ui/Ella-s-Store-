@@ -7,7 +7,18 @@ import Stripe from "stripe";
 
 dotenv.config();
 
-const stripe = new Stripe(process.env.STRIPE_SECRET_KEY || "");
+let stripeClient: Stripe | null = null;
+
+function getStripe(): Stripe {
+  if (!stripeClient) {
+    const key = process.env.STRIPE_SECRET_KEY;
+    if (!key) {
+      throw new Error("STRIPE_SECRET_KEY environment variable is required but not configured. Please add it to your environment variables or secrets settings.");
+    }
+    stripeClient = new Stripe(key);
+  }
+  return stripeClient;
+}
 
 async function startServer() {
   const app = express();
@@ -20,7 +31,8 @@ async function startServer() {
   app.post("/api/create-checkout-session", async (req, res) => {
     try {
       const { amount, charityName } = req.body;
-      const session = await stripe.checkout.sessions.create({
+      const stripeInstance = getStripe();
+      const session = await stripeInstance.checkout.sessions.create({
         line_items: [
           {
             price_data: {
@@ -34,8 +46,8 @@ async function startServer() {
           },
         ],
         mode: 'payment',
-        success_url: `${process.env.APP_URL}/?success=true`,
-        cancel_url: `${process.env.APP_URL}/?canceled=true`,
+        success_url: `${process.env.APP_URL || `${req.protocol}://${req.get('host')}`}/?success=true`,
+        cancel_url: `${process.env.APP_URL || `${req.protocol}://${req.get('host')}`}/?canceled=true`,
       });
       res.json({ url: session.url });
     } catch (error: any) {

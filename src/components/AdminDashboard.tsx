@@ -1,4 +1,4 @@
-import React, { useState, useMemo } from "react";
+import React, { useState, useMemo, useEffect } from "react";
 import { 
   Product, Order, Customer, Payment, CustomerLocation, 
   CustomerInquiry, ActivityLog, DiscountCode, Charity, MediaFile, HomepageSettings, StoreEvent, CustomerReview, DeliveryItem 
@@ -10,11 +10,14 @@ import {
   MapPin, HelpCircle, Activity, Tag, Mail, Image as ImageIcon, Paintbrush, 
   LogOut, Plus, Trash2, Edit, Eye, Check, CheckCircle, TrendingUp, DollarSign,
   Download, Search, Sparkles, MessageCircle, AlertTriangle, Maximize2, Minimize2, X,
-  Database, Utensils, Calendar, Star, Truck, Printer, Menu, Heart
+  Database, Utensils, Calendar, Star, Truck, Printer, Menu, Heart,
+  Video, Film, VideoOff
 } from "lucide-react";
 import jsPDF from "jspdf";
 import autoTable from "jspdf-autotable";
 import { LineChart, Line, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer } from "recharts";
+import { db } from "../lib/firebase";
+import { onSnapshot, collection, query, orderBy, doc, deleteDoc, setDoc, updateDoc } from "firebase/firestore";
 
 interface AdminDashboardProps {
   products: Product[];
@@ -65,6 +68,45 @@ export default function AdminDashboard({
 }: AdminDashboardProps) {
   
   const [activeTab, setActiveTab] = useState("dashboard");
+  
+  // Admin Video Conferences state & listeners
+  const [adminConferences, setAdminConferences] = useState<any[]>([]);
+  const [selectedAdminConf, setSelectedAdminConf] = useState<any | null>(null);
+  const [adminConfChats, setAdminConfChats] = useState<any[]>([]);
+
+  useEffect(() => {
+    const unsub = onSnapshot(collection(db, "conferences"), (snapshot) => {
+      const list: any[] = [];
+      snapshot.forEach((doc) => {
+        list.push({ id: doc.id, ...doc.data() });
+      });
+      setAdminConferences(list);
+    }, (error) => {
+      console.error("Error listening to conferences list in Admin:", error);
+    });
+    return () => unsub();
+  }, []);
+
+  useEffect(() => {
+    if (!selectedAdminConf) {
+      setAdminConfChats([]);
+      return;
+    }
+    const q = query(
+      collection(db, "conferences", selectedAdminConf.id, "chats"),
+      orderBy("timestamp", "asc")
+    );
+    const unsub = onSnapshot(q, (snapshot) => {
+      const msgs: any[] = [];
+      snapshot.forEach((doc) => {
+        msgs.push({ id: doc.id, ...doc.data() });
+      });
+      setAdminConfChats(msgs);
+    }, (error) => {
+      console.error("Error listening to conference chats in Admin:", error);
+    });
+    return () => unsub();
+  }, [selectedAdminConf?.id]);
   const [selectedCustomer, setSelectedCustomer] = useState<Customer | null>(null);
   const [maximized, setMaximized] = useState(false);
   const [minimized, setMinimized] = useState(false);
@@ -827,6 +869,7 @@ export default function AdminDashboard({
                 { id: "reviews", label: "Customer Reviews", icon: Star, count: reviews?.length || 0 },
                 { id: "delivery", label: "Delivery Tracker", icon: Truck, count: deliveries?.filter(d=>d.status!=='delivered' && d.status!=='failed').length || 0 },
                 { id: "charity", label: "Charity Management", icon: Heart },
+                { id: "conference", label: "Conference Manager", icon: Video, count: adminConferences.filter(c => c.status === "active").length },
                 { id: "economics", label: "Economic State", icon: TrendingUp },
                 { id: "customize", label: "Homepage Design", icon: Paintbrush },
               ].map(tab => {
@@ -1310,6 +1353,274 @@ export default function AdminDashboard({
                   </div>
                 </div>
               </div>
+            </div>
+          )}
+
+          {/* TAB: Conference Manager */}
+          {activeTab === "conference" && (
+            <div className="space-y-6 animate-in fade-in duration-300">
+              <div className="flex items-center justify-between border-b border-neutral-250 pb-4">
+                <div>
+                  <h2 className="font-serif text-2xl text-neutral-900 font-medium">Boutique Conference Manager</h2>
+                  <p className="text-xs text-neutral-500">Track and manage live client video fittings, recorded web streams, and text chats.</p>
+                </div>
+                {selectedAdminConf && (
+                  <button
+                    onClick={() => setSelectedAdminConf(null)}
+                    className="px-4 py-2 bg-neutral-100 hover:bg-neutral-200 text-neutral-800 rounded-xl text-xs font-bold transition-all"
+                  >
+                    ← Back to List
+                  </button>
+                )}
+              </div>
+
+              {!selectedAdminConf ? (
+                /* CONFERENCE OVERVIEW */
+                <div className="space-y-6">
+                  {/* Summary Metrics */}
+                  <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
+                    <div className="bg-white p-6 rounded-2xl border border-neutral-200 shadow-sm flex items-center gap-4">
+                      <div className="w-12 h-12 rounded-xl bg-indigo-50 text-indigo-600 flex items-center justify-center border border-indigo-100 shrink-0">
+                        <Video className="w-6 h-6" />
+                      </div>
+                      <div>
+                        <p className="text-[10px] uppercase font-black tracking-wider text-neutral-400 font-mono">Active Rooms</p>
+                        <p className="text-2xl font-bold text-neutral-900">{adminConferences.filter(c => c.status === "active").length}</p>
+                      </div>
+                    </div>
+
+                    <div className="bg-white p-6 rounded-2xl border border-neutral-200 shadow-sm flex items-center gap-4">
+                      <div className="w-12 h-12 rounded-xl bg-emerald-50 text-emerald-600 flex items-center justify-center border border-emerald-100 shrink-0">
+                        <Film className="w-6 h-6" />
+                      </div>
+                      <div>
+                        <p className="text-[10px] uppercase font-black tracking-wider text-neutral-400 font-mono">Recorded Sessions</p>
+                        <p className="text-2xl font-bold text-neutral-900">{adminConferences.filter(c => c.videoRecordedUrl).length}</p>
+                      </div>
+                    </div>
+
+                    <div className="bg-white p-6 rounded-2xl border border-neutral-200 shadow-sm flex items-center gap-4">
+                      <div className="w-12 h-12 rounded-xl bg-amber-50 text-amber-600 flex items-center justify-center border border-amber-100 shrink-0">
+                        <MessageCircle className="w-6 h-6" />
+                      </div>
+                      <div>
+                        <p className="text-[10px] uppercase font-black tracking-wider text-neutral-400 font-mono">Total Rooms Logged</p>
+                        <p className="text-2xl font-bold text-neutral-900">{adminConferences.length}</p>
+                      </div>
+                    </div>
+                  </div>
+
+                  {/* Rooms Table */}
+                  <div className="bg-white rounded-2xl border border-neutral-200 shadow-sm overflow-hidden">
+                    <div className="p-4 border-b border-neutral-150 flex items-center justify-between">
+                      <h3 className="text-xs font-black uppercase tracking-wider text-neutral-500">Boutique Call Records</h3>
+                    </div>
+
+                    {adminConferences.length === 0 ? (
+                      <div className="p-12 text-center text-neutral-400 space-y-2">
+                        <VideoOff className="w-10 h-10 mx-auto text-neutral-300" />
+                        <h4 className="font-bold text-neutral-700">No Conference Logs</h4>
+                        <p className="text-xs max-w-sm mx-auto">Call sessions appear here automatically when clients start a fitting room or a live bridal consultation.</p>
+                      </div>
+                    ) : (
+                      <div className="overflow-x-auto">
+                        <table className="w-full text-left border-collapse text-xs">
+                          <thead>
+                            <tr className="bg-neutral-50 text-neutral-500 border-b border-neutral-200 font-semibold uppercase tracking-wider">
+                              <th className="p-4">Room Subject / Topic</th>
+                              <th className="p-4">Host Name</th>
+                              <th className="p-4">Created At</th>
+                              <th className="p-4">Status</th>
+                              <th className="p-4 text-center">Video Rec</th>
+                              <th className="p-4 text-center">Chats Logged</th>
+                              <th className="p-4 text-right">Actions</th>
+                            </tr>
+                          </thead>
+                          <tbody className="divide-y divide-neutral-100 font-medium text-neutral-700">
+                            {adminConferences.map((conf) => (
+                              <tr key={conf.id} className="hover:bg-neutral-50/50 transition-colors">
+                                <td className="p-4">
+                                  <span className="font-bold text-neutral-900 block">{conf.name}</span>
+                                  <span className="text-[10px] text-neutral-400 font-mono block">ID: {conf.id}</span>
+                                </td>
+                                <td className="p-4 text-neutral-900">{conf.hostName}</td>
+                                <td className="p-4 text-neutral-500">{conf.createdAt}</td>
+                                <td className="p-4">
+                                  <span className={`px-2 py-0.5 rounded-full text-[9px] font-bold uppercase ${
+                                    conf.status === "active" ? "bg-emerald-100 text-emerald-800" : "bg-neutral-200 text-neutral-600"
+                                  }`}>
+                                    {conf.status}
+                                  </span>
+                                </td>
+                                <td className="p-4 text-center">
+                                  {conf.videoRecordedUrl ? (
+                                    <span className="text-emerald-600 inline-flex items-center gap-1 font-bold text-[10px]">
+                                      <Film className="w-3.5 h-3.5" />
+                                      <span>Recorded</span>
+                                    </span>
+                                  ) : (
+                                    <span className="text-neutral-400 font-mono text-[10px]">None</span>
+                                  )}
+                                </td>
+                                <td className="p-4 text-center font-bold text-neutral-900">{conf.totalChatsCount || 0}</td>
+                                <td className="p-4 text-right">
+                                  <div className="flex items-center justify-end gap-1.5">
+                                    <button
+                                      onClick={() => setSelectedAdminConf(conf)}
+                                      className="px-3 py-1.5 bg-indigo-50 text-indigo-700 hover:bg-indigo-100 rounded-lg text-[10px] font-bold flex items-center gap-1 transition-all"
+                                    >
+                                      <Eye className="w-3.5 h-3.5" />
+                                      <span>View Logs</span>
+                                    </button>
+                                    {conf.status === "active" && (
+                                      <button
+                                        onClick={async () => {
+                                          await updateDoc(doc(db, "conferences", conf.id), { status: "ended" });
+                                          onShowToast("Call Ended", `Terminated active call for room ID: ${conf.id}`, "info");
+                                        }}
+                                        className="px-2 py-1.5 bg-neutral-100 hover:bg-rose-50 text-neutral-600 hover:text-rose-600 rounded-lg text-[10px] font-bold transition-all border border-neutral-200 hover:border-rose-100"
+                                      >
+                                        End Call
+                                      </button>
+                                    )}
+                                    <button
+                                      onClick={async () => {
+                                        if (confirm(`Are you sure you want to delete all records and video files of conference: ${conf.name}?`)) {
+                                          await deleteDoc(doc(db, "conferences", conf.id));
+                                          onShowToast("Log Deleted", "Successfully removed call record.", "success");
+                                        }
+                                      }}
+                                      className="p-1.5 bg-neutral-100 hover:bg-red-50 text-neutral-600 hover:text-red-600 rounded-lg transition-all border border-neutral-200 hover:border-red-100"
+                                    >
+                                      <Trash2 className="w-3.5 h-3.5" />
+                                    </button>
+                                  </div>
+                                </td>
+                              </tr>
+                            ))}
+                          </tbody>
+                        </table>
+                      </div>
+                    )}
+                  </div>
+                </div>
+              ) : (
+                /* DETAILED CONFERENCE VIEWER (Play video + timeline chats) */
+                <div className="grid grid-cols-1 lg:grid-cols-12 gap-6">
+                  {/* Left panel: Video Player & Meta */}
+                  <div className="lg:col-span-7 space-y-6">
+                    <div className="bg-white p-6 rounded-2xl border border-neutral-200 shadow-sm space-y-4">
+                      <h3 className="text-sm font-bold text-neutral-900 border-b border-neutral-100 pb-2">
+                        Stored Video Playback
+                      </h3>
+
+                      {selectedAdminConf.videoRecordedUrl ? (
+                        <div className="space-y-3">
+                          <video
+                            src={selectedAdminConf.videoRecordedUrl}
+                            controls
+                            className="w-full rounded-2xl bg-black aspect-video shadow-md border border-neutral-800"
+                          />
+                          <div className="flex justify-between items-center bg-neutral-50 p-3 rounded-xl text-[10px] font-mono text-neutral-500 border border-neutral-100">
+                            <span>Status: Local WebM Blob</span>
+                            <span>Duration: {selectedAdminConf.recordingDurationSec || 15} seconds</span>
+                          </div>
+                        </div>
+                      ) : (
+                        <div className="border border-neutral-200/60 rounded-2xl bg-neutral-50 p-10 text-center space-y-3">
+                          <VideoOff className="w-10 h-10 text-neutral-300 mx-auto" />
+                          <h4 className="font-bold text-neutral-700 text-xs">No Stream Recording Available</h4>
+                          <p className="text-[11px] text-neutral-500 max-w-sm mx-auto">
+                            The client did not record webcam frames during this fitting session, or the session was kept text-only. The complete chat history is archived.
+                          </p>
+                        </div>
+                      )}
+
+                      <div className="space-y-3 pt-2">
+                        <h4 className="text-xs font-black uppercase text-neutral-400 font-mono tracking-wider">Session Meta</h4>
+                        <div className="grid grid-cols-2 gap-4 text-xs font-medium text-neutral-600 bg-neutral-50 p-4 rounded-xl border border-neutral-100">
+                          <div>
+                            <span className="text-[10px] text-neutral-400 font-mono block uppercase">Room Subject</span>
+                            <span className="font-bold text-neutral-900">{selectedAdminConf.name}</span>
+                          </div>
+                          <div>
+                            <span className="text-[10px] text-neutral-400 font-mono block uppercase">Conference Room ID</span>
+                            <span className="font-mono text-neutral-800">{selectedAdminConf.id}</span>
+                          </div>
+                          <div>
+                            <span className="text-[10px] text-neutral-400 font-mono block uppercase">Client Host</span>
+                            <span className="text-neutral-900">{selectedAdminConf.hostName}</span>
+                          </div>
+                          <div>
+                            <span className="text-[10px] text-neutral-400 font-mono block uppercase">Host Email</span>
+                            <span className="text-neutral-900 font-mono">{selectedAdminConf.hostEmail}</span>
+                          </div>
+                        </div>
+                      </div>
+                    </div>
+                  </div>
+
+                  {/* Right panel: Chat Transcript */}
+                  <div className="lg:col-span-5 space-y-6">
+                    <div className="bg-white p-6 rounded-2xl border border-neutral-200 shadow-sm flex flex-col h-[520px] justify-between">
+                      <div>
+                        <div className="flex items-center justify-between border-b border-neutral-100 pb-3 mb-4">
+                          <h3 className="text-sm font-bold text-neutral-900">Recorded Text Chats</h3>
+                          <span className="px-2.5 py-0.5 bg-indigo-50 text-indigo-700 text-[10px] font-mono font-bold rounded-full">
+                            {adminConfChats.length} messages
+                          </span>
+                        </div>
+
+                        {/* Scrollable messages timeline */}
+                        <div className="space-y-4 max-h-[360px] overflow-y-auto pr-1">
+                          {adminConfChats.length === 0 ? (
+                            <div className="py-20 text-center text-neutral-400 space-y-1">
+                              <MessageCircle className="w-8 h-8 text-neutral-200 mx-auto" />
+                              <p className="text-xs">No chat messages were recorded in this conference room.</p>
+                            </div>
+                          ) : (
+                            adminConfChats.map((m) => (
+                              <div key={m.id} className="p-3 bg-neutral-50 border border-neutral-100 rounded-xl space-y-1">
+                                <div className="flex justify-between items-center">
+                                  <span className="text-[10px] font-bold text-indigo-600 font-mono">{m.sender}</span>
+                                  <span className="text-[9px] text-neutral-400 font-mono">
+                                    {m.timestamp ? new Date(m.timestamp.seconds * 1000).toLocaleTimeString([], {hour: '2-digit', minute:'2-digit'}) : "Just now"}
+                                  </span>
+                                </div>
+                                <p className="text-xs text-neutral-700 leading-relaxed break-words">{m.text}</p>
+                              </div>
+                            ))
+                          )}
+                        </div>
+                      </div>
+
+                      {/* Download transcript block */}
+                      <div className="border-t border-neutral-100 pt-4 flex gap-2">
+                        <button
+                          disabled={adminConfChats.length === 0}
+                          onClick={() => {
+                            const formatted = adminConfChats.map(m => {
+                              const time = m.timestamp ? new Date(m.timestamp.seconds * 1000).toLocaleString() : "Just now";
+                              return `[${time}] ${m.sender}: ${m.text}`;
+                            }).join("\n");
+                            const blob = new Blob([formatted], { type: "text/plain" });
+                            const url = URL.createObjectURL(blob);
+                            const link = document.createElement("a");
+                            link.href = url;
+                            link.download = `chat-transcript-${selectedAdminConf.id}.txt`;
+                            link.click();
+                            onShowToast("Transcript Downloaded", "Text chat file generated successfully.", "success");
+                          }}
+                          className="flex-1 bg-indigo-600 hover:bg-indigo-500 disabled:opacity-50 text-white text-xs font-bold py-2.5 rounded-xl transition-all cursor-pointer flex items-center justify-center gap-1.5"
+                        >
+                          <Download className="w-4 h-4" />
+                          <span>Download Transcript</span>
+                        </button>
+                      </div>
+                    </div>
+                  </div>
+                </div>
+              )}
             </div>
           )}
 
@@ -3061,6 +3372,7 @@ export default function AdminDashboard({
               <CharityManager 
                 charityData={charityData} 
                 charityDonations={charityDonations}
+                payments={payments}
                 onSetCharityData={onSetCharityData} 
                 onShowToast={onShowToast} 
                 onLogActivity={(activity, type) => onLogActivity(activity, type)} 

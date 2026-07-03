@@ -1,10 +1,12 @@
 import React, { useState, useMemo } from "react";
-import { Charity } from "../types";
-import { Plus, Trash2, Edit, Save, Download, Users, DollarSign, Heart, TrendingUp, FileText, Search, Tag } from "lucide-react";
+import { Charity, Payment } from "../types";
+import { Plus, Trash2, Edit, Save, Download, Users, DollarSign, Heart, TrendingUp, FileText, Search, Tag, FileSpreadsheet } from "lucide-react";
+import * as XLSX from "xlsx";
 
 interface CharityManagerProps {
   charityData: Charity[];
   charityDonations?: any[];
+  payments?: Payment[];
   onSetCharityData: (data: Charity[]) => void;
   onShowToast: (title: string, message: string, type: 'success' | 'error' | 'info') => void;
   onLogActivity: (activity: string, type: 'admin_action') => void;
@@ -13,6 +15,7 @@ interface CharityManagerProps {
 export default function CharityManager({ 
   charityData, 
   charityDonations = [], 
+  payments = [],
   onSetCharityData, 
   onShowToast, 
   onLogActivity 
@@ -205,6 +208,79 @@ export default function CharityManager({
     onLogActivity(`Exported charity transaction spreadsheet reports (${dataToExport.length} records)`, "admin_action");
   };
 
+  const handleDownloadExcel = () => {
+    try {
+      if (charityDonations.length === 0 && payments.length === 0) {
+        onShowToast("No Data Available", "There are no payment or donation records to export.", "error");
+        return;
+      }
+
+      // 1. Create workbook
+      const wb = XLSX.utils.book_new();
+
+      // 2. Map Charity Donations Data
+      const donationsSheetData = charityDonations.map(d => ({
+        "Donation ID": d.id || "N/A",
+        "Charity Project ID": d.charityId || "N/A",
+        "Charity Project Name": d.charityName || "N/A",
+        "Donor Name": d.customerName || "Anonymous Donor",
+        "Donor Email": d.customerEmail || "anonymous@example.com",
+        "Amount (GH₵)": parseFloat(d.amount) || 0,
+        "Donation Date": d.date || "N/A",
+        "Payment Gateway": (d.method || "momo").toUpperCase(),
+        "Transaction Status": (d.status || "completed").toUpperCase()
+      }));
+
+      // 3. Map General Store Payments Data
+      const paymentsSheetData = payments.map(p => ({
+        "Transaction ID": p.id || "N/A",
+        "Order Reference ID": p.orderId || "N/A",
+        "Customer Name": p.customer || "N/A",
+        "Payment Gateway": (p.method || "momo").toUpperCase(),
+        "Amount Paid (GH₵)": parseFloat(p.amount as any) || 0,
+        "Verification Date": p.date || "N/A",
+        "Transaction Status": (p.status || "completed").toUpperCase()
+      }));
+
+      // 4. Create sheets from JSON
+      const wsDonations = XLSX.utils.json_to_sheet(donationsSheetData);
+      const wsPayments = XLSX.utils.json_to_sheet(paymentsSheetData);
+
+      // 5. Auto-size columns for better layout formatting
+      const fitToColumn = (data: any[]) => {
+        if (!data || data.length === 0) return [];
+        const keys = Object.keys(data[0]);
+        return keys.map(key => {
+          let maxLen = key.toString().length;
+          data.forEach(row => {
+            const val = row[key];
+            if (val !== undefined && val !== null) {
+              const valLen = val.toString().length;
+              if (valLen > maxLen) maxLen = valLen;
+            }
+          });
+          return { wch: Math.min(maxLen + 3, 50) };
+        });
+      };
+
+      wsDonations["!cols"] = fitToColumn(donationsSheetData);
+      wsPayments["!cols"] = fitToColumn(paymentsSheetData);
+
+      // 6. Append Sheets to the workbook
+      XLSX.utils.book_append_sheet(wb, wsDonations, "Charity Donations");
+      XLSX.utils.book_append_sheet(wb, wsPayments, "Store Payments");
+
+      // 7. Write and download the Excel workbook file
+      XLSX.writeFile(wb, `Ella_Boutique_Financial_Ledger_${new Date().toISOString().slice(0, 10)}.xlsx`);
+
+      onShowToast("Excel Exported", "Successfully downloaded Excel spreadsheet containing all payment and donation records.", "success");
+      onLogActivity("Exported all payment and donation records to Excel workbook", "admin_action");
+    } catch (error) {
+      console.error("Failed to export Excel file:", error);
+      onShowToast("Export Error", "An error occurred during Excel spreadsheet generation.", "error");
+    }
+  };
+
   return (
     <div className="space-y-6">
       {/* 1. Header Banner */}
@@ -258,8 +334,8 @@ export default function CharityManager({
           </button>
         </div>
 
-        {/* Global CSV Download */}
-        <div className="flex items-center gap-2">
+        {/* Global Downloads and Search */}
+        <div className="flex flex-wrap items-center gap-2">
           {activeSubTab !== "projects" && (
             <div className="relative w-48 sm:w-64">
               <span className="absolute inset-y-0 left-3 flex items-center pointer-events-none text-neutral-400">
@@ -275,11 +351,20 @@ export default function CharityManager({
             </div>
           )}
           <button 
+            onClick={handleDownloadExcel}
+            className="bg-emerald-600 hover:bg-emerald-500 text-white text-xs font-bold px-4.5 py-2.5 rounded-xl transition-all shadow-md flex items-center gap-2 cursor-pointer"
+            title="Download full payment & donation records in Excel (.xlsx) format"
+          >
+            <FileSpreadsheet className="w-4 h-4" />
+            <span>Download as Spreadsheet (Excel)</span>
+          </button>
+          <button 
             onClick={() => downloadDonationsCSV(charityDonations, "global_donations")}
             className="bg-indigo-600 hover:bg-indigo-500 text-white text-xs font-bold px-4.5 py-2.5 rounded-xl transition-all shadow flex items-center gap-2 cursor-pointer"
+            title="Download charity donations as CSV"
           >
             <Download className="w-4 h-4" />
-            <span>Export Spreadsheet (CSV)</span>
+            <span>Export CSV (Donations)</span>
           </button>
         </div>
       </div>

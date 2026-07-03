@@ -194,3 +194,23 @@ export interface Charity {
   active: boolean;
 }
 
+export interface ConferenceSession {
+  id: string;
+  name: string;
+  hostName: string;
+  hostEmail: string;
+  createdAt: string;
+  status: 'active' | 'ended';
+  videoRecordedUrl?: string;
+  recordingDurationSec?: number;
+  totalChatsCount?: number;
+}
+
+export interface ConferenceChat {
+  id: string;
+  sender: string;
+  text: string;
+  timestamp: string;
+}
+
+
