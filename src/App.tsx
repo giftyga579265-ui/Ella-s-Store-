@@ -423,7 +423,7 @@ const INITIAL_CHARITY_DONATIONS = [
   }
 ];
 
-const AUTHORIZED_ADMIN_USERS = ['Asante Isaiah', 'Kofi Asante', 'Etnasa Haiasi', 'gifty.ga579265@gmail.com', 'ella.accra.admin@gmail.com'];
+const AUTHORIZED_ADMIN_USERS = ['Asante ISAIAH', 'Asante Isaiah', 'Asante Kofi', 'Etnasa Haiasi', 'gifty.ga579265@gmail.com', 'ella.accra.admin@gmail.com'];
 
 interface Toast {
   id: number;
