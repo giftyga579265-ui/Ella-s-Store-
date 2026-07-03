@@ -1,7 +1,10 @@
 import React, { useState, useEffect, useRef } from "react";
 import { db } from "../lib/firebase";
-import { collection, doc, setDoc, addDoc, onSnapshot, query, orderBy, serverTimestamp, getDocs } from "firebase/firestore";
-import { Video, VideoOff, Mic, MicOff, Send, PhoneOff, Copy, Share2, Sparkles, User, Shield, Film, AlertCircle, Eye } from "lucide-react";
+import { collection, doc, setDoc, addDoc, onSnapshot, query, orderBy, serverTimestamp } from "firebase/firestore";
+import { 
+  Video, VideoOff, Mic, MicOff, Send, PhoneOff, Copy, Share2, Sparkles, User, Shield, 
+  Film, AlertCircle, Eye, EyeOff, Paperclip, Maximize2, Minimize2, ChevronUp, ChevronDown, FileText, Download, MessageSquare, X 
+} from "lucide-react";
 import { motion, AnimatePresence } from "motion/react";
 import { ConferenceSession, ConferenceChat } from "../types";
 
@@ -31,6 +34,14 @@ export default function ConferenceRoom({
   const [isRecording, setIsRecording] = useState(false);
   const [recordDuration, setRecordDuration] = useState(0);
   const [newRoomName, setNewRoomName] = useState("");
+  
+  // Layout and Upload states
+  const [isChatMaximized, setIsChatMaximized] = useState(false);
+  const [isVideoMaximized, setIsVideoMaximized] = useState(false);
+  const [isChatMinimized, setIsChatMinimized] = useState(false);
+  const [layoutPosition, setLayoutPosition] = useState<"side" | "bottom">("side");
+  const [isUploading, setIsUploading] = useState(false);
+  const [uploadProgress, setUploadProgress] = useState(0);
   
   // Media streams
   const [localStream, setLocalStream] = useState<MediaStream | null>(null);
@@ -202,7 +213,13 @@ export default function ConferenceRoom({
           id: doc.id,
           sender: d.sender || "Guest",
           text: d.text || "",
-          timestamp: d.timestamp ? new Date(d.timestamp.seconds * 1000).toLocaleTimeString([], {hour: '2-digit', minute:'2-digit'}) : "Just now"
+          timestamp: d.timestamp ? new Date(d.timestamp.seconds * 1000).toLocaleTimeString([], {hour: '2-digit', minute:'2-digit'}) : "Just now",
+          file: d.file ? {
+            url: d.file.url,
+            name: d.file.name,
+            type: d.file.type,
+            size: d.file.size
+          } : undefined
         });
       });
       setChats(msgs);
@@ -235,6 +252,93 @@ export default function ConferenceRoom({
       onLogActivity(`Sent message in video conference chat: "${msgText.substring(0, 30)}..."`, "user_action");
     } catch (error) {
       console.error("Error sending message:", error);
+    }
+  };
+
+  const handleFileUpload = async (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0];
+    if (!file || !activeRoom) return;
+
+    setIsUploading(true);
+    setUploadProgress(10);
+    onShowToast("Uploading File", `Securing "${file.name}" on couture network server...`, "info");
+
+    try {
+      const reader = new FileReader();
+      reader.onload = async (event) => {
+        try {
+          const fileData = event.target?.result as string;
+          setUploadProgress(40);
+          
+          const uploadResponse = await fetch("/api/upload", {
+            method: "POST",
+            headers: { "Content-Type": "application/json" },
+            body: JSON.stringify({
+              fileName: file.name,
+              fileType: file.type,
+              fileData: fileData
+            })
+          });
+
+          if (!uploadResponse.ok) {
+            throw new Error("Server upload refused the payload size.");
+          }
+
+          setUploadProgress(75);
+          const data = await uploadResponse.json();
+
+          // 1. Record file globally in database for Admin review
+          const fileRecord = {
+            id: doc(collection(db, "uploaded_files")).id,
+            fileName: data.fileName,
+            fileType: data.fileType,
+            fileUrl: data.url,
+            fileSize: data.fileSize,
+            uploadedBy: currentUser || "Guest Customer",
+            conferenceId: activeRoom.id,
+            conferenceName: activeRoom.name,
+            timestamp: new Date().toISOString()
+          };
+          await setDoc(doc(db, "uploaded_files", fileRecord.id), fileRecord);
+
+          setUploadProgress(90);
+
+          // 2. Add chat message with file attachment
+          await addDoc(collection(db, "conferences", activeRoom.id, "chats"), {
+            sender: currentUser || "Client",
+            text: `Shared a file: ${data.fileName}`,
+            timestamp: serverTimestamp(),
+            file: {
+              url: data.url,
+              name: data.fileName,
+              type: data.fileType,
+              size: data.fileSize
+            }
+          });
+
+          // 3. Update chats count in parent doc
+          const roomRef = doc(db, "conferences", activeRoom.id);
+          await setDoc(roomRef, {
+            totalChatsCount: (chats.length + 1)
+          }, { merge: true });
+
+          setUploadProgress(100);
+          onShowToast("Upload Successful", `"${file.name}" has been shared and logged!`, "success");
+          onLogActivity(`Uploaded conference file attachment: "${file.name}"`, "user_action");
+        } catch (err: any) {
+          console.error("Upload error inside reader.onload:", err);
+          onShowToast("Upload Failed", err.message || "Failed to process the upload on server.", "error");
+        } finally {
+          setIsUploading(false);
+          setUploadProgress(0);
+        }
+      };
+      reader.readAsDataURL(file);
+    } catch (err: any) {
+      console.error("File selection error:", err);
+      onShowToast("File Selection Error", "Could not load file from device.", "error");
+      setIsUploading(false);
+      setUploadProgress(0);
     }
   };
 
@@ -482,27 +586,33 @@ export default function ConferenceRoom({
               initial={{ opacity: 0 }}
               animate={{ opacity: 1 }}
               exit={{ opacity: 0 }}
-              className="flex-1 flex flex-col md:flex-row overflow-hidden bg-neutral-950"
+              className={`flex-1 flex overflow-hidden bg-neutral-950 ${
+                layoutPosition === "bottom" ? "flex-col" : "flex-col md:flex-row"
+              }`}
             >
               {/* VIDEO GRID (Left pane) */}
-              <div className="flex-1 p-6 flex flex-col justify-between overflow-hidden relative">
+              <div 
+                className={`p-6 flex-col justify-between overflow-hidden relative ${
+                  isChatMaximized ? "hidden md:hidden" : "flex flex-1"
+                }`}
+              >
                 {/* Info Bar */}
                 <div className="flex flex-wrap items-center justify-between gap-3 bg-neutral-900/80 backdrop-blur border border-neutral-800 rounded-2xl px-4 py-3 z-10">
-                  <div>
+                  <div className="min-w-0 flex-1">
                     <h3 className="text-xs font-black text-neutral-200 truncate uppercase tracking-wide">
                       {activeRoom.name}
                     </h3>
-                    <p className="text-[9px] text-neutral-400 font-mono flex items-center gap-1.5">
-                      <span className="w-1.5 h-1.5 bg-emerald-500 rounded-full animate-ping inline-block"></span>
+                    <p className="text-[9px] text-neutral-400 font-mono flex items-center gap-1.5 truncate">
+                      <span className="w-1.5 h-1.5 bg-emerald-500 rounded-full animate-ping inline-block shrink-0"></span>
                       Room ID: {activeRoom.id} &bull; Host: {activeRoom.hostName}
                     </p>
                   </div>
                   
-                  {/* Share Room Button */}
-                  <div className="flex items-center gap-2">
+                  {/* Share Room, Record and Sizing Buttons */}
+                  <div className="flex flex-wrap items-center gap-2">
                     <button
                       onClick={copyShareLink}
-                      className="bg-indigo-600 hover:bg-indigo-500 text-white text-[10px] font-black uppercase px-3.5 py-2 rounded-xl flex items-center gap-1.5 transition-colors cursor-pointer shadow"
+                      className="bg-indigo-600 hover:bg-indigo-500 text-white text-[10px] font-black uppercase px-3.5 py-2 rounded-xl flex items-center gap-1.5 transition-colors cursor-pointer shadow animate-fade-in"
                     >
                       <Copy className="w-3 h-3" />
                       <span>Copy Link</span>
@@ -521,6 +631,95 @@ export default function ConferenceRoom({
                         <span>Record call</span>
                       </button>
                     )}
+
+                    {isChatMinimized && (
+                      <button
+                        onClick={() => {
+                          setIsChatMinimized(false);
+                          setIsChatMaximized(false);
+                          setIsVideoMaximized(false);
+                        }}
+                        className="bg-indigo-600 hover:bg-indigo-500 text-white text-[10px] font-black uppercase px-3.5 py-2 rounded-xl flex items-center gap-1.5 transition-all cursor-pointer shadow-lg animate-fade-in border border-indigo-500/30"
+                        title="Restore minimized Chat window"
+                      >
+                        <MessageSquare className="w-3 h-3 text-white" />
+                        <span>Show Chat ({chats.length})</span>
+                      </button>
+                    )}
+
+                    {/* Sizing Controller buttons */}
+                    <div className="flex items-center bg-neutral-950/80 p-0.5 rounded-xl border border-neutral-800 shrink-0">
+                      <button
+                        onClick={() => {
+                          setIsVideoMaximized(prev => !prev);
+                          setIsChatMaximized(false);
+                          setIsChatMinimized(false);
+                        }}
+                        className={`p-1.5 rounded-lg text-xs font-bold transition-all cursor-pointer flex items-center gap-1 ${
+                          isVideoMaximized 
+                            ? "bg-indigo-600 text-white shadow" 
+                            : "text-neutral-400 hover:text-white"
+                        }`}
+                        title={isVideoMaximized ? "Restore default side layout" : "Maximize actual video conference"}
+                      >
+                        {isVideoMaximized ? <Minimize2 className="w-3.5 h-3.5" /> : <Maximize2 className="w-3.5 h-3.5" />}
+                        <span className="hidden lg:inline text-[9px] font-black uppercase">Max Video</span>
+                      </button>
+
+                      <button
+                        onClick={() => {
+                          setIsChatMaximized(prev => !prev);
+                          setIsVideoMaximized(false);
+                          setIsChatMinimized(false);
+                        }}
+                        className={`p-1.5 rounded-lg text-xs font-bold transition-all cursor-pointer flex items-center gap-1 ${
+                          isChatMaximized 
+                            ? "bg-indigo-600 text-white shadow" 
+                            : "text-neutral-400 hover:text-white"
+                        }`}
+                        title={isChatMaximized ? "Restore default side layout" : "Maximize message center"}
+                      >
+                        {isChatMaximized ? <Minimize2 className="w-3.5 h-3.5" /> : <Maximize2 className="w-3.5 h-3.5" />}
+                        <span className="hidden lg:inline text-[9px] font-black uppercase">Max Chat</span>
+                      </button>
+
+                      <button
+                        onClick={() => {
+                          setIsChatMinimized(prev => !prev);
+                          setIsChatMaximized(false);
+                          setIsVideoMaximized(false);
+                        }}
+                        className={`p-1.5 rounded-lg text-xs font-bold transition-all cursor-pointer flex items-center gap-1 ${
+                          isChatMinimized 
+                            ? "bg-rose-950/50 text-rose-400 border border-rose-900/40" 
+                            : "text-neutral-400 hover:text-white"
+                        }`}
+                        title={isChatMinimized ? "Restore chat drawer" : "Hide/Minimize chat drawer"}
+                      >
+                        {isChatMinimized ? <Eye className="w-3.5 h-3.5 text-indigo-400" /> : <EyeOff className="w-3.5 h-3.5" />}
+                        <span className="hidden lg:inline text-[9px] font-black uppercase">
+                          {isChatMinimized ? "Show Chat" : "Hide Chat"}
+                        </span>
+                      </button>
+
+                      <button
+                        onClick={() => {
+                          setLayoutPosition(prev => prev === "side" ? "bottom" : "side");
+                          setIsChatMaximized(false);
+                          setIsVideoMaximized(false);
+                          setIsChatMinimized(false);
+                        }}
+                        className={`p-1.5 rounded-lg text-xs font-bold transition-all cursor-pointer flex items-center gap-1 ${
+                          layoutPosition === "bottom" 
+                            ? "bg-indigo-600 text-white shadow" 
+                            : "text-neutral-400 hover:text-white"
+                        }`}
+                        title={layoutPosition === "bottom" ? "Minimize Chat to Side" : "Maximize message center to bottom span"}
+                      >
+                        {layoutPosition === "bottom" ? <ChevronUp className="w-3.5 h-3.5" /> : <ChevronDown className="w-3.5 h-3.5" />}
+                        <span className="hidden lg:inline text-[9px] font-black uppercase">Max Bottom</span>
+                      </button>
+                    </div>
                   </div>
                 </div>
 
@@ -609,16 +808,56 @@ export default function ConferenceRoom({
                 </div>
               </div>
 
-              {/* LIVE CHAT DRAWER (Right pane) */}
-              <div className="w-full md:w-80 bg-neutral-900 border-t md:border-t-0 md:border-l border-neutral-800 flex flex-col justify-between overflow-hidden">
+              {/* LIVE CHAT DRAWER / MESSAGE CENTRE */}
+              <div 
+                className={`bg-neutral-900 border-neutral-800 flex flex-col justify-between overflow-hidden transition-all duration-300 ${
+                  isVideoMaximized || isChatMinimized ? "hidden" : "flex"
+                } ${
+                  isChatMaximized ? "flex-1 w-full h-full border-t-0 border-l-0" : ""
+                } ${
+                  !isChatMaximized && layoutPosition === "bottom" ? "w-full h-80 md:h-[350px] border-t" : ""
+                } ${
+                  !isChatMaximized && layoutPosition === "side" ? "w-full md:w-80 border-t md:border-t-0 md:border-l" : ""
+                }`}
+              >
                 {/* Chat Header */}
-                <div className="p-4 border-b border-neutral-800 bg-neutral-950 flex justify-between items-center">
+                <div className="p-4 border-b border-neutral-800 bg-neutral-950 flex justify-between items-center shrink-0">
                   <h4 className="text-xs font-black uppercase tracking-wider text-neutral-200">
                     Session Chats ({chats.length})
                   </h4>
-                  <span className="text-[9px] px-2 py-0.5 rounded-full bg-indigo-600/20 text-indigo-400 font-mono font-bold">
-                    Recorded
-                  </span>
+                  <div className="flex items-center gap-2">
+                    {/* Minimize Chat Drawer entirely to view video clearly */}
+                    <button 
+                      onClick={() => {
+                        setIsChatMinimized(true);
+                        setIsChatMaximized(false);
+                      }}
+                      className="p-1.5 rounded bg-neutral-900 border border-neutral-800 text-neutral-400 hover:text-rose-400 hover:border-rose-900/50 transition-all cursor-pointer flex items-center justify-center shadow-sm"
+                      title="Minimize Chat (Clear Video View)"
+                    >
+                      <EyeOff className="w-3.5 h-3.5" />
+                    </button>
+
+                    {/* Inline Maximize/Minimize toggle button for Chat drawer */}
+                    <button 
+                      onClick={() => {
+                        setIsChatMaximized(!isChatMaximized);
+                        setIsVideoMaximized(false);
+                      }}
+                      className="p-1.5 rounded bg-neutral-900 border border-neutral-800 text-neutral-400 hover:text-white hover:border-neutral-700 transition-all cursor-pointer flex items-center justify-center shadow-sm"
+                      title={isChatMaximized ? "Minimize Chat Window (Restore Layout)" : "Maximize Chat Window"}
+                    >
+                      {isChatMaximized ? (
+                        <Minimize2 className="w-3.5 h-3.5 text-indigo-400" />
+                      ) : (
+                        <Maximize2 className="w-3.5 h-3.5 text-neutral-400" />
+                      )}
+                    </button>
+
+                    <span className="text-[9px] px-2 py-0.5 rounded-full bg-indigo-600/20 text-indigo-400 font-mono font-bold">
+                      Recorded
+                    </span>
+                  </div>
                 </div>
 
                 {/* Messages Shelf */}
@@ -642,13 +881,40 @@ export default function ConferenceRoom({
                             {msg.sender}
                           </span>
                           <div
-                            className={`px-3 py-2 rounded-2xl text-xs leading-relaxed break-words shadow-sm ${
+                            className={`px-3 py-2 rounded-2xl text-xs leading-relaxed break-words shadow-sm relative ${
                               isMe 
                                 ? "bg-indigo-600 text-white rounded-tr-none" 
                                 : "bg-neutral-950 text-neutral-200 border border-neutral-800/80 rounded-tl-none"
                             }`}
                           >
-                            {msg.text}
+                            <span>{msg.text}</span>
+
+                            {/* Optional File Attachment Display inside chat box */}
+                            {msg.file && (
+                              <div className="mt-2 p-2 bg-neutral-900/95 border border-neutral-800 rounded-xl space-y-1.5 max-w-[200px] overflow-hidden text-left">
+                                {msg.file.type.startsWith("image/") ? (
+                                  <a href={msg.file.url} target="_blank" rel="noreferrer" className="block overflow-hidden rounded-lg group">
+                                    <img src={msg.file.url} alt={msg.file.name} className="w-full h-auto max-h-[120px] object-cover rounded-lg group-hover:scale-105 transition-transform" />
+                                  </a>
+                                ) : msg.file.type.startsWith("audio/") ? (
+                                  <div className="space-y-1">
+                                    <p className="text-[8px] font-bold text-neutral-400 truncate font-mono">{msg.file.name}</p>
+                                    <audio src={msg.file.url} controls className="w-full h-8 max-w-[170px] bg-neutral-950 rounded" />
+                                  </div>
+                                ) : (
+                                  <div className="flex items-center gap-2">
+                                    <FileText className="w-5 h-5 text-indigo-400 shrink-0" />
+                                    <div className="flex-1 min-w-0">
+                                      <p className="text-[9px] font-bold text-neutral-200 truncate">{msg.file.name}</p>
+                                      <p className="text-[8px] text-neutral-500 font-mono">{(msg.file.size ? (msg.file.size / 1024).toFixed(1) + " KB" : "Unknown size")}</p>
+                                    </div>
+                                    <a href={msg.file.url} download={msg.file.name} className="p-1 text-neutral-400 hover:text-white bg-neutral-950 hover:bg-neutral-800 rounded-lg transition-all" title="Download file">
+                                      <Download className="w-3.5 h-3.5" />
+                                    </a>
+                                  </div>
+                                )}
+                              </div>
+                            )}
                           </div>
                           <span className="text-[7px] text-neutral-500 font-mono">{msg.timestamp}</span>
                         </div>
@@ -657,22 +923,46 @@ export default function ConferenceRoom({
                   )}
                 </div>
 
-                {/* Send Box */}
-                <form onSubmit={handleSendMessage} className="p-4 border-t border-neutral-800 bg-neutral-950">
-                  <div className="relative">
-                    <input
-                      type="text"
-                      placeholder="Type a message to record..."
-                      value={newMessage}
-                      onChange={e => setNewMessage(e.target.value)}
-                      className="w-full bg-neutral-900 border border-neutral-800 rounded-xl pl-4 pr-10 py-2.5 text-xs text-white placeholder-neutral-500 focus:outline-none focus:border-indigo-500"
-                    />
-                    <button
-                      type="submit"
-                      className="absolute right-2.5 top-2 w-7.5 h-7.5 bg-indigo-600 hover:bg-indigo-500 text-white rounded-lg flex items-center justify-center transition-colors cursor-pointer"
-                    >
-                      <Send className="w-3.5 h-3.5" />
-                    </button>
+                {/* Send Box with file uploader trigger */}
+                <form onSubmit={handleSendMessage} className="p-4 border-t border-neutral-800 bg-neutral-950 shrink-0 space-y-2">
+                  {/* Upload Progress Bar */}
+                  {isUploading && (
+                    <div className="space-y-1">
+                      <div className="flex justify-between items-center text-[8px] font-mono font-bold text-indigo-400 uppercase tracking-wider">
+                        <span>Uploading file attachment...</span>
+                        <span>{uploadProgress}%</span>
+                      </div>
+                      <div className="w-full bg-neutral-800 rounded-full h-1 overflow-hidden">
+                        <div className="bg-indigo-500 h-full transition-all duration-300" style={{ width: `${uploadProgress}%` }} />
+                      </div>
+                    </div>
+                  )}
+
+                  <div className="relative flex items-center gap-2">
+                    <label className="p-2.5 bg-neutral-800 border border-neutral-750 hover:bg-neutral-700 text-neutral-300 rounded-xl cursor-pointer transition-colors flex items-center justify-center shrink-0 shadow-sm" title="Upload Image, Audio, Document, Zip, or Pdf">
+                      <Paperclip className="w-3.5 h-3.5 text-indigo-400 hover:scale-110 transition-transform" />
+                      <input 
+                        type="file" 
+                        className="hidden" 
+                        onChange={handleFileUpload}
+                        disabled={isUploading}
+                      />
+                    </label>
+                    <div className="relative flex-1">
+                      <input
+                        type="text"
+                        placeholder="Type a message to record..."
+                        value={newMessage}
+                        onChange={e => setNewMessage(e.target.value)}
+                        className="w-full bg-neutral-900 border border-neutral-800 rounded-xl pl-4 pr-10 py-2.5 text-xs text-white placeholder-neutral-500 focus:outline-none focus:border-indigo-500"
+                      />
+                      <button
+                        type="submit"
+                        className="absolute right-2.5 top-2 w-7.5 h-7.5 bg-indigo-600 hover:bg-indigo-500 text-white rounded-lg flex items-center justify-center transition-colors cursor-pointer"
+                      >
+                        <Send className="w-3.5 h-3.5" />
+                      </button>
+                    </div>
                   </div>
                 </form>
               </div>

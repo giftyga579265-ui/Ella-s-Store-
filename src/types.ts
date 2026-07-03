@@ -43,6 +43,7 @@ export interface Customer {
   orders: number;
   totalSpent: number;
   signedUp: boolean;
+  avatarUrl?: string;
 }
 
 export interface Order {
@@ -211,6 +212,24 @@ export interface ConferenceChat {
   sender: string;
   text: string;
   timestamp: string;
+  file?: {
+    url: string;
+    name: string;
+    type: string;
+    size?: number;
+  };
+}
+
+export interface UploadedFile {
+  id: string;
+  fileName: string;
+  fileType: string;
+  fileUrl: string;
+  uploadedBy: string;
+  conferenceId: string;
+  conferenceName: string;
+  timestamp: string;
+  fileSize?: number;
 }
 
 

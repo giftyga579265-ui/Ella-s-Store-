@@ -25,6 +25,8 @@ interface OrderHistoryProps {
   currentUserEmail: string;
   onClose: () => void;
   isCustomerOnly?: boolean;
+  currentUserAvatar?: string;
+  onUpdateAvatar?: (url: string) => Promise<void>;
 }
 
 export default function OrderHistory({ 
@@ -33,7 +35,9 @@ export default function OrderHistory({
   currentUser, 
   currentUserEmail, 
   onClose,
-  isCustomerOnly = true
+  isCustomerOnly = true,
+  currentUserAvatar = "",
+  onUpdateAvatar
 }: OrderHistoryProps) {
   const [activeTab, setActiveTab] = useState<"orders" | "payments">("orders");
 
@@ -174,6 +178,61 @@ export default function OrderHistory({
 
         {/* Content Body */}
         <div className="flex-1 overflow-y-auto p-6 space-y-6">
+          {/* CUSTOMER PROFILE CARD WITH ACTIVE AVATAR AND IMAGE UPDATE */}
+          <div className="bg-neutral-50 rounded-2xl p-4 border border-neutral-200/60 flex items-center gap-3.5 relative overflow-hidden shadow-sm">
+            <div className="relative group shrink-0">
+              <div className="w-12 h-12 rounded-full overflow-hidden border-2 border-indigo-150 bg-neutral-100 flex items-center justify-center shadow-md">
+                {currentUserAvatar ? (
+                  <img src={currentUserAvatar} alt={currentUser} className="w-full h-full object-cover" />
+                ) : (
+                  <div className="w-full h-full bg-indigo-100 text-indigo-700 flex items-center justify-center font-bold text-lg">
+                    {currentUser ? currentUser[0].toUpperCase() : 'U'}
+                  </div>
+                )}
+              </div>
+              {onUpdateAvatar && (
+                <label className="absolute inset-0 bg-slate-950/70 rounded-full opacity-0 group-hover:opacity-100 flex flex-col items-center justify-center cursor-pointer transition-opacity">
+                  <span className="text-[8px] text-white font-extrabold">Edit</span>
+                  <input
+                    type="file"
+                    accept="image/*"
+                    className="hidden"
+                    onChange={async (e) => {
+                      const file = e.target.files?.[0];
+                      if (file) {
+                        const reader = new FileReader();
+                        reader.onload = (event) => {
+                          const img = new Image();
+                          img.onload = () => {
+                            const canvas = document.createElement("canvas");
+                            canvas.width = 120;
+                            canvas.height = 120;
+                            const ctx = canvas.getContext("2d");
+                            if (ctx) {
+                              ctx.drawImage(img, 0, 0, 120, 120);
+                              const resizedBase64 = canvas.toDataURL("image/jpeg", 0.85);
+                              onUpdateAvatar(resizedBase64);
+                            }
+                          };
+                          img.src = event.target?.result as string;
+                        };
+                        reader.readAsDataURL(file);
+                      }
+                    }}
+                  />
+                </label>
+              )}
+            </div>
+            
+            <div className="space-y-0.5">
+              <span className="text-[8px] font-black text-indigo-600 bg-indigo-50 border border-indigo-100/60 px-2 py-0.5 rounded-full uppercase tracking-wider font-mono">
+                Bespoke Customer
+              </span>
+              <h3 className="font-sans text-xs font-black text-neutral-800 uppercase tracking-wide">{currentUser}</h3>
+              <p className="text-[10px] text-neutral-500 font-semibold truncate max-w-[200px]">{currentUserEmail}</p>
+            </div>
+          </div>
+
           <AnimatePresence mode="wait">
             {activeTab === "orders" ? (
               <motion.div

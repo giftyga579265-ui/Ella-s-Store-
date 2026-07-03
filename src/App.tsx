@@ -7,7 +7,7 @@ import {
 import { 
   ShoppingBag, Phone, MapPin, Mail, Clock, HelpCircle, 
   Settings, User, Check, Sparkles, Star, ChevronDown, Lock, Bell, Trash2, X, Menu, Heart, Search,
-  Mic, Video, Film
+  Mic, Video, Film, Upload, Camera, Image as ImageIcon
 } from "lucide-react";
 
 import SmsWidget from "./components/SmsWidget";
@@ -29,6 +29,16 @@ import { signInWithPopup } from "firebase/auth";
 import { 
   collection, doc, setDoc, deleteDoc, onSnapshot, getDocs 
 } from "firebase/firestore";
+
+// LUXURIOUS AVATAR PRESETS
+const AVATAR_PRESETS = [
+  { name: "Sleek Gold", url: "https://images.unsplash.com/photo-1534528741775-53994a69daeb?w=150&fit=crop&q=80" },
+  { name: "Modern Charcoal", url: "https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?w=150&fit=crop&q=80" },
+  { name: "Traditional Ankara", url: "https://images.unsplash.com/photo-1517841905240-472988babdf9?w=150&fit=crop&q=80" },
+  { name: "Regal Emerald", url: "https://images.unsplash.com/photo-1494790108377-be9c29b29330?w=150&fit=crop&q=80" },
+  { name: "Vibrant Indigo", url: "https://images.unsplash.com/photo-1500648767791-00dcc994a43e?w=150&fit=crop&q=80" },
+  { name: "Crimson Velvet", url: "https://images.unsplash.com/photo-1524504388940-b1c1722653e1?w=150&fit=crop&q=80" }
+];
 
 // INITIAL DATA CONSTANTS
 const INITIAL_PRODUCTS: Product[] = [
@@ -463,6 +473,10 @@ export default function App() {
   const [currentUserEmail, setCurrentUserEmail] = useState(() => {
     return localStorage.getItem("currentUserEmail") || "";
   });
+  const [currentUserAvatar, setCurrentUserAvatar] = useState(() => {
+    return localStorage.getItem("currentUserAvatar") || "";
+  });
+  const [selectedAvatarUrl, setSelectedAvatarUrl] = useState<string>(AVATAR_PRESETS[0].url);
 
   // Computed notification count for user
   const unreadNotificationsCount = useMemo(() => {
@@ -1133,6 +1147,8 @@ export default function App() {
     setCurrentUser(loginUsername.trim());
     localStorage.setItem("isLoggedIn", "true");
     localStorage.setItem("currentUser", loginUsername.trim());
+    setCurrentUserAvatar(selectedAvatarUrl);
+    localStorage.setItem("currentUserAvatar", selectedAvatarUrl);
     
     // CRM synchronization
     const existing = customers.find(c => c.name.toLowerCase() === loginUsername.trim().toLowerCase());
@@ -1158,7 +1174,8 @@ export default function App() {
         registrationDate: new Date().toISOString().split('T')[0],
         orders: 0,
         totalSpent: 0,
-        signedUp: true
+        signedUp: true,
+        avatarUrl: selectedAvatarUrl
       };
       setDoc(doc(db, "customers", String(newC.id)), newC).catch(err => {
         console.error("Error saving customer to Firestore:", err);
@@ -1168,7 +1185,8 @@ export default function App() {
         ...existing,
         email: loginEmail.trim() || existing.email,
         phone: loginPhone.trim() || existing.phone,
-        signedUp: true
+        signedUp: true,
+        avatarUrl: selectedAvatarUrl || existing?.avatarUrl
       };
       setDoc(doc(db, "customers", String(existing.id)), updatedC).catch(err => {
         console.error("Error updating customer in Firestore:", err);
@@ -1247,12 +1265,15 @@ export default function App() {
       const result = await signInWithPopup(auth, googleProvider);
       const user = result.user;
       if (user) {
+        const photo = user.photoURL || "";
         setIsLoggedIn(true);
         setCurrentUser(user.displayName || user.email || "Google User");
         setCurrentUserEmail(user.email || "");
+        setCurrentUserAvatar(photo);
         localStorage.setItem("isLoggedIn", "true");
         localStorage.setItem("currentUser", user.displayName || user.email || "Google User");
         localStorage.setItem("currentUserEmail", user.email || "");
+        localStorage.setItem("currentUserAvatar", photo);
         setShowLogin(false);
         showToast("Signed In with Google", `Welcome back, ${user.displayName || 'user'}!`, "success");
         
@@ -1278,14 +1299,16 @@ export default function App() {
             registrationDate: new Date().toISOString().split('T')[0],
             orders: 0,
             totalSpent: 0,
-            signedUp: true
+            signedUp: true,
+            avatarUrl: photo
           };
           await setDoc(doc(db, "customers", String(newC.id)), newC);
         } else {
           const updatedC = {
             ...existing,
             email: userEmail,
-            signedUp: true
+            signedUp: true,
+            avatarUrl: existing.avatarUrl || photo
           };
           await setDoc(doc(db, "customers", String(existing.id)), updatedC);
         }
@@ -1333,9 +1356,11 @@ export default function App() {
       setIsLoggedIn(false);
       setCurrentUser("");
       setCurrentUserEmail("");
+      setCurrentUserAvatar("");
       localStorage.removeItem("isLoggedIn");
       localStorage.removeItem("currentUser");
       localStorage.removeItem("currentUserEmail");
+      localStorage.removeItem("currentUserAvatar");
       showToast("Signed Out", "You have logged out successfully.", "info");
       logActivity("Logged out of the storefront", "user_action");
       setShowLogin(true);
@@ -1579,6 +1604,72 @@ export default function App() {
             </div>
 
             <div className="space-y-3.5 text-left">
+              {/* AVATAR SELECTOR / CUSTOM UPLOADER */}
+              <div className="space-y-3 p-3 bg-slate-950/40 rounded-2xl border border-slate-800/40">
+                <div className="flex items-center gap-4">
+                  <div className="relative w-16 h-16 rounded-full border border-slate-700 bg-slate-950 overflow-hidden group flex items-center justify-center shrink-0 shadow-inner">
+                    {selectedAvatarUrl ? (
+                      <img src={selectedAvatarUrl} alt="Selected Avatar" className="w-full h-full object-cover" />
+                    ) : (
+                      <User className="w-7 h-7 text-slate-500" />
+                    )}
+                    <label className="absolute inset-0 bg-slate-950/70 opacity-0 group-hover:opacity-100 flex flex-col items-center justify-center cursor-pointer transition-opacity">
+                      <Camera className="w-4 h-4 text-amber-500" />
+                      <span className="text-[8px] text-white font-bold mt-0.5">Upload</span>
+                      <input 
+                        type="file" 
+                        accept="image/*" 
+                        className="hidden" 
+                        onChange={async (e) => {
+                          const file = e.target.files?.[0];
+                          if (file) {
+                            const reader = new FileReader();
+                            reader.onload = (event) => {
+                              const img = new Image();
+                              img.onload = () => {
+                                const canvas = document.createElement("canvas");
+                                canvas.width = 120;
+                                canvas.height = 120;
+                                const ctx = canvas.getContext("2d");
+                                if (ctx) {
+                                  ctx.drawImage(img, 0, 0, 120, 120);
+                                  const resizedBase64 = canvas.toDataURL("image/jpeg", 0.85);
+                                  setSelectedAvatarUrl(resizedBase64);
+                                  showToast("Photo Uploaded", "Your custom profile image is ready!", "success");
+                                }
+                              };
+                              img.src = event.target?.result as string;
+                            };
+                            reader.readAsDataURL(file);
+                          }
+                        }}
+                      />
+                    </label>
+                  </div>
+                  <div>
+                    <h4 className="text-xs font-bold text-slate-200 uppercase tracking-wider">Couture Style Profile</h4>
+                    <p className="text-[10px] text-slate-400">Select a luxurious preset or upload a custom photo as your digital avatar.</p>
+                  </div>
+                </div>
+                
+                {/* Presets Row */}
+                <div className="flex gap-1.5 justify-between">
+                  {AVATAR_PRESETS.map((p, idx) => (
+                    <button
+                      key={idx}
+                      type="button"
+                      onClick={() => setSelectedAvatarUrl(p.url)}
+                      className={`w-8 h-8 rounded-full overflow-hidden border transition-all hover:scale-105 cursor-pointer ${
+                        selectedAvatarUrl === p.url ? "border-amber-500 scale-110 ring-2 ring-amber-500/20" : "border-slate-800 opacity-60 hover:opacity-100"
+                      }`}
+                      title={p.name}
+                    >
+                      <img src={p.url} alt={p.name} className="w-full h-full object-cover" />
+                    </button>
+                  ))}
+                </div>
+              </div>
+
               <div className="space-y-1.5">
                 <label className="text-xs font-semibold text-slate-400">Full Name / Username</label>
                 <input
@@ -1783,8 +1874,19 @@ export default function App() {
               </button>
             </div>
             {isLoggedIn && (
-              <div className="flex items-center gap-1.5 text-xs text-neutral-700 font-medium bg-neutral-100 px-3 py-1.5 rounded-full border border-neutral-200 shrink-0">
-                <User className="w-3.5 h-3.5 text-indigo-500" />
+              <div 
+                onClick={() => {
+                  setShowOrderHistory(true);
+                  logActivity("Opened customer order history panel via profile chip", "user_action");
+                }}
+                className="flex items-center gap-2 text-xs text-neutral-700 font-medium bg-neutral-100 pl-1.5 pr-3.5 py-1.5 rounded-full border border-neutral-200 shrink-0 cursor-pointer hover:bg-neutral-200/80 transition-colors"
+                title="View Style Profile & Dashboard"
+              >
+                {currentUserAvatar ? (
+                  <img src={currentUserAvatar} alt={currentUser} className="w-5.5 h-5.5 rounded-full object-cover border border-indigo-200" />
+                ) : (
+                  <User className="w-3.5 h-3.5 text-indigo-500" />
+                )}
                 <span className="max-w-[120px] truncate">{currentUser}</span>
               </div>
             )}
@@ -2911,6 +3013,21 @@ export default function App() {
           payments={payments}
           currentUser={currentUser}
           currentUserEmail={currentUserEmail}
+          currentUserAvatar={currentUserAvatar}
+          onUpdateAvatar={async (newUrl) => {
+            setCurrentUserAvatar(newUrl);
+            localStorage.setItem("currentUserAvatar", newUrl);
+            const existing = customers.find(c => c.name.toLowerCase() === currentUser.toLowerCase() || (currentUserEmail && c.email.toLowerCase() === currentUserEmail.toLowerCase()));
+            if (existing) {
+              const updatedC = {
+                ...existing,
+                avatarUrl: newUrl
+              };
+              await setDoc(doc(db, "customers", String(existing.id)), updatedC);
+              showToast("Avatar Updated", "Your couture styling profile avatar has been refreshed!", "success");
+              logActivity("Updated styling profile avatar on customer dashboard", "user_action");
+            }
+          }}
           onClose={() => setShowOrderHistory(false)}
           isCustomerOnly={!isAuthorizedAdmin}
         />

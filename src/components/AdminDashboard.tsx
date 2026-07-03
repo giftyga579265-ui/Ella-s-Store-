@@ -6,12 +6,12 @@ import {
 import CustomerLiveMap from "./CustomerLiveMap";
 import CharityManager from "./CharityManager";
 import { 
-  LayoutDashboard, ShoppingCart, Shirt, Users, CreditCard, 
+  LayoutDashboard, ShoppingCart, Shirt, Users, User, CreditCard, 
   MapPin, HelpCircle, Activity, Tag, Mail, Image as ImageIcon, Paintbrush, 
   LogOut, Plus, Trash2, Edit, Eye, Check, CheckCircle, TrendingUp, DollarSign,
   Download, Search, Sparkles, MessageCircle, AlertTriangle, Maximize2, Minimize2, X,
   Database, Utensils, Calendar, Star, Truck, Printer, Menu, Heart,
-  Video, Film, VideoOff
+  Video, Film, VideoOff, FileText, FolderHeart
 } from "lucide-react";
 import jsPDF from "jspdf";
 import autoTable from "jspdf-autotable";
@@ -73,6 +73,25 @@ export default function AdminDashboard({
   const [adminConferences, setAdminConferences] = useState<any[]>([]);
   const [selectedAdminConf, setSelectedAdminConf] = useState<any | null>(null);
   const [adminConfChats, setAdminConfChats] = useState<any[]>([]);
+
+  // Uploaded Files list state & Firestore subscription listener
+  const [uploadedFiles, setUploadedFiles] = useState<any[]>([]);
+  const [fileFilter, setFileFilter] = useState<"all" | "image" | "audio" | "document">("all");
+  const [fileSearch, setFileSearch] = useState("");
+
+  useEffect(() => {
+    const q = query(collection(db, "uploaded_files"), orderBy("uploadedAt", "desc"));
+    const unsub = onSnapshot(q, (snapshot) => {
+      const list: any[] = [];
+      snapshot.forEach((doc) => {
+        list.push({ id: doc.id, ...doc.data() });
+      });
+      setUploadedFiles(list);
+    }, (error) => {
+      console.error("Error listening to uploaded_files in Admin:", error);
+    });
+    return () => unsub();
+  }, []);
 
   useEffect(() => {
     const unsub = onSnapshot(collection(db, "conferences"), (snapshot) => {
@@ -870,6 +889,7 @@ export default function AdminDashboard({
                 { id: "delivery", label: "Delivery Tracker", icon: Truck, count: deliveries?.filter(d=>d.status!=='delivered' && d.status!=='failed').length || 0 },
                 { id: "charity", label: "Charity Management", icon: Heart },
                 { id: "conference", label: "Conference Manager", icon: Video, count: adminConferences.filter(c => c.status === "active").length },
+                { id: "files", label: "Recorded Media Files", icon: FolderHeart, count: uploadedFiles.length },
                 { id: "economics", label: "Economic State", icon: TrendingUp },
                 { id: "customize", label: "Homepage Design", icon: Paintbrush },
               ].map(tab => {
@@ -1580,7 +1600,7 @@ export default function AdminDashboard({
                             </div>
                           ) : (
                             adminConfChats.map((m) => (
-                              <div key={m.id} className="p-3 bg-neutral-50 border border-neutral-100 rounded-xl space-y-1">
+                              <div key={m.id} className="p-3 bg-neutral-50 border border-neutral-100 rounded-xl space-y-2">
                                 <div className="flex justify-between items-center">
                                   <span className="text-[10px] font-bold text-indigo-600 font-mono">{m.sender}</span>
                                   <span className="text-[9px] text-neutral-400 font-mono">
@@ -1588,6 +1608,30 @@ export default function AdminDashboard({
                                   </span>
                                 </div>
                                 <p className="text-xs text-neutral-700 leading-relaxed break-words">{m.text}</p>
+                                {m.file && (
+                                  <div className="p-2 bg-white border border-neutral-200 rounded-lg space-y-1 max-w-[180px] overflow-hidden text-left">
+                                    {m.file.type?.startsWith("image/") ? (
+                                      <a href={m.file.url} target="_blank" rel="noreferrer" className="block overflow-hidden rounded">
+                                        <img src={m.file.url} alt={m.file.name} className="w-full h-auto max-h-[80px] object-cover rounded" referrerPolicy="no-referrer" />
+                                      </a>
+                                    ) : m.file.type?.startsWith("audio/") ? (
+                                      <div className="space-y-0.5">
+                                        <p className="text-[7px] text-neutral-400 font-mono truncate">{m.file.name}</p>
+                                        <audio src={m.file.url} controls className="w-full h-6 rounded" />
+                                      </div>
+                                    ) : (
+                                      <div className="flex items-center gap-1.5">
+                                        <FileText className="w-4 h-4 text-indigo-400 shrink-0" />
+                                        <div className="flex-1 min-w-0">
+                                          <p className="text-[8px] text-neutral-600 truncate font-bold">{m.file.name}</p>
+                                        </div>
+                                        <a href={m.file.url} download={m.file.name} className="p-0.5 text-neutral-450 hover:text-neutral-900 bg-neutral-100 rounded" title="Download">
+                                          <Download className="w-3 h-3" />
+                                        </a>
+                                      </div>
+                                    )}
+                                  </div>
+                                )}
                               </div>
                             ))
                           )}
@@ -1621,6 +1665,243 @@ export default function AdminDashboard({
                   </div>
                 </div>
               )}
+            </div>
+          )}
+
+          {/* TAB: Recorded Media Files */}
+          {activeTab === "files" && (
+            <div className="space-y-6 animate-in fade-in duration-300">
+              <div className="border-b border-neutral-250 pb-4 flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4">
+                <div>
+                  <h2 className="font-serif text-2xl text-neutral-900 font-medium font-bold">Recorded Media Files Locker</h2>
+                  <p className="text-xs text-neutral-500">Secure directory recording customer uploaded images, audio clips, documents, and other conference items.</p>
+                </div>
+                <PageToggleBtn />
+              </div>
+
+              {/* Statistics Row */}
+              <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-5">
+                <div className="bg-white border border-neutral-200 p-5 rounded-2xl shadow-sm flex items-center gap-4">
+                  <div className="w-12 h-12 bg-indigo-50 text-indigo-600 rounded-xl flex items-center justify-center font-bold">
+                    {uploadedFiles.length}
+                  </div>
+                  <div>
+                    <span className="text-[10px] font-bold text-neutral-400 uppercase tracking-wider block">Total Stored Files</span>
+                    <span className="text-sm font-semibold text-neutral-850">Unlimited locker space</span>
+                  </div>
+                </div>
+
+                <div className="bg-white border border-neutral-200 p-5 rounded-2xl shadow-sm flex items-center gap-4">
+                  <div className="w-12 h-12 bg-emerald-50 text-emerald-600 rounded-xl flex items-center justify-center font-bold">
+                    {uploadedFiles.filter(f => f.type?.startsWith("image/")).length}
+                  </div>
+                  <div>
+                    <span className="text-[10px] font-bold text-neutral-400 uppercase tracking-wider block">Images & Photos</span>
+                    <span className="text-sm font-semibold text-neutral-850">Client snap visual drafts</span>
+                  </div>
+                </div>
+
+                <div className="bg-white border border-neutral-200 p-5 rounded-2xl shadow-sm flex items-center gap-4">
+                  <div className="w-12 h-12 bg-amber-50 text-amber-600 rounded-xl flex items-center justify-center font-bold">
+                    {uploadedFiles.filter(f => f.type?.startsWith("audio/")).length}
+                  </div>
+                  <div>
+                    <span className="text-[10px] font-bold text-neutral-400 uppercase tracking-wider block">Audio Voice Notes</span>
+                    <span className="text-sm font-semibold text-neutral-850">Spoken size measurements</span>
+                  </div>
+                </div>
+
+                <div className="bg-white border border-neutral-200 p-5 rounded-2xl shadow-sm flex items-center gap-4">
+                  <div className="w-12 h-12 bg-sky-50 text-sky-600 rounded-xl flex items-center justify-center font-bold">
+                    {uploadedFiles.filter(f => !f.type?.startsWith("image/") && !f.type?.startsWith("audio/")).length}
+                  </div>
+                  <div>
+                    <span className="text-[10px] font-bold text-neutral-400 uppercase tracking-wider block">Docs & Other files</span>
+                    <span className="text-sm font-semibold text-neutral-850">Sizing PDFs & techpack logs</span>
+                  </div>
+                </div>
+              </div>
+
+              {/* Filters & Search Control Panel */}
+              <div className="bg-white rounded-2xl border border-neutral-200/60 shadow-sm p-6 space-y-5">
+                <div className="flex flex-col md:flex-row justify-between items-start md:items-center gap-4">
+                  {/* Filter Pills */}
+                  <div className="flex flex-wrap gap-2">
+                    {[
+                      { key: "all", label: "All Stored Files" },
+                      { key: "image", label: "Images/Drawings" },
+                      { key: "audio", label: "Audio Playbacks" },
+                      { key: "document", label: "Documents/PDFs" },
+                    ].map(pill => (
+                      <button
+                        key={pill.key}
+                        onClick={() => setFileFilter(pill.key as any)}
+                        className={`px-3.5 py-1.5 rounded-xl text-xs font-semibold tracking-wide transition-all cursor-pointer ${
+                          fileFilter === pill.key
+                            ? "bg-indigo-600 text-white shadow-sm"
+                            : "bg-neutral-50 hover:bg-neutral-100 text-neutral-600 border border-neutral-200"
+                        }`}
+                      >
+                        {pill.label}
+                      </button>
+                    ))}
+                  </div>
+
+                  {/* Search bar */}
+                  <div className="relative w-full md:w-80">
+                    <Search className="absolute left-3.5 top-1/2 -translate-y-1/2 w-4 h-4 text-neutral-400" />
+                    <input
+                      type="text"
+                      placeholder="Search files by name, sender..."
+                      value={fileSearch}
+                      onChange={(e) => setFileSearch(e.target.value)}
+                      className="w-full pl-10 pr-4 py-2 bg-white border border-neutral-200 rounded-xl text-xs focus:outline-none focus:border-indigo-500 font-medium"
+                    />
+                  </div>
+                </div>
+
+                {/* Files Grid Display */}
+                {uploadedFiles.length === 0 ? (
+                  <div className="py-16 text-center text-neutral-400 space-y-3">
+                    <Video className="w-12 h-12 text-neutral-300 mx-auto animate-pulse" />
+                    <div>
+                      <p className="font-serif font-semibold text-neutral-700">No client files recorded yet</p>
+                      <p className="text-xs text-neutral-500 max-w-sm mx-auto mt-1">Files shared in the live Ankara video fitting room will register here permanently without limitation storage space.</p>
+                    </div>
+                  </div>
+                ) : (
+                  (() => {
+                    const filtered = uploadedFiles
+                      .filter(f => {
+                        if (fileFilter === "image") return f.type?.startsWith("image/");
+                        if (fileFilter === "audio") return f.type?.startsWith("audio/");
+                        if (fileFilter === "document") return !f.type?.startsWith("image/") && !f.type?.startsWith("audio/");
+                        return true;
+                      })
+                      .filter(f => {
+                        const s = fileSearch.toLowerCase();
+                        return (
+                          f.name?.toLowerCase().includes(s) ||
+                          f.sender?.toLowerCase().includes(s) ||
+                          f.conferenceId?.toLowerCase().includes(s)
+                        );
+                      });
+
+                    if (filtered.length === 0) {
+                      return (
+                        <div className="py-12 text-center text-neutral-400 text-xs font-semibold">
+                          No records match your selected file parameters.
+                        </div>
+                      );
+                    }
+
+                    return (
+                      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6">
+                        {filtered.map(file => {
+                          const isImg = file.type?.startsWith("image/");
+                          const isAud = file.type?.startsWith("audio/");
+                          const sizeStr = file.size 
+                            ? file.size > 1024 * 1024 
+                              ? `${(file.size / (1024 * 1024)).toFixed(1)} MB` 
+                              : `${(file.size / 1024).toFixed(0)} KB`
+                            : "Unknown size";
+                          const dateObj = file.uploadedAt?.seconds 
+                            ? new Date(file.uploadedAt.seconds * 1000) 
+                            : new Date(file.uploadedAt || Date.now());
+
+                          return (
+                            <div key={file.id} className="bg-neutral-50 border border-neutral-200/60 p-4 rounded-2xl flex flex-col justify-between hover:border-indigo-400/50 hover:shadow-md transition-all group relative">
+                              <button
+                                onClick={async () => {
+                                  if (confirm(`Remove permanently from files log: ${file.name}?`)) {
+                                    try {
+                                      await deleteDoc(doc(db, "uploaded_files", file.id));
+                                      onShowToast("File Record Deleted", "Secure log cleared successfully.", "success");
+                                    } catch (err: any) {
+                                      onShowToast("Error", err.message, "error");
+                                    }
+                                  }
+                                }}
+                                className="absolute top-3 right-3 p-1.5 bg-white border border-neutral-100 hover:bg-rose-50 hover:border-rose-200 hover:text-rose-600 text-neutral-400 rounded-lg opacity-0 group-hover:opacity-100 transition-opacity z-10 shadow-sm"
+                                title="Delete from locker logs"
+                              >
+                                <Trash2 className="w-3.5 h-3.5" />
+                              </button>
+
+                              <div className="space-y-3.5">
+                                {/* Visual Thumbnail preview */}
+                                <div className="aspect-video bg-white border border-neutral-150 rounded-xl overflow-hidden relative flex items-center justify-center">
+                                  {isImg ? (
+                                    <img src={file.url} alt={file.name} className="w-full h-full object-cover" referrerPolicy="no-referrer" />
+                                  ) : isAud ? (
+                                    <div className="p-3 w-full text-center space-y-1.5 bg-amber-500/5">
+                                      <Activity className="w-8 h-8 text-amber-500 mx-auto animate-pulse" />
+                                      <p className="text-[9px] text-amber-700 font-mono font-bold truncate">{file.name}</p>
+                                    </div>
+                                  ) : (
+                                    <div className="text-center space-y-1">
+                                      <FileText className="w-10 h-10 text-indigo-400 mx-auto" />
+                                      <span className="text-[8px] px-1.5 py-0.5 bg-neutral-100 rounded text-neutral-500 font-mono uppercase font-black">{file.type?.split('/')?.[1] || "doc"}</span>
+                                    </div>
+                                  )}
+                                </div>
+
+                                {/* Details info block */}
+                                <div className="space-y-1">
+                                  <h4 className="text-xs font-black text-neutral-800 truncate" title={file.name}>{file.name}</h4>
+                                  <div className="space-y-0.5 text-[10px] text-neutral-500 font-medium">
+                                    <p className="flex justify-between">
+                                      <span className="text-neutral-400">Shared by:</span>
+                                      <span className="font-bold text-neutral-700 truncate max-w-[120px]">{file.sender}</span>
+                                    </p>
+                                    <p className="flex justify-between">
+                                      <span className="text-neutral-400">Size / Date:</span>
+                                      <span>{sizeStr} &bull; {dateObj.toLocaleDateString([], {month: 'short', day: 'numeric'})}</span>
+                                    </p>
+                                    <p className="flex justify-between">
+                                      <span className="text-neutral-400">Room Link:</span>
+                                      <span className="font-mono text-[9px] bg-indigo-50 text-indigo-700 px-1 rounded truncate max-w-[110px]" title="Conference Room ID">
+                                        {file.conferenceId || "External"}
+                                      </span>
+                                    </p>
+                                  </div>
+                                </div>
+                              </div>
+
+                              {/* Interactive download action button & audio inline playback */}
+                              <div className="pt-3 border-t border-neutral-200/60 mt-3.5 space-y-2">
+                                {isAud && (
+                                  <audio src={file.url} controls className="w-full h-7 rounded bg-amber-50/40 p-0.5" />
+                                )}
+                                <div className="flex gap-2">
+                                  {isImg && (
+                                    <a
+                                      href={file.url}
+                                      target="_blank"
+                                      rel="noreferrer"
+                                      className="flex-1 text-center py-1.5 border border-neutral-200 hover:bg-neutral-100 text-[10px] font-bold text-neutral-600 rounded-xl transition-all"
+                                    >
+                                      Full Screen
+                                    </a>
+                                  )}
+                                  <a
+                                    href={file.url}
+                                    download={file.name}
+                                    className="flex-1 bg-indigo-600 hover:bg-indigo-500 text-white text-center py-1.5 text-[10px] font-black rounded-xl transition-all flex items-center justify-center gap-1 shadow-sm"
+                                  >
+                                    <Download className="w-3 h-3" />
+                                    Download File
+                                  </a>
+                                </div>
+                              </div>
+                            </div>
+                          );
+                        })}
+                      </div>
+                    );
+                  })()
+                )}
+              </div>
             </div>
           )}
 
@@ -1730,7 +2011,14 @@ export default function AdminDashboard({
                             >
                               <td className="p-4 font-mono font-bold text-neutral-400">CRM-{customer.id}</td>
                               <td className="p-4 font-bold text-neutral-800 flex items-center gap-2">
-                                {customer.name}
+                                <div className="w-7 h-7 rounded-full overflow-hidden border border-neutral-250 bg-neutral-100 flex items-center justify-center shrink-0 shadow-inner">
+                                  {customer.avatarUrl ? (
+                                    <img src={customer.avatarUrl} alt={customer.name} className="w-full h-full object-cover" />
+                                  ) : (
+                                    <User className="w-3.5 h-3.5 text-neutral-450" />
+                                  )}
+                                </div>
+                                <span className="truncate max-w-[120px]">{customer.name}</span>
                                 {selectedCustomer?.id === customer.id && <Check className="w-3.5 h-3.5 text-amber-500" />}
                               </td>
                               <td className="p-4 font-medium text-neutral-600">{customer.email}</td>
@@ -1750,10 +2038,19 @@ export default function AdminDashboard({
                 {selectedCustomer && (
                   <div className="bg-white rounded-2xl border border-neutral-200/60 p-6 shadow-sm space-y-6 animate-in slide-in-from-right-4 duration-350">
                     <div className="flex justify-between items-start border-b border-neutral-150 pb-4">
-                      <div>
-                        <span className="text-[10px] font-mono font-bold uppercase text-amber-600">Active CRM Profile</span>
-                        <h3 className="font-serif text-lg text-neutral-900 font-medium">{selectedCustomer.name}</h3>
-                        <p className="text-[10px] text-neutral-400">Registered on {selectedCustomer.registrationDate}</p>
+                      <div className="flex items-center gap-3">
+                        <div className="w-12 h-12 rounded-full overflow-hidden border border-neutral-200 bg-neutral-100 flex items-center justify-center shrink-0 shadow-md">
+                          {selectedCustomer.avatarUrl ? (
+                            <img src={selectedCustomer.avatarUrl} alt={selectedCustomer.name} className="w-full h-full object-cover" />
+                          ) : (
+                            <User className="w-6 h-6 text-neutral-400" />
+                          )}
+                        </div>
+                        <div>
+                          <span className="text-[10px] font-mono font-bold uppercase text-amber-600">Active CRM Profile</span>
+                          <h3 className="font-serif text-md text-neutral-900 font-bold leading-tight">{selectedCustomer.name}</h3>
+                          <p className="text-[10px] text-neutral-400">Registered on {selectedCustomer.registrationDate}</p>
+                        </div>
                       </div>
                       <button 
                         onClick={() => setSelectedCustomer(null)}

@@ -2,6 +2,115 @@ import { useState, useRef, useEffect } from "react";
 import { ChatMessage } from "../types";
 import { Bot, Send, X, Sparkles, Trash2, Maximize2, Minimize2 } from "lucide-react";
 
+// A luxurious formatter component to beautifully render Haiasi AI's responses
+function FormattedMessage({ text }: { text: string }) {
+  const lines = text.split("\n");
+
+  const parseInlineStyles = (str: string) => {
+    // Splits on markdown bold (**text**) and italic (*text*)
+    const parts = str.split(/(\*\*.*?\*\*|\*.*?\*)/g);
+    return parts.map((part, index) => {
+      if (part.startsWith("**") && part.endsWith("**")) {
+        return (
+          <strong key={index} className="text-neutral-950 font-black bg-amber-500/10 border-b border-amber-500/25 px-1 py-0.5 rounded-sm">
+            {part.slice(2, -2)}
+          </strong>
+        );
+      } else if (part.startsWith("*") && part.endsWith("*")) {
+        return (
+          <em key={index} className="text-neutral-900 font-serif font-semibold italic">
+            {part.slice(1, -1)}
+          </em>
+        );
+      }
+      return part;
+    });
+  };
+
+  return (
+    <div className="space-y-3.5 text-neutral-850 text-[13px] leading-relaxed">
+      {lines.map((line, idx) => {
+        const trimmed = line.trim();
+        if (!trimmed) {
+          return <div key={idx} className="h-1.5" />;
+        }
+
+        // Horizontal Line Divider
+        if (trimmed === "---" || trimmed === "***" || trimmed === "___") {
+          return <div key={idx} className="my-4 border-t border-dashed border-amber-500/30" />;
+        }
+
+        // Heading lines starting with #s or enclosed in bold (e.g., **Heading**)
+        if (trimmed.startsWith("###")) {
+          const clean = trimmed.replace(/^###\s*/, "");
+          return (
+            <h4 key={idx} className="text-xs font-serif font-black text-neutral-950 tracking-wider mt-4 mb-2 first:mt-0 flex items-center gap-1.5 border-b-2 border-amber-500/15 pb-1 uppercase">
+              <Sparkles className="w-3.5 h-3.5 text-amber-500 shrink-0" />
+              {parseInlineStyles(clean)}
+            </h4>
+          );
+        }
+        if (trimmed.startsWith("####") || trimmed.startsWith("##") || trimmed.startsWith("#")) {
+          const clean = trimmed.replace(/^#+\s*/, "");
+          return (
+            <h4 key={idx} className="text-xs font-serif font-black text-neutral-950 tracking-wider mt-4 mb-2 first:mt-0 flex items-center gap-1.5 border-b border-amber-500/10 pb-0.5 uppercase">
+              <Sparkles className="w-3 h-3 text-amber-500 shrink-0 animate-pulse" />
+              {parseInlineStyles(clean)}
+            </h4>
+          );
+        }
+
+        // Bullet points
+        if (trimmed.startsWith("* ") || trimmed.startsWith("- ") || trimmed.startsWith("• ")) {
+          const clean = trimmed.replace(/^[\*\-•]\s*/, "");
+          return (
+            <div key={idx} className="flex items-start gap-2.5 my-2 pl-1 leading-relaxed">
+              <span className="w-1.5 h-1.5 bg-amber-500 rounded-full shrink-0 mt-1.5 shadow shadow-amber-500/60" />
+              <div className="flex-1 text-[12.5px] font-medium text-neutral-800">
+                {parseInlineStyles(clean)}
+              </div>
+            </div>
+          );
+        }
+
+        // Numbered list items
+        const numMatch = trimmed.match(/^(\d+)\.\s(.*)/);
+        if (numMatch) {
+          const num = numMatch[1];
+          const content = numMatch[2];
+          return (
+            <div key={idx} className="flex items-start gap-2.5 my-2.5 pl-1 leading-relaxed">
+              <span className="inline-flex items-center justify-center w-5 h-5 rounded-full bg-amber-500/10 border border-amber-500/20 text-amber-600 text-[10px] font-mono font-black shrink-0 mt-0.5">
+                {num}
+              </span>
+              <div className="flex-1 pt-0.5 text-[12.5px] font-medium text-neutral-800">
+                {parseInlineStyles(content)}
+              </div>
+            </div>
+          );
+        }
+
+        // Blockquotes
+        if (trimmed.startsWith(">")) {
+          const clean = trimmed.replace(/^>\s*/, "");
+          return (
+            <blockquote key={idx} className="pl-3.5 border-l-2 border-amber-500 bg-amber-500/5 py-1.5 px-2.5 rounded-r-xl my-2 text-xs text-neutral-700 italic font-medium leading-relaxed">
+              {parseInlineStyles(clean)}
+            </blockquote>
+          );
+        }
+
+        // Default: Regular text block
+        return (
+          <p key={idx} className="text-neutral-700 font-medium text-[13px] leading-relaxed pl-1 my-1">
+            {parseInlineStyles(trimmed)}
+          </p>
+        );
+      })}
+    </div>
+  );
+}
+
 interface HaiasiChatbotProps {
   onLogActivity: (activity: string, type: 'login' | 'cart_addition' | 'purchase' | 'product_view' | 'inquiry' | 'admin_action' | 'user_action') => void;
   username: string;
@@ -173,10 +282,13 @@ export default function HaiasiChatbot({ onLogActivity, username }: HaiasiChatbot
                     : 'bg-white text-neutral-800 self-start rounded-bl-none border-neutral-100'
                 }`}
               >
-                {/* Text Formatter for formatting Markdown bullet points nicely */}
-                <div className="whitespace-pre-line">
-                  {msg.text}
-                </div>
+                {msg.sender === 'user' ? (
+                  <div className="whitespace-pre-line font-medium text-neutral-900">
+                    {msg.text}
+                  </div>
+                ) : (
+                  <FormattedMessage text={msg.text} />
+                )}
               </div>
             ))}
             
