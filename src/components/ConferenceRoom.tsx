@@ -1,6 +1,6 @@
 import React, { useState, useEffect, useRef } from "react";
 import { db } from "../lib/firebase";
-import { collection, doc, setDoc, addDoc, onSnapshot, query, orderBy, serverTimestamp } from "firebase/firestore";
+import { collection, doc, setDoc, addDoc, onSnapshot, query, orderBy, serverTimestamp, deleteDoc } from "firebase/firestore";
 import { 
   Video, VideoOff, Mic, MicOff, Send, PhoneOff, Copy, Share2, Sparkles, User, Shield, 
   Film, AlertCircle, Eye, EyeOff, Paperclip, Maximize2, Minimize2, ChevronUp, ChevronDown, FileText, Download, MessageSquare, X 
@@ -16,6 +16,13 @@ interface ConferenceRoomProps {
   onLogActivity: (activity: string, type: "user_action") => void;
   initialRoomId?: string | null;
 }
+
+const VIDEO_LOOPS = [
+  "https://assets.mixkit.co/videos/preview/mixkit-girl-in-front-of-a-mirror-fitting-a-dress-40176-large.mp4",
+  "https://assets.mixkit.co/videos/preview/mixkit-woman-choosing-clothes-in-a-boutique-42332-large.mp4",
+  "https://assets.mixkit.co/videos/preview/mixkit-fashion-model-showing-her-outfit-in-the-studio-41718-large.mp4",
+  "https://assets.mixkit.co/videos/preview/mixkit-girl-trying-on-sunglasses-in-a-store-40182-large.mp4"
+];
 
 export default function ConferenceRoom({
   onClose,
@@ -50,8 +57,45 @@ export default function ConferenceRoom({
   const recordedChunksRef = useRef<Blob[]>([]);
   const timerIntervalRef = useRef<NodeJS.Timeout | null>(null);
 
+  // Participant tracking
+  const [participants, setParticipants] = useState<any[]>([]);
+  const participantIdRef = useRef<string>(`part_${Date.now()}_${Math.floor(Math.random() * 10000)}`);
+  const activeRoomRef = useRef<string | null>(null);
+
   // Firestore listeners
   const chatUnsubscribeRef = useRef<(() => void) | null>(null);
+  const participantsUnsubscribeRef = useRef<(() => void) | null>(null);
+
+  useEffect(() => {
+    activeRoomRef.current = activeRoom ? activeRoom.id : null;
+  }, [activeRoom]);
+
+  const syncParticipantToFirestore = async (isVideoOnVal: boolean, isMutedVal: boolean) => {
+    if (!activeRoom) return;
+    try {
+      const pDocRef = doc(db, "conferences", activeRoom.id, "participants", participantIdRef.current);
+      await setDoc(pDocRef, {
+        id: participantIdRef.current,
+        name: currentUser || "Guest Customer",
+        email: currentUserEmail || "anonymous@example.com",
+        joinedAt: new Date().toISOString(),
+        isVideoOn: isVideoOnVal,
+        isMuted: isMutedVal,
+        lastSeen: new Date().toISOString()
+      }, { merge: true });
+    } catch (e) {
+      console.error("Error syncing participant", e);
+    }
+  };
+
+  const removeParticipantFromFirestore = async (roomId: string) => {
+    try {
+      const pDocRef = doc(db, "conferences", roomId, "participants", participantIdRef.current);
+      await deleteDoc(pDocRef);
+    } catch (e) {
+      console.error("Error removing participant", e);
+    }
+  };
 
   // Auto-join if initialRoomId is provided
   useEffect(() => {
@@ -93,6 +137,13 @@ export default function ConferenceRoom({
       unsubRooms();
       stopCameraAndMic();
       if (chatUnsubscribeRef.current) chatUnsubscribeRef.current();
+      if (participantsUnsubscribeRef.current) participantsUnsubscribeRef.current();
+      
+      // Sync cleanup when component unmounts
+      if (activeRoomRef.current) {
+        const pDocRef = doc(db, "conferences", activeRoomRef.current, "participants", participantIdRef.current);
+        deleteDoc(pDocRef).catch(e => console.error("Error on unmount cleanup", e));
+      }
       if (timerIntervalRef.current) clearInterval(timerIntervalRef.current);
     };
   }, [initialRoomId]);
@@ -103,6 +154,13 @@ export default function ConferenceRoom({
       localVideoRef.current.srcObject = localStream;
     }
   }, [localStream, isVideoOff]);
+
+  // Keep participant state synced to Firestore when muted or video off state changes
+  useEffect(() => {
+    if (activeRoom) {
+      syncParticipantToFirestore(!isVideoOff, isMuted);
+    }
+  }, [isMuted, isVideoOff, activeRoom]);
 
   // Handle video recording timer
   useEffect(() => {
@@ -223,6 +281,37 @@ export default function ConferenceRoom({
         });
       });
       setChats(msgs);
+    });
+
+    // Write participant document to Firestore
+    try {
+      const pDocRef = doc(db, "conferences", room.id, "participants", participantIdRef.current);
+      await setDoc(pDocRef, {
+        id: participantIdRef.current,
+        name: currentUser || "Guest Customer",
+        email: currentUserEmail || "anonymous@example.com",
+        joinedAt: new Date().toISOString(),
+        isVideoOn: !isVideoOff,
+        isMuted: isMuted,
+        lastSeen: new Date().toISOString()
+      });
+    } catch (e) {
+      console.error("Error creating participant document:", e);
+    }
+
+    // Subscribe to participants subcollection
+    if (participantsUnsubscribeRef.current) participantsUnsubscribeRef.current();
+
+    const qParticipants = query(collection(db, "conferences", room.id, "participants"));
+    participantsUnsubscribeRef.current = onSnapshot(qParticipants, (snapshot) => {
+      const partsList: any[] = [];
+      snapshot.forEach((doc) => {
+        partsList.push({
+          id: doc.id,
+          ...doc.data()
+        });
+      });
+      setParticipants(partsList);
     });
 
     // Auto-record warning
@@ -432,10 +521,18 @@ export default function ConferenceRoom({
       stopVideoRecording();
     }
     
+    if (activeRoom) {
+      await removeParticipantFromFirestore(activeRoom.id);
+    }
+    
     stopCameraAndMic();
     if (chatUnsubscribeRef.current) {
       chatUnsubscribeRef.current();
       chatUnsubscribeRef.current = null;
+    }
+    if (participantsUnsubscribeRef.current) {
+      participantsUnsubscribeRef.current();
+      participantsUnsubscribeRef.current = null;
     }
 
     onShowToast("Disconnected", "You have securely closed your boutique conference session.", "info");
@@ -726,7 +823,7 @@ export default function ConferenceRoom({
                 {/* Video Streams Container */}
                 <div className="flex-1 my-6 grid grid-cols-1 md:grid-cols-2 gap-6 items-center justify-center overflow-hidden">
                   {/* Local camera feed */}
-                  <div className="relative w-full h-full max-h-[380px] bg-neutral-900 border border-neutral-800 rounded-3xl overflow-hidden shadow-2xl flex items-center justify-center group">
+                  <div className="relative w-full h-full min-h-[220px] max-h-[380px] bg-neutral-900 border border-neutral-800 rounded-3xl overflow-hidden shadow-2xl flex items-center justify-center group">
                     {isVideoOff ? (
                       <div className="text-center space-y-2 z-10">
                         <div className="w-12 h-12 rounded-full bg-neutral-800 flex items-center justify-center text-neutral-500 mx-auto border border-neutral-700">
@@ -750,28 +847,70 @@ export default function ConferenceRoom({
                     </div>
                   </div>
 
-                  {/* Remote / Designer Mock feed */}
-                  <div className="relative w-full h-full max-h-[380px] bg-neutral-900 border border-neutral-800 rounded-3xl overflow-hidden shadow-2xl flex items-center justify-center group">
-                    {/* Simulated live video for isolated users, or peer connection info */}
-                    <div className="absolute inset-0 bg-neutral-900 flex flex-col items-center justify-center text-center p-6 space-y-4">
-                      <div className="w-14 h-14 bg-indigo-600/20 text-indigo-400 rounded-full flex items-center justify-center border border-indigo-500/30 shadow-inner">
-                        <User className="w-6 h-6" />
+                  {/* Remote Participants */}
+                  {participants.filter(p => p.id !== participantIdRef.current).map((p, idx) => {
+                    const videoSrc = VIDEO_LOOPS[idx % VIDEO_LOOPS.length];
+                    return (
+                      <div key={p.id} className="relative w-full h-full min-h-[220px] max-h-[380px] bg-neutral-900 border border-neutral-800 rounded-3xl overflow-hidden shadow-2xl flex items-center justify-center group animate-in fade-in zoom-in-95 duration-350">
+                        {!p.isVideoOn ? (
+                          <div className="text-center space-y-2 z-10">
+                            <div className="w-12 h-12 rounded-full bg-neutral-800 flex items-center justify-center text-neutral-500 mx-auto border border-neutral-700">
+                              <VideoOff className="w-6 h-6" />
+                            </div>
+                            <p className="text-xs text-neutral-400 font-bold">{p.name || "Customer"}'s Video is Off</p>
+                            <p className="text-[10px] text-neutral-500">Camera paused</p>
+                          </div>
+                        ) : (
+                          <video
+                            src={videoSrc}
+                            autoPlay
+                            playsInline
+                            loop
+                            muted
+                            className="w-full h-full object-cover"
+                          />
+                        )}
+                        {/* Audio visualizer bar overlay if active/not-muted */}
+                        {!p.isMuted && p.isVideoOn && (
+                          <div className="absolute top-4 right-4 flex items-end gap-0.5 h-3">
+                            <span className="w-0.5 bg-indigo-400 rounded-full animate-[bounce_0.6s_infinite] h-2"></span>
+                            <span className="w-0.5 bg-indigo-400 rounded-full animate-[bounce_0.8s_infinite] h-3"></span>
+                            <span className="w-0.5 bg-indigo-400 rounded-full animate-[bounce_0.5s_infinite] h-1.5"></span>
+                          </div>
+                        )}
+                        {/* Badge */}
+                        <div className="absolute bottom-4 left-4 bg-neutral-900/80 backdrop-blur px-3 py-1.5 rounded-xl border border-neutral-800 text-[10px] font-bold text-neutral-200 flex items-center gap-1.5">
+                          {p.isMuted ? <MicOff className="w-3.5 h-3.5 text-rose-400 shrink-0" /> : <Mic className="w-3.5 h-3.5 text-emerald-400 shrink-0" />}
+                          <span className="truncate max-w-[120px]">{p.name || "Boutique Guest"}</span>
+                        </div>
                       </div>
-                      <div className="space-y-1">
-                        <h4 className="text-xs font-black uppercase text-neutral-200">Boutique Designer</h4>
-                        <p className="text-[10px] text-neutral-400 max-w-[200px] leading-relaxed mx-auto">
-                          Awaiting additional customers or design tailors to join via your room invitation link.
-                        </p>
+                    );
+                  })}
+
+                  {/* Remote / Designer Mock feed (only visible if you are alone) */}
+                  {participants.filter(p => p.id !== participantIdRef.current).length === 0 && (
+                    <div className="relative w-full h-full min-h-[220px] max-h-[380px] bg-neutral-900 border border-neutral-800 rounded-3xl overflow-hidden shadow-2xl flex items-center justify-center group">
+                      {/* Simulated live video for isolated users, or peer connection info */}
+                      <div className="absolute inset-0 bg-neutral-900 flex flex-col items-center justify-center text-center p-6 space-y-4">
+                        <div className="w-14 h-14 bg-indigo-600/20 text-indigo-400 rounded-full flex items-center justify-center border border-indigo-500/30 shadow-inner">
+                          <User className="w-6 h-6 animate-pulse" />
+                        </div>
+                        <div className="space-y-1">
+                          <h4 className="text-xs font-black uppercase text-neutral-200">Boutique Designer</h4>
+                          <p className="text-[10px] text-neutral-400 max-w-[200px] leading-relaxed mx-auto">
+                            Awaiting additional customers or design tailors to join via your room invitation link.
+                          </p>
+                        </div>
+                        <div className="bg-neutral-950 px-4 py-2 rounded-2xl border border-neutral-800 text-[9px] font-mono text-neutral-500">
+                          P2P Signal listening on room endpoint...
+                        </div>
                       </div>
-                      <div className="bg-neutral-950 px-4 py-2 rounded-2xl border border-neutral-800 text-[9px] font-mono text-neutral-500">
-                        P2P Signal listening on room endpoint...
+                      {/* Badge */}
+                      <div className="absolute bottom-4 left-4 bg-neutral-900/80 backdrop-blur px-3 py-1.5 rounded-xl border border-neutral-800 text-[10px] font-bold text-indigo-400">
+                        Boutique Peer Station
                       </div>
                     </div>
-                    {/* Badge */}
-                    <div className="absolute bottom-4 left-4 bg-neutral-900/80 backdrop-blur px-3 py-1.5 rounded-xl border border-neutral-800 text-[10px] font-bold text-indigo-400">
-                      Boutique Peer Station
-                    </div>
-                  </div>
+                  )}
                 </div>
 
                 {/* Call Controller */}
@@ -832,10 +971,11 @@ export default function ConferenceRoom({
                         setIsChatMinimized(true);
                         setIsChatMaximized(false);
                       }}
-                      className="p-1.5 rounded bg-neutral-900 border border-neutral-800 text-neutral-400 hover:text-rose-400 hover:border-rose-900/50 transition-all cursor-pointer flex items-center justify-center shadow-sm"
+                      className="px-2.5 py-1 bg-rose-500/10 border border-rose-500/30 text-rose-400 hover:bg-rose-500/20 rounded-xl text-[10px] font-black uppercase tracking-wider transition-all cursor-pointer flex items-center gap-1 shadow-sm"
                       title="Minimize Chat (Clear Video View)"
                     >
-                      <EyeOff className="w-3.5 h-3.5" />
+                      <EyeOff className="w-3 h-3" />
+                      <span>Minimize Chat</span>
                     </button>
 
                     {/* Inline Maximize/Minimize toggle button for Chat drawer */}

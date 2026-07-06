@@ -2582,6 +2582,7 @@ export default function App() {
                   <ProductCard
                     key={prod.id}
                     product={prod}
+                    allProducts={products}
                     onAddToCart={addToCart}
                     isLoggedIn={isLoggedIn}
                     onShowLogin={() => setShowLogin(true)}
