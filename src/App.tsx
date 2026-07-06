@@ -17,6 +17,7 @@ import CheckoutModal from "./components/CheckoutModal";
 import HaiasiChatbot from "./components/HaiasiChatbot";
 import AdminDashboard from "./components/AdminDashboard";
 import ProductCard from "./components/ProductCard";
+import ProductDetailModal from "./components/ProductDetailModal";
 import NotificationInbox from "./components/NotificationInbox";
 import OrderHistory from "./components/OrderHistory";
 import ReviewModal from "./components/ReviewModal";
@@ -517,6 +518,7 @@ export default function App() {
   const [showOrderHistory, setShowOrderHistory] = useState(false);
   const [showReviewModal, setShowReviewModal] = useState(false);
   const [showSearchDialog, setShowSearchDialog] = useState(false);
+  const [selectedDetailProduct, setSelectedDetailProduct] = useState<Product | null>(null);
 
   // Toasts
   const [toasts, setToasts] = useState<Toast[]>([]);
@@ -2587,6 +2589,7 @@ export default function App() {
                     isLoggedIn={isLoggedIn}
                     onShowLogin={() => setShowLogin(true)}
                     layout={homepageSettings.productLayout as any}
+                    onViewDetail={setSelectedDetailProduct}
                   />
                 ))}
             </div>
@@ -3168,7 +3171,11 @@ export default function App() {
                       {filteredProducts.map((prod) => (
                         <div
                           key={prod.id}
-                          className="bg-white p-3.5 rounded-2xl border border-neutral-100 hover:border-pink-100 shadow-sm hover:shadow-md transition-all duration-300 flex items-center gap-4 group"
+                          onClick={() => {
+                            setShowSearchDialog(false);
+                            setSelectedDetailProduct(prod);
+                          }}
+                          className="bg-white p-3.5 rounded-2xl border border-neutral-100 hover:border-pink-100 shadow-sm hover:shadow-md transition-all duration-300 flex items-center gap-4 group cursor-pointer"
                         >
                           <div className="w-16 h-16 rounded-xl overflow-hidden bg-neutral-100 shrink-0 border border-neutral-200">
                             <img
@@ -3187,12 +3194,15 @@ export default function App() {
                               )}
                             </div>
                             <h4 className="text-xs font-black text-neutral-900 uppercase tracking-tight truncate">{prod.name}</h4>
-                            <div className="text-xs font-black text-indigo-600 font-mono">${prod.price}</div>
+                            <div className="text-xs font-black text-indigo-600 font-mono">₵{prod.price}</div>
                           </div>
 
                           <div className="text-right shrink-0">
                             <button
-                              onClick={() => addToCart(prod)}
+                              onClick={(e) => {
+                                e.stopPropagation();
+                                addToCart(prod);
+                              }}
                               className="bg-indigo-600 hover:bg-indigo-500 text-white text-[9px] font-bold px-3 py-2 rounded-xl uppercase tracking-wider transition-colors shadow-sm block cursor-pointer"
                             >
                               Add to Bag
@@ -3214,6 +3224,21 @@ export default function App() {
               </div>
             </motion.div>
           </div>
+        )}
+      </AnimatePresence>
+
+      {/* 11. PRODUCT DETAIL MODAL */}
+      <AnimatePresence>
+        {selectedDetailProduct && (
+          <ProductDetailModal
+            product={selectedDetailProduct}
+            allProducts={products}
+            onClose={() => setSelectedDetailProduct(null)}
+            onAddToCart={addToCart}
+            isLoggedIn={isLoggedIn}
+            onShowLogin={() => setShowLogin(true)}
+            onViewProduct={setSelectedDetailProduct}
+          />
         )}
       </AnimatePresence>
 

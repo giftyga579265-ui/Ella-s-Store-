@@ -10,9 +10,10 @@ interface ProductCardProps {
   isLoggedIn: boolean;
   onShowLogin: () => void;
   layout: 'grid' | 'list' | 'carousel' | 'masonry';
+  onViewDetail?: (product: Product) => void;
 }
 
-export default function ProductCard({ product, allProducts = [], onAddToCart, isLoggedIn, onShowLogin, layout }: ProductCardProps) {
+export default function ProductCard({ product, allProducts = [], onAddToCart, isLoggedIn, onShowLogin, layout, onViewDetail }: ProductCardProps) {
   
   const handleAddClick = () => {
     if (!isLoggedIn) {
@@ -49,7 +50,7 @@ export default function ProductCard({ product, allProducts = [], onAddToCart, is
     return (
       <div className="bg-white p-5 rounded-3xl border border-neutral-200 shadow-sm flex flex-col sm:flex-row items-start sm:items-center justify-between gap-5 hover:border-indigo-500/50 transition-all duration-300 hover:shadow-lg animate-in fade-in">
         <div className="flex flex-col md:flex-row md:items-center gap-4.5 flex-1">
-          <div className="flex items-center gap-4.5">
+          <div className="flex items-center gap-4.5 cursor-pointer hover:opacity-95 transition-opacity" onClick={() => onViewDetail?.(product)}>
             <img src={product.image} alt={product.name} className="w-20 h-20 rounded-2xl object-cover border border-neutral-150 shadow-inner shrink-0" />
             <div className="space-y-1">
               <div className="flex items-center gap-2">
@@ -58,7 +59,7 @@ export default function ProductCard({ product, allProducts = [], onAddToCart, is
                   <span className="text-[9px] bg-rose-50 border border-rose-200 text-rose-600 px-2 py-0.5 rounded font-black font-mono">ONLY {product.stock} LEFT</span>
                 )}
               </div>
-              <h4 className="font-sans text-base text-neutral-900 font-semibold tracking-tight">{product.name}</h4>
+              <h4 className="font-sans text-base text-neutral-900 font-semibold tracking-tight hover:text-indigo-600 transition-colors">{product.name}</h4>
               <p className="text-xs text-neutral-500 line-clamp-1 leading-relaxed max-w-md">{product.description}</p>
             </div>
           </div>
@@ -117,7 +118,7 @@ export default function ProductCard({ product, allProducts = [], onAddToCart, is
   return (
     <div className="bg-white rounded-3xl overflow-hidden shadow-sm border border-neutral-200 hover:border-indigo-500/50 hover:shadow-lg transition-all duration-500 hover:-translate-y-1.5 flex flex-col justify-between animate-in fade-in group h-full">
       {/* Image Wrap */}
-      <div className="relative aspect-[4/5] bg-neutral-100 overflow-hidden w-full">
+      <div className="relative aspect-[4/5] bg-neutral-100 overflow-hidden w-full cursor-pointer hover:opacity-95 transition-opacity" onClick={() => onViewDetail?.(product)}>
         <img 
           src={product.image} 
           alt={product.name} 
@@ -144,7 +145,7 @@ export default function ProductCard({ product, allProducts = [], onAddToCart, is
 
       {/* Info Block */}
       <div className="p-5 flex-1 flex flex-col justify-between space-y-4">
-        <div className="space-y-1.5">
+        <div className="space-y-1.5 cursor-pointer" onClick={() => onViewDetail?.(product)}>
           <h4 className="font-sans text-neutral-900 text-lg group-hover:text-indigo-600 transition-colors duration-300 font-semibold tracking-tight line-clamp-1">
             {product.name}
           </h4>
