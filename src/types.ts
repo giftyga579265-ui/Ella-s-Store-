@@ -6,6 +6,9 @@ export interface Product {
   stock: number;
   description: string;
   image: string;
+  videoUrl?: string;
+  images360?: string[];
+  tryOnImage?: string;
 }
 
 export enum OperationType {
@@ -44,6 +47,10 @@ export interface Customer {
   totalSpent: number;
   signedUp: boolean;
   avatarUrl?: string;
+  lastActive?: string;
+  location?: string;
+  device?: string;
+  ip?: string;
 }
 
 export interface Order {

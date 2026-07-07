@@ -10,7 +10,7 @@ interface ProductCardProps {
   isLoggedIn: boolean;
   onShowLogin: () => void;
   layout: 'grid' | 'list' | 'carousel' | 'masonry';
-  onViewDetail?: (product: Product) => void;
+  onViewDetail?: (product: Product, initialTab?: 'classic' | 'spin360' | 'video' | 'tryon') => void;
 }
 
 export default function ProductCard({ product, allProducts = [], onAddToCart, isLoggedIn, onShowLogin, layout, onViewDetail }: ProductCardProps) {
@@ -102,6 +102,15 @@ export default function ProductCard({ product, allProducts = [], onAddToCart, is
 
         <div className="text-left sm:text-right space-y-2.5 shrink-0 w-full sm:w-auto flex sm:flex-col justify-between sm:justify-start items-center sm:items-end border-t sm:border-0 pt-3 sm:pt-0">
           <div className="text-xl font-mono font-black text-black">₵{product.price.toFixed(2)}</div>
+          
+          <button
+            onClick={() => onViewDetail?.(product, 'tryon')}
+            className="bg-slate-900 hover:bg-indigo-600 text-indigo-400 hover:text-white border border-indigo-500/35 hover:border-indigo-600 px-4 py-2.5 rounded-xl text-[10px] font-black tracking-wider transition-all duration-300 flex items-center gap-1.5 shadow-sm hover:shadow-md cursor-pointer uppercase"
+          >
+            <Sparkles className="w-3.5 h-3.5 text-amber-400 animate-pulse" />
+            <span>AR Try-On & 3D</span>
+          </button>
+
           <button
             onClick={handleAddClick}
             disabled={product.stock === 0}
@@ -186,6 +195,17 @@ export default function ProductCard({ product, allProducts = [], onAddToCart, is
             </div>
           </div>
         )}
+
+        {/* Interactive AR/360 Try-On Quick Link */}
+        <div className="pt-2">
+          <button
+            onClick={() => onViewDetail?.(product, 'tryon')}
+            className="w-full bg-slate-900 hover:bg-indigo-600 text-indigo-400 hover:text-white border border-indigo-500/35 hover:border-indigo-600 py-2.5 rounded-2xl text-[10px] font-black tracking-widest uppercase transition-all duration-300 flex items-center justify-center gap-2 shadow-inner cursor-pointer"
+          >
+            <Sparkles className="w-3.5 h-3.5 text-amber-400 animate-pulse" />
+            <span>AR Try-On & Interactive 3D</span>
+          </button>
+        </div>
 
         <div className="pt-3.5 border-t border-neutral-100 flex items-center justify-between">
           <span className="text-xl font-mono font-black text-black">₵{product.price.toFixed(2)}</span>

@@ -519,6 +519,12 @@ export default function App() {
   const [showReviewModal, setShowReviewModal] = useState(false);
   const [showSearchDialog, setShowSearchDialog] = useState(false);
   const [selectedDetailProduct, setSelectedDetailProduct] = useState<Product | null>(null);
+  const [detailInitialTab, setDetailInitialTab] = useState<'classic' | 'spin360' | 'video' | 'tryon'>('classic');
+
+  const handleViewDetail = (product: Product | null, tab: 'classic' | 'spin360' | 'video' | 'tryon' = 'classic') => {
+    setSelectedDetailProduct(product);
+    setDetailInitialTab(tab);
+  };
 
   // Toasts
   const [toasts, setToasts] = useState<Toast[]>([]);
@@ -691,16 +697,121 @@ export default function App() {
     }
   };
 
-  // Track visitor session accesses when they load the storefront
+  // Synchronize or register current visitor (both Guest and Logged-In Customers)
+  const registerVisitorDetails = async (nameToUse: string, emailToUse: string, isLoggedInUser: boolean) => {
+    try {
+      // 1. Establish persistent Visitor ID
+      let visitorIdStr = localStorage.getItem("visitor_tracker_id");
+      let visitorId = visitorIdStr ? parseInt(visitorIdStr) : 0;
+      
+      // If no ID exists, check if there's an existing customer with this name or email
+      if (!visitorId) {
+        const existingByEmail = customers.find(c => emailToUse && c.email.toLowerCase() === emailToUse.toLowerCase());
+        const existingByName = customers.find(c => c.name.toLowerCase() === nameToUse.toLowerCase());
+        
+        if (existingByEmail) {
+          visitorId = existingByEmail.id;
+        } else if (existingByName) {
+          visitorId = existingByName.id;
+        } else {
+          // Generate a new unique ID
+          visitorId = customers.length > 0 ? Math.max(...customers.map(c => c.id)) + 1 : 1000 + Math.floor(Math.random() * 9000);
+        }
+        localStorage.setItem("visitor_tracker_id", String(visitorId));
+      }
+
+      // 2. Identify Device Information
+      const userAgent = navigator.userAgent;
+      let device = "Desktop (Web)";
+      if (/Mobi|Android|iPhone|iPad|iPod/i.test(userAgent)) {
+        device = "Mobile Device";
+        if (/iPhone/i.test(userAgent)) device = "iPhone";
+        else if (/iPad/i.test(userAgent)) device = "iPad";
+        else if (/Android/i.test(userAgent)) device = "Android Mobile";
+      } else if (/Macintosh/i.test(userAgent)) {
+        device = "macOS";
+      } else if (/Windows/i.test(userAgent)) {
+        device = "Windows PC";
+      } else if (/Linux/i.test(userAgent)) {
+        device = "Linux PC";
+      }
+
+      // 3. Fetch IP and Location Details
+      let ipAddress = "127.0.0.1";
+      let locationStr = "Accra, Ghana"; // default fallback local timezone city
+
+      try {
+        const res = await fetch("https://ipapi.co/json/");
+        if (res.ok) {
+          const data = await res.json();
+          ipAddress = data.ip || ipAddress;
+          if (data.city && data.country_name) {
+            locationStr = `${data.city}, ${data.country_name}`;
+          }
+        }
+      } catch (err) {
+        console.warn("Could not retrieve IP-based geolocation, using default fallback info:", err);
+      }
+
+      // 4. Construct customer record
+      const existingRecord = customers.find(c => c.id === visitorId);
+      const isSignedUp = isLoggedInUser || (existingRecord ? existingRecord.signedUp : false);
+      const ordersCount = existingRecord ? existingRecord.orders : 0;
+      const totalSpentCount = existingRecord ? existingRecord.totalSpent : 0;
+      const regDate = existingRecord ? existingRecord.registrationDate : new Date().toISOString().split('T')[0];
+
+      // Keep temporary guest names fresh if they change session names
+      const finalName = isLoggedInUser ? nameToUse : (existingRecord ? existingRecord.name : nameToUse);
+
+      const updatedCustomer: Customer = {
+        id: visitorId,
+        name: finalName,
+        email: emailToUse || (existingRecord ? existingRecord.email : `${finalName.toLowerCase().replace(/\s+/g, '')}_guest@ellastore.com`),
+        phone: existingRecord ? existingRecord.phone : "024" + Math.floor(1000000 + Math.random() * 8999999),
+        registrationDate: regDate,
+        orders: ordersCount,
+        totalSpent: totalSpentCount,
+        signedUp: isSignedUp,
+        lastActive: new Date().toISOString(),
+        location: locationStr,
+        device: device,
+        ip: ipAddress,
+        avatarUrl: existingRecord?.avatarUrl || ""
+      };
+
+      // 5. Persist to Firestore database
+      await setDoc(doc(db, "customers", String(visitorId)), updatedCustomer);
+      console.log(`Registered details for ${isLoggedInUser ? 'Authenticated' : 'Anonymous'} customer:`, updatedCustomer);
+    } catch (err) {
+      console.error("Error synchronizing customer activity:", err);
+    }
+  };
+
+  // Track visitor session accesses and synchronize database customer records
   useEffect(() => {
-    // Check if we've already logged a visit this tab session
+    const isGuest = !isLoggedIn || !currentUser;
+    const displayName = currentUser || localStorage.getItem("guest_visitor_name") || (() => {
+      const generatedName = "Guest_" + Math.floor(1000 + Math.random() * 9000);
+      localStorage.setItem("guest_visitor_name", generatedName);
+      return generatedName;
+    })();
+    const displayEmail = currentUserEmail || "";
+    
+    // Check if we've already registered this session
     const hasLoggedAccess = sessionStorage.getItem("hasLoggedAccess");
     if (!hasLoggedAccess) {
       sessionStorage.setItem("hasLoggedAccess", "true");
-      const userStr = currentUser || "Guest Session";
-      logActivity(`Accessed the storefront as ${userStr}`, "user_action");
+      logActivity(`Accessed the storefront as ${currentUser || "Guest Customer"}`, "user_action");
     }
-  }, [currentUser]);
+    
+    // Synchronize to customer list in Firestore
+    // Introduce a short timeout to let initial database customer arrays load first
+    const timer = setTimeout(() => {
+      registerVisitorDetails(displayName, displayEmail, !isGuest);
+    }, 1500);
+
+    return () => clearTimeout(timer);
+  }, [currentUser, isLoggedIn, currentUserEmail]);
 
   // REAL-TIME FIRESTORE SYNCHRONIZATION
   useEffect(() => {
@@ -2589,7 +2700,7 @@ export default function App() {
                     isLoggedIn={isLoggedIn}
                     onShowLogin={() => setShowLogin(true)}
                     layout={homepageSettings.productLayout as any}
-                    onViewDetail={setSelectedDetailProduct}
+                    onViewDetail={handleViewDetail}
                   />
                 ))}
             </div>
@@ -3173,7 +3284,7 @@ export default function App() {
                           key={prod.id}
                           onClick={() => {
                             setShowSearchDialog(false);
-                            setSelectedDetailProduct(prod);
+                            handleViewDetail(prod);
                           }}
                           className="bg-white p-3.5 rounded-2xl border border-neutral-100 hover:border-pink-100 shadow-sm hover:shadow-md transition-all duration-300 flex items-center gap-4 group cursor-pointer"
                         >
@@ -3233,11 +3344,12 @@ export default function App() {
           <ProductDetailModal
             product={selectedDetailProduct}
             allProducts={products}
-            onClose={() => setSelectedDetailProduct(null)}
+            onClose={() => handleViewDetail(null)}
             onAddToCart={addToCart}
             isLoggedIn={isLoggedIn}
             onShowLogin={() => setShowLogin(true)}
-            onViewProduct={setSelectedDetailProduct}
+            onViewProduct={handleViewDetail}
+            initialTab={detailInitialTab}
           />
         )}
       </AnimatePresence>

@@ -1,5 +1,5 @@
 import { initializeApp } from "firebase/app";
-import { getFirestore } from "firebase/firestore";
+import { initializeFirestore } from "firebase/firestore";
 import { getAuth, GoogleAuthProvider } from "firebase/auth";
 import { OperationType, FirestoreErrorInfo } from "../types";
 
@@ -16,8 +16,10 @@ const firebaseConfig = {
 // Initialize Firebase App
 const app = initializeApp(firebaseConfig);
 
-// Initialize Firestore with the custom database ID from config
-export const db = getFirestore(app, "ai-studio-ellasstore-6673b3a5-ee4c-4237-b264-769d13c47377");
+// Initialize Firestore with the custom database ID from config and force long-polling to prevent connection issues in iframe/sandboxed environments
+export const db = initializeFirestore(app, {
+  experimentalForceLongPolling: true,
+}, "ai-studio-ellasstore-6673b3a5-ee4c-4237-b264-769d13c47377");
 
 // Initialize Firebase Auth
 export const auth = getAuth(app);

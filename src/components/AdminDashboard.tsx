@@ -157,6 +157,9 @@ export default function AdminDashboard({
   const [productStock, setProductStock] = useState("");
   const [productDescription, setProductDescription] = useState("");
   const [productImage, setProductImage] = useState("");
+  const [productVideoUrl, setProductVideoUrl] = useState("");
+  const [productImages360, setProductImages360] = useState<string[]>([]);
+  const [productTryOnImage, setProductTryOnImage] = useState("");
   const [showProductForm, setShowProductForm] = useState(false);
 
   // 2. Location Form
@@ -391,7 +394,10 @@ export default function AdminDashboard({
             category: productCategory,
             stock: stockNum,
             description: productDescription,
-            image: productImage || p.image
+            image: productImage || p.image,
+            videoUrl: productVideoUrl,
+            images360: productImages360,
+            tryOnImage: productTryOnImage
           };
         }
         return p;
@@ -408,7 +414,10 @@ export default function AdminDashboard({
         category: productCategory,
         stock: stockNum,
         description: productDescription,
-        image: productImage || "https://images.unsplash.com/photo-1539109136881-3be0616acf4b?w=400"
+        image: productImage || "https://images.unsplash.com/photo-1539109136881-3be0616acf4b?w=400",
+        videoUrl: productVideoUrl,
+        images360: productImages360,
+        tryOnImage: productTryOnImage
       };
       onSetProducts([...products, newProd]);
       onShowToast("Product Added", `Added new catalog item: ${productName}`, "success");
@@ -423,6 +432,9 @@ export default function AdminDashboard({
     setProductStock("");
     setProductDescription("");
     setProductImage("");
+    setProductVideoUrl("");
+    setProductImages360([]);
+    setProductTryOnImage("");
     setShowProductForm(false);
   };
 
@@ -434,6 +446,9 @@ export default function AdminDashboard({
     setProductStock(prod.stock.toString());
     setProductDescription(prod.description);
     setProductImage(prod.image);
+    setProductVideoUrl(prod.videoUrl || "");
+    setProductImages360(prod.images360 || []);
+    setProductTryOnImage(prod.tryOnImage || "");
     setShowProductForm(true);
   };
 
@@ -1267,6 +1282,113 @@ export default function AdminDashboard({
                     </div>
                   </div>
 
+                  {/* Interactive Elements and AR Virtual Try-On Settings */}
+                  <div className="border border-neutral-200 rounded-2xl p-5 bg-neutral-50/40 space-y-4">
+                    <div className="flex items-center gap-1.5 pb-2 border-b border-neutral-100">
+                      <Sparkles className="w-4 h-4 text-indigo-500 animate-pulse" />
+                      <h4 className="text-xs font-black uppercase tracking-wider text-neutral-800">
+                        Interactive Showcase & AR Try-On
+                      </h4>
+                    </div>
+
+                    {/* 1. Showcase Video */}
+                    <div className="space-y-1.5">
+                      <div className="flex justify-between items-center">
+                        <label className="text-xs font-semibold text-neutral-600 block">Showcase Video URL / Embed</label>
+                        <button
+                          type="button"
+                          onClick={() => setProductVideoUrl("https://assets.mixkit.co/videos/preview/mixkit-beautiful-woman-in-fashion-dress-posing-41838-large.mp4")}
+                          className="text-[9px] text-indigo-600 hover:text-indigo-800 font-bold uppercase tracking-wider cursor-pointer"
+                        >
+                          ✨ Load Catwalk Video
+                        </button>
+                      </div>
+                      <input
+                        type="url"
+                        value={productVideoUrl}
+                        onChange={e => setProductVideoUrl(e.target.value)}
+                        placeholder="e.g. https://assets.mixkit.co/.../video.mp4"
+                        className="w-full px-4 py-2 bg-white border border-neutral-200 rounded-xl text-xs focus:outline-none focus:border-indigo-500"
+                      />
+                    </div>
+
+                    {/* 2. 360-degree Interactive View */}
+                    <div className="space-y-1.5">
+                      <div className="flex justify-between items-center">
+                        <label className="text-xs font-semibold text-neutral-600 block">360° Frame Sequences (Images)</label>
+                        <button
+                          type="button"
+                          onClick={() => setProductImages360([
+                            "https://images.unsplash.com/photo-1595777457583-95e059d581b8?w=500&auto=format&fit=crop",
+                            "https://images.unsplash.com/photo-1515372039744-b8f02a3ae446?w=500&auto=format&fit=crop",
+                            "https://images.unsplash.com/photo-1566174053879-31528523f8ae?w=500&auto=format&fit=crop",
+                            "https://images.unsplash.com/photo-1618932260643-eee4a2f652a6?w=500&auto=format&fit=crop",
+                            "https://images.unsplash.com/photo-1539109136881-3be0616acf4b?w=500&auto=format&fit=crop",
+                            "https://images.unsplash.com/photo-1572804013309-59a88b7e92f1?w=500&auto=format&fit=crop"
+                          ])}
+                          className="text-[9px] text-indigo-600 hover:text-indigo-800 font-bold uppercase tracking-wider cursor-pointer"
+                        >
+                          ✨ Load 360° Studio Presets
+                        </button>
+                      </div>
+                      <div className="text-[10px] text-neutral-400 font-medium">
+                        Configure multiple angle images for drag-to-spin interactivity.
+                      </div>
+                      {productImages360.length > 0 ? (
+                        <div className="space-y-2">
+                          <div className="grid grid-cols-6 gap-2">
+                            {productImages360.map((url, idx) => (
+                              <div key={idx} className="relative aspect-square rounded-lg border border-neutral-200 overflow-hidden bg-white">
+                                <img src={url} alt={`Angle ${idx + 1}`} className="w-full h-full object-cover" />
+                                <button
+                                  type="button"
+                                  onClick={() => setProductImages360(productImages360.filter((_, i) => i !== idx))}
+                                  className="absolute top-0.5 right-0.5 bg-rose-500 text-white rounded-full p-0.5 text-[8px] hover:bg-rose-600"
+                                >
+                                  ×
+                                </button>
+                              </div>
+                            ))}
+                          </div>
+                          <p className="text-[10px] text-green-600 font-bold">✓ {productImages360.length} rotational frame views successfully mapped</p>
+                        </div>
+                      ) : (
+                        <div className="p-3 bg-neutral-100/50 text-neutral-500 rounded-xl text-center border border-dashed border-neutral-200 text-[11px]">
+                          No 360° rotation sequence active. Tap load preset to configure.
+                        </div>
+                      )}
+                    </div>
+
+                    {/* 3. AR Virtual Try-On Asset */}
+                    <div className="space-y-1.5">
+                      <div className="flex justify-between items-center">
+                        <label className="text-xs font-semibold text-neutral-600 block">AR Try-on Gown Overlay (Transparent PNG)</label>
+                        <button
+                          type="button"
+                          onClick={() => setProductTryOnImage("https://i.ibb.co/Xz9tG1B/tryon-dress-2.png")}
+                          className="text-[9px] text-indigo-600 hover:text-indigo-800 font-bold uppercase tracking-wider cursor-pointer"
+                        >
+                          ✨ Load Demo Red Gown PNG
+                        </button>
+                      </div>
+                      <div className="border border-dashed border-neutral-200 p-4 rounded-xl text-center hover:border-indigo-500 transition-colors relative cursor-pointer bg-white">
+                        <input 
+                          type="file" 
+                          accept="image/png" 
+                          onChange={e => handleImageUpload(e, setProductTryOnImage)}
+                          className="absolute inset-0 opacity-0 cursor-pointer w-full h-full"
+                        />
+                        <span className="text-[11px] text-neutral-600 font-medium">Click to upload transparent garment overlay file (PNG only)</span>
+                        {productTryOnImage && (
+                          <div className="mt-3 max-w-[120px] mx-auto relative bg-neutral-100 p-2 rounded-xl border border-neutral-200">
+                            <img src={productTryOnImage} alt="AR try-on overlay" className="max-h-24 mx-auto object-contain" />
+                            <p className="text-[8px] text-indigo-600 mt-1 font-bold">✓ AR Dress Ready</p>
+                          </div>
+                        )}
+                      </div>
+                    </div>
+                  </div>
+
                   <div className="flex gap-3.5 pt-3">
                     <button
                       type="submit"
@@ -2070,6 +2192,29 @@ export default function AdminDashboard({
                         <span className="text-[9px] text-neutral-400 block font-semibold uppercase">Phone Contact</span>
                         <span className="font-mono font-medium text-neutral-800 break-all">{selectedCustomer.phone}</span>
                       </div>
+                    </div>
+
+                    {/* Access & Geolocation Info */}
+                    <div className="grid grid-cols-2 gap-3 text-xs bg-amber-500/5 p-3 rounded-xl border border-amber-500/10">
+                      <div>
+                        <span className="text-[9px] text-amber-700 block font-bold uppercase">Customer Location</span>
+                        <span className="font-semibold text-neutral-800 flex items-center gap-1">
+                          <MapPin className="w-3.5 h-3.5 text-amber-600" />
+                          <span>{selectedCustomer.location || "Accra, Ghana"}</span>
+                        </span>
+                      </div>
+                      <div>
+                        <span className="text-[9px] text-amber-700 block font-bold uppercase">Last Active Time</span>
+                        <span className="font-mono text-[10px] text-neutral-700">
+                          {selectedCustomer.lastActive ? new Date(selectedCustomer.lastActive).toLocaleTimeString([], {hour: '2-digit', minute:'2-digit', second: '2-digit'}) : "Recently"}
+                        </span>
+                      </div>
+                      {selectedCustomer.device && (
+                        <div className="col-span-2 border-t border-amber-500/5 pt-2 mt-1">
+                          <span className="text-[9px] text-amber-700 block font-bold uppercase font-mono">Device / Platform</span>
+                          <span className="text-[10px] text-neutral-500 truncate block font-mono">{selectedCustomer.device}</span>
+                        </div>
+                      )}
                     </div>
 
                     {/* Fulfillments Summary */}
