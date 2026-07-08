@@ -239,4 +239,20 @@ export interface UploadedFile {
   fileSize?: number;
 }
 
+export interface ArMannequin {
+  id: string;
+  name: string;
+  image: string;
+  style: string;
+}
+
+export interface ArDress {
+  id: string;
+  name: string;
+  image: string;
+  category?: string;
+  description?: string;
+}
+
+
 

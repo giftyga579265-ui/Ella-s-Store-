@@ -14,6 +14,7 @@ interface ProductCardProps {
 }
 
 export default function ProductCard({ product, allProducts = [], onAddToCart, isLoggedIn, onShowLogin, layout, onViewDetail }: ProductCardProps) {
+  const isFood = product.category === "food" || product.category === "kitchen";
   
   const handleAddClick = () => {
     if (!isLoggedIn) {
@@ -24,7 +25,7 @@ export default function ProductCard({ product, allProducts = [], onAddToCart, is
   };
 
   const compProducts = React.useMemo(() => {
-    if (!allProducts || allProducts.length === 0) return [];
+    if (!allProducts || allProducts.length === 0 || isFood) return [];
     
     let targetCategories: string[] = [];
     const cat = product.category.toLowerCase();
@@ -68,7 +69,7 @@ export default function ProductCard({ product, allProducts = [], onAddToCart, is
           {compProducts.length > 0 && (
             <div className="md:ml-6 pt-3 md:pt-0 md:pl-6 md:border-l border-neutral-100 flex flex-col gap-1.5 shrink-0 max-w-xs">
               <div className="flex items-center gap-1 text-[9px] font-black uppercase text-indigo-600 tracking-wider font-mono">
-                <Sparkles className="w-2.5 h-2.5 animate-pulse" />
+                <span className="text-xs animate-pulse filter drop-shadow-[0_0_2px_rgba(245,158,11,0.5)]">🎗️</span>
                 <span>Complete the Look</span>
               </div>
               <div className="flex gap-2">
@@ -103,13 +104,15 @@ export default function ProductCard({ product, allProducts = [], onAddToCart, is
         <div className="text-left sm:text-right space-y-2.5 shrink-0 w-full sm:w-auto flex sm:flex-col justify-between sm:justify-start items-center sm:items-end border-t sm:border-0 pt-3 sm:pt-0">
           <div className="text-xl font-mono font-black text-black">₵{product.price.toFixed(2)}</div>
           
-          <button
-            onClick={() => onViewDetail?.(product, 'tryon')}
-            className="bg-slate-900 hover:bg-indigo-600 text-indigo-400 hover:text-white border border-indigo-500/35 hover:border-indigo-600 px-4 py-2.5 rounded-xl text-[10px] font-black tracking-wider transition-all duration-300 flex items-center gap-1.5 shadow-sm hover:shadow-md cursor-pointer uppercase"
-          >
-            <Sparkles className="w-3.5 h-3.5 text-amber-400 animate-pulse" />
-            <span>AR Try-On & 3D</span>
-          </button>
+          {!isFood && (
+            <button
+              onClick={() => onViewDetail?.(product, 'tryon')}
+              className="bg-slate-900 hover:bg-indigo-600 text-indigo-400 hover:text-white border border-indigo-500/35 hover:border-indigo-600 px-4 py-2.5 rounded-xl text-[10px] font-black tracking-wider transition-all duration-300 flex items-center gap-1.5 shadow-sm hover:shadow-md cursor-pointer uppercase"
+            >
+              <span className="text-xs animate-pulse filter drop-shadow-[0_0_2px_rgba(245,158,11,0.5)]">🎗️</span>
+              <span>AR Try-On & 3D</span>
+            </button>
+          )}
 
           <button
             onClick={handleAddClick}
@@ -165,7 +168,7 @@ export default function ProductCard({ product, allProducts = [], onAddToCart, is
         {compProducts.length > 0 && (
           <div className="mt-2 pt-3 border-t border-neutral-100 space-y-2">
             <div className="flex items-center gap-1 text-[10px] font-black uppercase text-indigo-600 tracking-wider font-mono">
-              <Sparkles className="w-3 h-3 animate-pulse text-indigo-500" />
+              <span className="text-xs animate-pulse filter drop-shadow-[0_0_2px_rgba(245,158,11,0.5)]">🎗️</span>
               <span>Complete the Look</span>
             </div>
             <div className="grid grid-cols-2 gap-2">
@@ -197,15 +200,17 @@ export default function ProductCard({ product, allProducts = [], onAddToCart, is
         )}
 
         {/* Interactive AR/360 Try-On Quick Link */}
-        <div className="pt-2">
-          <button
-            onClick={() => onViewDetail?.(product, 'tryon')}
-            className="w-full bg-slate-900 hover:bg-indigo-600 text-indigo-400 hover:text-white border border-indigo-500/35 hover:border-indigo-600 py-2.5 rounded-2xl text-[10px] font-black tracking-widest uppercase transition-all duration-300 flex items-center justify-center gap-2 shadow-inner cursor-pointer"
-          >
-            <Sparkles className="w-3.5 h-3.5 text-amber-400 animate-pulse" />
-            <span>AR Try-On & Interactive 3D</span>
-          </button>
-        </div>
+        {!isFood && (
+          <div className="pt-2">
+            <button
+              onClick={() => onViewDetail?.(product, 'tryon')}
+              className="w-full bg-slate-900 hover:bg-indigo-600 text-indigo-400 hover:text-white border border-indigo-500/35 hover:border-indigo-600 py-2.5 rounded-2xl text-[10px] font-black tracking-widest uppercase transition-all duration-300 flex items-center justify-center gap-2 shadow-inner cursor-pointer"
+            >
+              <span className="text-xs animate-pulse filter drop-shadow-[0_0_2px_rgba(245,158,11,0.5)]">🎗️</span>
+              <span>AR Try-On & Interactive 3D</span>
+            </button>
+          </div>
+        )}
 
         <div className="pt-3.5 border-t border-neutral-100 flex items-center justify-between">
           <span className="text-xl font-mono font-black text-black">₵{product.price.toFixed(2)}</span>

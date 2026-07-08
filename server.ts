@@ -66,6 +66,32 @@ async function startServer() {
     }
   });
 
+  // CORS-enabled Image Proxy to solve Canvas dirtying/CORS error for AR garments
+  app.get("/api/proxy-image", async (req, res) => {
+    try {
+      const imageUrl = req.query.url as string;
+      if (!imageUrl) {
+        return res.status(400).json({ error: "url parameter is required" });
+      }
+
+      const response = await fetch(imageUrl);
+      if (!response.ok) {
+        throw new Error(`Failed to fetch image: ${response.statusText} (${response.status})`);
+      }
+
+      const contentType = response.headers.get("content-type") || "image/png";
+      res.setHeader("Content-Type", contentType);
+      res.setHeader("Access-Control-Allow-Origin", "*");
+      res.setHeader("Cache-Control", "public, max-age=86400"); // cache for 1 day
+
+      const arrayBuffer = await response.arrayBuffer();
+      res.send(Buffer.from(arrayBuffer));
+    } catch (err: any) {
+      console.error("CORS Image Proxy Error:", err);
+      res.status(500).json({ error: err.message || "Failed to proxy image" });
+    }
+  });
+
   // Real Gemini-powered AI Fashion Assistant API Route
   app.post("/api/chat", async (req, res) => {
     try {

@@ -1,10 +1,12 @@
 import React, { useState, useMemo, useEffect } from "react";
 import { 
   Product, Order, Customer, Payment, CustomerLocation, 
-  CustomerInquiry, ActivityLog, DiscountCode, Charity, MediaFile, HomepageSettings, StoreEvent, CustomerReview, DeliveryItem 
+  CustomerInquiry, ActivityLog, DiscountCode, Charity, MediaFile, HomepageSettings, StoreEvent, CustomerReview, DeliveryItem,
+  ArMannequin, ArDress
 } from "../types";
 import CustomerLiveMap from "./CustomerLiveMap";
 import CharityManager from "./CharityManager";
+import GarmentExtractor from "./GarmentExtractor";
 import { 
   LayoutDashboard, ShoppingCart, Shirt, Users, User, CreditCard, 
   MapPin, HelpCircle, Activity, Tag, Mail, Image as ImageIcon, Paintbrush, 
@@ -68,6 +70,51 @@ export default function AdminDashboard({
 }: AdminDashboardProps) {
   
   const [activeTab, setActiveTab] = useState("dashboard");
+  
+  // AR Try-On states and listeners
+  const [arMannequins, setArMannequins] = useState<ArMannequin[]>([]);
+  const [arDresses, setArDresses] = useState<ArDress[]>([]);
+  
+  // Forms states
+  const [editingMannequinId, setEditingMannequinId] = useState<string | null>(null);
+  const [mannequinName, setMannequinName] = useState("");
+  const [mannequinImage, setMannequinImage] = useState("");
+  const [mannequinStyle, setMannequinStyle] = useState("Standard Structure");
+  const [showMannequinForm, setShowMannequinForm] = useState(false);
+
+  const [editingDressId, setEditingDressId] = useState<string | null>(null);
+  const [dressName, setDressName] = useState("");
+  const [dressImage, setDressImage] = useState("");
+  const [dressCategory, setDressCategory] = useState("dresses");
+  const [dressDescription, setDressDescription] = useState("");
+  const [showDressForm, setShowDressForm] = useState(false);
+
+  useEffect(() => {
+    const unsub = onSnapshot(collection(db, "ar_mannequins"), (snapshot) => {
+      const list: ArMannequin[] = [];
+      snapshot.forEach((doc) => {
+        list.push({ id: doc.id, ...doc.data() } as ArMannequin);
+      });
+      setArMannequins(list);
+    }, (error) => {
+      console.error("Error listening to ar_mannequins in Admin:", error);
+    });
+    return () => unsub();
+  }, []);
+
+  useEffect(() => {
+    const unsub = onSnapshot(collection(db, "ar_dresses"), (snapshot) => {
+      const list: ArDress[] = [];
+      snapshot.forEach((doc) => {
+        list.push({ id: doc.id, ...doc.data() } as ArDress);
+      });
+      setArDresses(list);
+    }, (error) => {
+      console.error("Error listening to ar_dresses in Admin:", error);
+    });
+    return () => unsub();
+  }, []);
+
   
   // Admin Video Conferences state & listeners
   const [adminConferences, setAdminConferences] = useState<any[]>([]);
@@ -284,6 +331,170 @@ export default function AdminDashboard({
 
     onShowToast("Spreadsheet Exported", "Successfully exported payment ledger as CSV spreadsheet.", "success");
     onLogActivity("Exported general payment transaction spreadsheet reports", "admin_action");
+  };
+
+  // AR Try-On subtab state
+  const [arActiveSubTab, setArActiveSubTab] = useState<"models" | "dresses">("models");
+
+  // AR Try-On admin action helpers
+  const handleMannequinSubmit = async (e: React.FormEvent) => {
+    e.preventDefault();
+    if (!mannequinName || !mannequinImage) {
+      onShowToast("Form Incomplete", "Please specify name and image URL.", "error");
+      return;
+    }
+    try {
+      const docId = editingMannequinId || `man-${Date.now()}`;
+      await setDoc(doc(db, "ar_mannequins", docId), {
+        name: mannequinName,
+        image: mannequinImage,
+        style: mannequinStyle
+      });
+      onShowToast(
+        editingMannequinId ? "Model Backdrop Updated" : "Model Backdrop Added",
+        `Successfully saved mannequin backdrop ${mannequinName}`,
+        "success"
+      );
+      onLogActivity(`${editingMannequinId ? 'Updated' : 'Added'} AR backdrop mannequin model: ${mannequinName}`, "admin_action");
+      // Reset form
+      setEditingMannequinId(null);
+      setMannequinName("");
+      setMannequinImage("");
+      setMannequinStyle("Standard Structure");
+      setShowMannequinForm(false);
+    } catch (err: any) {
+      console.error(err);
+      onShowToast("Save Failed", err.message || "An error occurred.", "error");
+    }
+  };
+
+  const handleMannequinDelete = async (id: string) => {
+    if (!window.confirm("Are you sure you want to delete this virtual model backdrop?")) return;
+    try {
+      await deleteDoc(doc(db, "ar_mannequins", id));
+      onShowToast("Model Deleted", "Successfully removed mannequin model.", "success");
+      onLogActivity(`Deleted AR mannequin model backdrop: ${id}`, "admin_action");
+    } catch (err: any) {
+      console.error(err);
+      onShowToast("Delete Failed", err.message || "An error occurred.", "error");
+    }
+  };
+
+  const handleDressSubmit = async (e: React.FormEvent) => {
+    e.preventDefault();
+    if (!dressName || !dressImage) {
+      onShowToast("Form Incomplete", "Please specify dress name and translucent transparent image overlay URL.", "error");
+      return;
+    }
+    try {
+      const docId = editingDressId || `dress-${Date.now()}`;
+      await setDoc(doc(db, "ar_dresses", docId), {
+        name: dressName,
+        image: dressImage,
+        category: dressCategory,
+        description: dressDescription
+      });
+      onShowToast(
+        editingDressId ? "Try-on Gown Updated" : "Try-on Gown Added",
+        `Successfully saved dress overlay ${dressName}`,
+        "success"
+      );
+      onLogActivity(`${editingDressId ? 'Updated' : 'Added'} AR dress gown try-on option: ${dressName}`, "admin_action");
+      // Reset form
+      setEditingDressId(null);
+      setDressName("");
+      setDressImage("");
+      setDressCategory("dresses");
+      setDressDescription("");
+      setShowDressForm(false);
+    } catch (err: any) {
+      console.error(err);
+      onShowToast("Save Failed", err.message || "An error occurred.", "error");
+    }
+  };
+
+  const handleDressDelete = async (id: string) => {
+    if (!window.confirm("Are you sure you want to delete this dress try-on overlay?")) return;
+    try {
+      await deleteDoc(doc(db, "ar_dresses", id));
+      onShowToast("Dress Deleted", "Successfully removed try-on dress overlay.", "success");
+      onLogActivity(`Deleted AR try-on dress overlay: ${id}`, "admin_action");
+    } catch (err: any) {
+      console.error(err);
+      onShowToast("Delete Failed", err.message || "An error occurred.", "error");
+    }
+  };
+
+  const seedArTryOnDefaults = async () => {
+    try {
+      const defaultModels = [
+        {
+          id: "man-1",
+          name: "Dami (Classic Pose)",
+          image: "https://images.unsplash.com/photo-1515886657613-9f3515b0c78f?w=600&auto=format&fit=crop",
+          style: "Petite/Standard Structure"
+        },
+        {
+          id: "man-2",
+          name: "Amara (Sassy Posing)",
+          image: "https://images.unsplash.com/photo-1524504388940-b1c1722653e1?w=600&auto=format&fit=crop",
+          style: "Athletic/Tall Structure"
+        },
+        {
+          id: "man-3",
+          name: "Naa (Graceful Evening Silhouette)",
+          image: "https://images.unsplash.com/photo-1534528741775-53994a69daeb?w=600&auto=format&fit=crop",
+          style: "Curvy/Full Silhouette"
+        }
+      ];
+
+      const defaultDresses = [
+        {
+          id: "dress-1",
+          name: "Ella Gold Kente Gown",
+          image: "https://pngimg.com/uploads/dress/dress_PNG20.png",
+          category: "dresses",
+          description: "Traditional Ghanaian Kente ceremonial dress translucent overlay."
+        },
+        {
+          id: "dress-2",
+          name: "Lace Wedding Gown",
+          image: "https://pngimg.com/uploads/dress/dress_PNG16.png",
+          category: "dresses",
+          description: "Elegantly detailed bridal white lace gown overlay."
+        },
+        {
+          id: "dress-3",
+          name: "Summer Floral Midi",
+          image: "https://pngimg.com/uploads/dress/dress_PNG22.png",
+          category: "dresses",
+          description: "Chic lightweight floral casual wear overlay."
+        }
+      ];
+
+      for (const m of defaultModels) {
+        await setDoc(doc(db, "ar_mannequins", m.id), {
+          name: m.name,
+          image: m.image,
+          style: m.style
+        });
+      }
+
+      for (const d of defaultDresses) {
+        await setDoc(doc(db, "ar_dresses", d.id), {
+          name: d.name,
+          image: d.image,
+          category: d.category,
+          description: d.description
+        });
+      }
+
+      onShowToast("Defaults Seeded", "Successfully loaded high-class mannequins & premium transparent gown overlays into database.", "success");
+      onLogActivity("Seeded default high-class AR mannequins & try-on dress overlays", "admin_action");
+    } catch (err: any) {
+      console.error(err);
+      onShowToast("Seeding Failed", err.message || "An error occurred.", "error");
+    }
   };
 
   // Food Metrics
@@ -907,6 +1118,7 @@ export default function AdminDashboard({
                 { id: "files", label: "Recorded Media Files", icon: FolderHeart, count: uploadedFiles.length },
                 { id: "economics", label: "Economic State", icon: TrendingUp },
                 { id: "customize", label: "Homepage Design", icon: Paintbrush },
+                { id: "artryon", label: "AR Try-On Assets", icon: Sparkles },
               ].map(tab => {
                 const Icon = tab.icon;
                 return (
@@ -1365,10 +1577,10 @@ export default function AdminDashboard({
                         <label className="text-xs font-semibold text-neutral-600 block">AR Try-on Gown Overlay (Transparent PNG)</label>
                         <button
                           type="button"
-                          onClick={() => setProductTryOnImage("https://i.ibb.co/Xz9tG1B/tryon-dress-2.png")}
+                          onClick={() => setProductTryOnImage("https://pngimg.com/uploads/dress/dress_PNG20.png")}
                           className="text-[9px] text-indigo-600 hover:text-indigo-800 font-bold uppercase tracking-wider cursor-pointer"
                         >
-                          ✨ Load Demo Red Gown PNG
+                          ✨ Load Demo Gold Gown PNG
                         </button>
                       </div>
                       <div className="border border-dashed border-neutral-200 p-4 rounded-xl text-center hover:border-indigo-500 transition-colors relative cursor-pointer bg-white">
@@ -4274,6 +4486,407 @@ export default function AdminDashboard({
             </div>
           )}
           
+          {/* TAB: AR Try-On Studio Assets */}
+          {activeTab === "artryon" && (
+            <div className="space-y-8 animate-in fade-in duration-300">
+              <div className="border-b border-neutral-250 pb-4 flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4">
+                <div>
+                  <h2 className="font-serif text-2xl text-neutral-900 font-medium">AR Virtual Try-On Assets Studio</h2>
+                  <p className="text-xs text-neutral-500">Add, edit, or configure virtual background models and transparent dress try-on overlays.</p>
+                </div>
+                <div className="flex gap-3">
+                  <button
+                    onClick={seedArTryOnDefaults}
+                    className="px-4 py-2 bg-amber-500 hover:bg-amber-600 text-neutral-900 rounded-xl text-xs font-bold tracking-wide transition-all duration-300 shadow flex items-center gap-1.5 cursor-pointer"
+                  >
+                    <Sparkles className="w-3.5 h-3.5 animate-pulse" />
+                    Seed Sample AR Assets
+                  </button>
+                </div>
+              </div>
+
+              {/* Subtab Buttons */}
+              <div className="flex gap-2.5 border-b border-neutral-200 pb-px">
+                <button
+                  onClick={() => setArActiveSubTab("models")}
+                  className={`px-5 py-3 border-b-2 text-xs font-bold tracking-wide transition-all duration-300 flex items-center gap-2 cursor-pointer ${
+                    arActiveSubTab === "models"
+                      ? "border-amber-500 text-amber-600 animate-in border-b-2"
+                      : "border-transparent text-neutral-500 hover:text-neutral-800"
+                  }`}
+                >
+                  <User className="w-4 h-4" />
+                  3D Backdrop Models / Mannequins ({arMannequins.length})
+                </button>
+                <button
+                  onClick={() => setArActiveSubTab("dresses")}
+                  className={`px-5 py-3 border-b-2 text-xs font-bold tracking-wide transition-all duration-300 flex items-center gap-2 cursor-pointer ${
+                    arActiveSubTab === "dresses"
+                      ? "border-amber-500 text-amber-600 animate-in border-b-2"
+                      : "border-transparent text-neutral-500 hover:text-neutral-800"
+                  }`}
+                >
+                  <Shirt className="w-4 h-4" />
+                  Try-on Dress Overlays ({arDresses.length})
+                </button>
+              </div>
+
+              {/* SUBTAB 1: 3D MANNEQUINS */}
+              {arActiveSubTab === "models" && (
+                <div className="space-y-6 animate-in fade-in duration-300">
+                  {/* Model Backdrop Form Button or Form Container */}
+                  {!showMannequinForm ? (
+                    <div className="flex justify-end">
+                      <button
+                        onClick={() => {
+                          setEditingMannequinId(null);
+                          setMannequinName("");
+                          setMannequinImage("");
+                          setMannequinStyle("Standard Structure");
+                          setShowMannequinForm(true);
+                        }}
+                        className="px-4 py-2.5 bg-indigo-600 hover:bg-indigo-500 text-white rounded-xl text-xs font-extrabold tracking-wide transition-all shadow-sm flex items-center gap-1.5 cursor-pointer"
+                      >
+                        <Plus className="w-4 h-4" />
+                        Add virtual Backdrop Mannequin
+                      </button>
+                    </div>
+                  ) : (
+                    <form onSubmit={handleMannequinSubmit} className="bg-white border border-neutral-200 rounded-3xl p-6 shadow-md space-y-4 max-w-2xl">
+                      <div className="flex justify-between items-center pb-3 border-b border-neutral-100">
+                        <h3 className="font-serif text-sm font-bold text-neutral-900">
+                          {editingMannequinId ? "✏️ Edit virtual Backdrop Model" : "✨ Create virtual Backdrop Model"}
+                        </h3>
+                        <button
+                          type="button"
+                          onClick={() => setShowMannequinForm(false)}
+                          className="text-neutral-400 hover:text-neutral-600 cursor-pointer"
+                        >
+                          <X className="w-4 h-4" />
+                        </button>
+                      </div>
+
+                      <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                        <div className="space-y-1.5">
+                          <label className="text-xs font-bold text-neutral-600 uppercase">Model / Backdrop Name</label>
+                          <input
+                            type="text"
+                            value={mannequinName}
+                            onChange={(e) => setMannequinName(e.target.value)}
+                            placeholder="e.g. Amara (Graceful pose)"
+                            className="w-full px-4 py-2.5 bg-neutral-50 border border-neutral-200 rounded-xl text-xs focus:outline-none focus:border-indigo-500"
+                            required
+                          />
+                        </div>
+
+                        <div className="space-y-1.5">
+                          <label className="text-xs font-bold text-neutral-600 uppercase">Silhouette / Structure Type</label>
+                          <select
+                            value={mannequinStyle}
+                            onChange={(e) => setMannequinStyle(e.target.value)}
+                            className="w-full px-4 py-2.5 bg-neutral-50 border border-neutral-200 rounded-xl text-xs focus:outline-none focus:border-indigo-500"
+                          >
+                            <option value="Petite/Standard Structure">Petite/Standard Structure</option>
+                            <option value="Athletic/Tall Structure">Athletic/Tall Structure</option>
+                            <option value="Curvy/Full Silhouette">Curvy/Full Silhouette</option>
+                          </select>
+                        </div>
+                      </div>
+
+                      <div className="space-y-1.5">
+                        <label className="text-xs font-bold text-neutral-600 uppercase">Backdrop Image URL (Full portrait on clean bg)</label>
+                        <input
+                          type="url"
+                          value={mannequinImage}
+                          onChange={(e) => setMannequinImage(e.target.value)}
+                          placeholder="https://images.unsplash.com/photo-..."
+                          className="w-full px-4 py-2.5 bg-neutral-50 border border-neutral-200 rounded-xl text-xs focus:outline-none focus:border-indigo-500"
+                          required
+                        />
+                      </div>
+
+                      {/* URL helpers */}
+                      <div className="flex gap-2 flex-wrap">
+                        <button
+                          type="button"
+                          onClick={() => setMannequinImage("https://images.unsplash.com/photo-1515886657613-9f3515b0c78f?w=600&auto=format&fit=crop")}
+                          className="px-2 py-1 bg-neutral-100 hover:bg-neutral-200 rounded text-[10px] text-neutral-600 font-mono transition cursor-pointer"
+                        >
+                          Preset Model A
+                        </button>
+                        <button
+                          type="button"
+                          onClick={() => setMannequinImage("https://images.unsplash.com/photo-1524504388940-b1c1722653e1?w=600&auto=format&fit=crop")}
+                          className="px-2 py-1 bg-neutral-100 hover:bg-neutral-200 rounded text-[10px] text-neutral-600 font-mono transition cursor-pointer"
+                        >
+                          Preset Model B
+                        </button>
+                        <button
+                          type="button"
+                          onClick={() => setMannequinImage("https://images.unsplash.com/photo-1534528741775-53994a69daeb?w=600&auto=format&fit=crop")}
+                          className="px-2 py-1 bg-neutral-100 hover:bg-neutral-200 rounded text-[10px] text-neutral-600 font-mono transition cursor-pointer"
+                        >
+                          Preset Model C
+                        </button>
+                      </div>
+
+                      <div className="flex justify-end gap-3 pt-3 border-t border-neutral-100">
+                        <button
+                          type="button"
+                          onClick={() => setShowMannequinForm(false)}
+                          className="px-4 py-2 border border-neutral-200 rounded-xl text-neutral-600 hover:bg-neutral-50 text-xs font-bold transition cursor-pointer"
+                        >
+                          Cancel
+                        </button>
+                        <button
+                          type="submit"
+                          className="px-5 py-2 bg-indigo-600 hover:bg-indigo-500 text-white rounded-xl text-xs font-bold transition shadow-sm cursor-pointer"
+                        >
+                          {editingMannequinId ? "Save Changes" : "Add Mannequin"}
+                        </button>
+                      </div>
+                    </form>
+                  )}
+
+                  {/* Mannequin grid */}
+                  <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
+                    {arMannequins.map((man) => (
+                      <div key={man.id} className="bg-white rounded-3xl border border-neutral-200 shadow-sm overflow-hidden flex flex-col hover:border-amber-500/30 transition duration-300">
+                        <div className="aspect-[3/4] relative bg-neutral-100 overflow-hidden">
+                          <img src={man.image} alt={man.name} className="w-full h-full object-cover animate-fade-in" referrerPolicy="no-referrer" />
+                          <span className="absolute bottom-3 left-3 bg-neutral-900/85 backdrop-blur-sm text-amber-500 text-[10px] font-bold font-mono px-2.5 py-1 rounded-full uppercase">
+                            {man.style}
+                          </span>
+                        </div>
+                        <div className="p-5 flex-1 flex flex-col justify-between space-y-3">
+                          <div>
+                            <h4 className="font-serif text-sm font-bold text-neutral-900">{man.name}</h4>
+                            <p className="text-[10px] text-neutral-400 font-mono mt-0.5">Asset ID: {man.id}</p>
+                          </div>
+                          <div className="flex gap-2 pt-2 border-t border-neutral-100">
+                            <button
+                              onClick={() => {
+                                setEditingMannequinId(man.id);
+                                setMannequinName(man.name);
+                                setMannequinImage(man.image);
+                                setMannequinStyle(man.style);
+                                setShowMannequinForm(true);
+                              }}
+                              className="flex-1 py-1.5 bg-neutral-50 hover:bg-neutral-100 text-neutral-700 rounded-xl border border-neutral-200 text-[10px] font-bold transition flex items-center justify-center gap-1 cursor-pointer"
+                            >
+                              <Edit className="w-3 h-3 text-neutral-500" />
+                              Edit
+                            </button>
+                            <button
+                              onClick={() => handleMannequinDelete(man.id)}
+                              className="px-3 py-1.5 bg-rose-50 hover:bg-rose-100 text-rose-600 rounded-xl border border-rose-100 text-[10px] font-bold transition flex items-center justify-center gap-1 cursor-pointer"
+                            >
+                              <Trash2 className="w-3.5 h-3.5 text-rose-500" />
+                            </button>
+                          </div>
+                        </div>
+                      </div>
+                    ))}
+
+                    {arMannequins.length === 0 && (
+                      <div className="col-span-full bg-neutral-50 border border-neutral-200 rounded-3xl p-10 text-center space-y-4">
+                        <User className="w-12 h-12 text-neutral-300 mx-auto" />
+                        <div>
+                          <p className="font-serif text-sm font-bold text-neutral-700">No AR Backdrop Models Added</p>
+                          <p className="text-xs text-neutral-400 mt-1">Tap "Seed Sample AR Assets" above or "Add virtual Backdrop Mannequin" to start.</p>
+                        </div>
+                      </div>
+                    )}
+                  </div>
+                </div>
+              )}
+
+              {/* SUBTAB 2: TRYON DRESS OVERLAYS */}
+              {arActiveSubTab === "dresses" && (
+                <div className="space-y-6 animate-in fade-in duration-300">
+                  {/* Dress form toggle or form */}
+                  {!showDressForm ? (
+                    <div className="flex justify-end">
+                      <button
+                        onClick={() => {
+                          setEditingDressId(null);
+                          setDressName("");
+                          setDressImage("");
+                          setDressCategory("dresses");
+                          setDressDescription("");
+                          setShowDressForm(true);
+                        }}
+                        className="px-4 py-2.5 bg-indigo-600 hover:bg-indigo-500 text-white rounded-xl text-xs font-extrabold tracking-wide transition-all shadow-sm flex items-center gap-1.5 cursor-pointer"
+                      >
+                        <Plus className="w-4 h-4" />
+                        Add Transparent Dress Overlay
+                      </button>
+                    </div>
+                  ) : (
+                    <form onSubmit={handleDressSubmit} className="bg-white border border-neutral-200 rounded-3xl p-6 shadow-md space-y-4 max-w-2xl">
+                      <div className="flex justify-between items-center pb-3 border-b border-neutral-100">
+                        <h3 className="font-serif text-sm font-bold text-neutral-900">
+                          {editingDressId ? "✏️ Edit Transparent Dress Overlay" : "✨ Create Transparent Dress Overlay"}
+                        </h3>
+                        <button
+                          type="button"
+                          onClick={() => setShowDressForm(false)}
+                          className="text-neutral-400 hover:text-neutral-600 cursor-pointer"
+                        >
+                          <X className="w-4 h-4" />
+                        </button>
+                      </div>
+
+                      <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                        <div className="space-y-1.5">
+                          <label className="text-xs font-bold text-neutral-600 uppercase">Dress Name</label>
+                          <input
+                            type="text"
+                            value={dressName}
+                            onChange={(e) => setDressName(e.target.value)}
+                            placeholder="e.g. Ella Kente Ceremony Dress"
+                            className="w-full px-4 py-2.5 bg-neutral-50 border border-neutral-200 rounded-xl text-xs focus:outline-none focus:border-indigo-500"
+                            required
+                          />
+                        </div>
+
+                        <div className="space-y-1.5">
+                          <label className="text-xs font-bold text-neutral-600 uppercase">Category</label>
+                          <select
+                            value={dressCategory}
+                            onChange={(e) => setDressCategory(e.target.value)}
+                            className="w-full px-4 py-2.5 bg-neutral-50 border border-neutral-200 rounded-xl text-xs focus:outline-none focus:border-indigo-500 font-medium"
+                          >
+                            <option value="dresses">Dresses</option>
+                            <option value="accessories">Accessories</option>
+                            <option value="shoes">Shoes</option>
+                          </select>
+                        </div>
+                      </div>
+
+                      <div className="space-y-1.5">
+                        <label className="text-xs font-bold text-neutral-600 uppercase">Gown Photo & Garment Background Extractor</label>
+                        <GarmentExtractor
+                          value={dressImage}
+                          onChange={(val) => setDressImage(val)}
+                          onShowToast={onShowToast}
+                        />
+                      </div>
+
+                      {/* Dress transparent presets helpers */}
+                      <div className="flex gap-2 flex-wrap">
+                        <button
+                          type="button"
+                          onClick={() => setDressImage("https://pngimg.com/uploads/dress/dress_PNG20.png")}
+                          className="px-2 py-1 bg-neutral-100 hover:bg-neutral-200 rounded text-[10px] text-neutral-600 font-mono transition cursor-pointer"
+                        >
+                          Preset Dress A
+                        </button>
+                        <button
+                          type="button"
+                          onClick={() => setDressImage("https://pngimg.com/uploads/dress/dress_PNG16.png")}
+                          className="px-2 py-1 bg-neutral-100 hover:bg-neutral-200 rounded text-[10px] text-neutral-600 font-mono transition cursor-pointer"
+                        >
+                          Preset Dress B
+                        </button>
+                        <button
+                          type="button"
+                          onClick={() => setDressImage("https://pngimg.com/uploads/dress/dress_PNG22.png")}
+                          className="px-2 py-1 bg-neutral-100 hover:bg-neutral-200 rounded text-[10px] text-neutral-600 font-mono transition cursor-pointer"
+                        >
+                          Preset Dress C
+                        </button>
+                      </div>
+
+                      <div className="space-y-1.5">
+                        <label className="text-xs font-bold text-neutral-600 uppercase">Description / Fitting Guide</label>
+                        <textarea
+                          value={dressDescription}
+                          onChange={(e) => setDressDescription(e.target.value)}
+                          placeholder="Write fabric notes or size/position tips..."
+                          rows={2}
+                          className="w-full px-4 py-2.5 bg-neutral-50 border border-neutral-200 rounded-xl text-xs focus:outline-none focus:border-indigo-500"
+                        />
+                      </div>
+
+                      <div className="flex justify-end gap-3 pt-3 border-t border-neutral-100">
+                        <button
+                          type="button"
+                          onClick={() => setShowDressForm(false)}
+                          className="px-4 py-2 border border-neutral-200 rounded-xl text-neutral-600 hover:bg-neutral-50 text-xs font-bold transition cursor-pointer"
+                        >
+                          Cancel
+                        </button>
+                        <button
+                          type="submit"
+                          className="px-5 py-2 bg-indigo-600 hover:bg-indigo-500 text-white rounded-xl text-xs font-bold transition shadow-sm cursor-pointer"
+                        >
+                          {editingDressId ? "Save Changes" : "Add Dress"}
+                        </button>
+                      </div>
+                    </form>
+                  )}
+
+                  {/* Dress grid */}
+                  <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
+                    {arDresses.map((dress) => (
+                      <div key={dress.id} className="bg-white rounded-3xl border border-neutral-200 shadow-sm overflow-hidden flex flex-col hover:border-amber-500/30 transition duration-300">
+                        {/* Checkerboard Pattern for transparent backdrop */}
+                        <div className="aspect-[3/4] relative bg-neutral-100 overflow-hidden flex items-center justify-center p-4 bg-[radial-gradient(#e5e7eb_1px,transparent_1px)] [background-size:16px_16px]">
+                          <img src={dress.image} alt={dress.name} className="max-h-full max-w-full object-contain filter drop-shadow-md animate-fade-in" referrerPolicy="no-referrer" />
+                          <span className="absolute bottom-3 left-3 bg-neutral-900/85 backdrop-blur-sm text-amber-500 text-[10px] font-bold font-mono px-2.5 py-1 rounded-full uppercase">
+                            {dress.category || "Dresses"}
+                          </span>
+                        </div>
+                        <div className="p-5 flex-1 flex flex-col justify-between space-y-3">
+                          <div>
+                            <h4 className="font-serif text-sm font-bold text-neutral-900 line-clamp-1">{dress.name}</h4>
+                            {dress.description && (
+                              <p className="text-xs text-neutral-500 line-clamp-2 mt-1">{dress.description}</p>
+                            )}
+                            <p className="text-[10px] text-neutral-400 font-mono mt-1">Asset ID: {dress.id}</p>
+                          </div>
+                          <div className="flex gap-2 pt-2 border-t border-neutral-100">
+                            <button
+                              onClick={() => {
+                                setEditingDressId(dress.id);
+                                setDressName(dress.name);
+                                setDressImage(dress.image);
+                                setDressCategory(dress.category || "dresses");
+                                setDressDescription(dress.description || "");
+                                setShowDressForm(true);
+                              }}
+                              className="flex-1 py-1.5 bg-neutral-50 hover:bg-neutral-100 text-neutral-700 rounded-xl border border-neutral-200 text-[10px] font-bold transition flex items-center justify-center gap-1 cursor-pointer"
+                            >
+                              <Edit className="w-3 h-3 text-neutral-500" />
+                              Edit
+                            </button>
+                            <button
+                              onClick={() => handleDressDelete(dress.id)}
+                              className="px-3 py-1.5 bg-rose-50 hover:bg-rose-100 text-rose-600 rounded-xl border border-rose-100 text-[10px] font-bold transition flex items-center justify-center gap-1 cursor-pointer"
+                            >
+                              <Trash2 className="w-3.5 h-3.5 text-rose-500" />
+                            </button>
+                          </div>
+                        </div>
+                      </div>
+                    ))}
+
+                    {arDresses.length === 0 && (
+                      <div className="col-span-full bg-neutral-50 border border-neutral-200 rounded-3xl p-10 text-center space-y-4">
+                        <Shirt className="w-12 h-12 text-neutral-300 mx-auto" />
+                        <div>
+                          <p className="font-serif text-sm font-bold text-neutral-700">No AR Gown Overlays Added</p>
+                          <p className="text-xs text-neutral-400 mt-1">Tap "Seed Sample AR Assets" above or "Add Transparent Dress Overlay" to start.</p>
+                        </div>
+                      </div>
+                    )}
+                  </div>
+                </div>
+              )}
+            </div>
+          )}
+
           {/* Persistent Footer - Clear All Data */}
           <div className="mt-12 pt-6 border-t border-neutral-200 flex justify-end">
             <button

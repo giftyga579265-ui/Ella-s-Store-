@@ -6,7 +6,7 @@ import {
 } from "./types";
 import { 
   ShoppingBag, Phone, MapPin, Mail, Clock, HelpCircle, 
-  Settings, User, Check, Sparkles, Star, ChevronDown, Lock, Bell, Trash2, X, Menu, Heart, Search,
+  Settings, User, Check, Ribbon, Star, ChevronDown, Lock, Bell, Trash2, X, Menu, Heart, Search,
   Mic, Video, Film, Upload, Camera, Image as ImageIcon
 } from "lucide-react";
 
@@ -2436,10 +2436,12 @@ export default function App() {
 
             {/* Typography */}
             <div className="text-center space-y-1">
-              <div className="flex items-center justify-center gap-1">
-                <Sparkles className="w-3.5 h-3.5 text-amber-500 animate-pulse" />
-                <h2 className="font-sans text-lg font-black tracking-[0.2em] text-neutral-900 uppercase">ELLA'S STORE</h2>
-                <Sparkles className="w-3.5 h-3.5 text-indigo-500 animate-pulse" />
+              <div className="flex items-center justify-center gap-1.5">
+                <Ribbon className="w-3.5 h-3.5 text-amber-500 animate-bounce" />
+                <h2 className="font-sans text-lg font-black tracking-[0.2em] text-neutral-900 uppercase flex items-center gap-1">
+                  ELLA'S <span>🎗</span> STORE
+                </h2>
+                <Ribbon className="w-3.5 h-3.5 text-amber-500 animate-bounce" />
               </div>
               <p className="text-[9px] font-mono tracking-widest text-indigo-600 font-bold uppercase">COUTURE & LUXURY ALTERATIONS</p>
               <div className="flex items-center justify-center gap-1.5 pt-1">
@@ -2685,25 +2687,56 @@ export default function App() {
               </p>
             </div>
           ) : (
-            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
+            <motion.div 
+              key={activeCategory + "-" + searchQuery}
+              variants={{
+                hidden: { opacity: 0 },
+                show: {
+                  opacity: 1,
+                  transition: {
+                    staggerChildren: 0.12,
+                    delayChildren: 0.05
+                  }
+                }
+              }}
+              initial="hidden"
+              animate="show"
+              className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6"
+            >
               {products
                 .filter(p => 
                   (activeCategory === 'all' || p.category === activeCategory) &&
                   (p.name.toLowerCase().includes(searchQuery.toLowerCase()) || p.category.toLowerCase().includes(searchQuery.toLowerCase()))
                 )
                 .map(prod => (
-                  <ProductCard
+                  <motion.div
                     key={prod.id}
-                    product={prod}
-                    allProducts={products}
-                    onAddToCart={addToCart}
-                    isLoggedIn={isLoggedIn}
-                    onShowLogin={() => setShowLogin(true)}
-                    layout={homepageSettings.productLayout as any}
-                    onViewDetail={handleViewDetail}
-                  />
+                    variants={{
+                      hidden: { opacity: 0, y: 30 },
+                      show: { 
+                        opacity: 1, 
+                        y: 0, 
+                        transition: { 
+                          type: "spring", 
+                          stiffness: 120, 
+                          damping: 18 
+                        } 
+                      }
+                    }}
+                    className="h-full"
+                  >
+                    <ProductCard
+                      product={prod}
+                      allProducts={products}
+                      onAddToCart={addToCart}
+                      isLoggedIn={isLoggedIn}
+                      onShowLogin={() => setShowLogin(true)}
+                      layout={homepageSettings.productLayout as any}
+                      onViewDetail={handleViewDetail}
+                    />
+                  </motion.div>
                 ))}
-            </div>
+            </motion.div>
           )}
 
           {/* Proceed button */}

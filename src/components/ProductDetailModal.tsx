@@ -1,11 +1,14 @@
 import React, { useState, useMemo, useEffect, useRef } from "react";
 import { Product } from "../types";
 import { 
-  X, ShoppingBag, Sparkles, Plus, Check, ArrowRight, 
+  X, ShoppingBag, Ribbon, Plus, Check, ArrowRight, 
   RotateCw, Video, Camera, Sliders, User, RefreshCw, 
-  Download, Image as ImageIcon, Sparkle, Play, Pause, Volume2, VolumeX
+  Download, Image as ImageIcon, Play, Pause, Volume2, VolumeX,
+  Sparkles, Layers
 } from "lucide-react";
 import { motion, AnimatePresence } from "motion/react";
+import { db } from "../lib/firebase";
+import { collection, onSnapshot } from "firebase/firestore";
 
 interface ProductDetailModalProps {
   product: Product;
@@ -54,7 +57,7 @@ const DEFAULT_360_FRAMES = [
 ];
 
 // Default transparent gown overlay fallback
-const DEFAULT_TRYON_GARMENT = "https://i.ibb.co/Xz9tG1B/tryon-dress-2.png";
+const DEFAULT_TRYON_GARMENT = "https://pngimg.com/uploads/dress/dress_PNG20.png";
 
 export default function ProductDetailModal({
   product,
@@ -66,14 +69,20 @@ export default function ProductDetailModal({
   onViewProduct,
   initialTab,
 }: ProductDetailModalProps) {
+  const isFood = product.category === 'food' || product.category === 'kitchen';
+
   // Tabs: 'classic' (Photo), 'spin360' (360° Spin), 'video' (Catwalk), 'tryon' (AR/VR Studio)
   const [activeMediaTab, setActiveMediaTab] = useState<'classic' | 'spin360' | 'video' | 'tryon'>('classic');
 
   useEffect(() => {
     if (initialTab) {
-      setActiveMediaTab(initialTab);
+      if (initialTab === 'tryon' && isFood) {
+        setActiveMediaTab('classic');
+      } else {
+        setActiveMediaTab(initialTab);
+      }
     }
-  }, [initialTab]);
+  }, [initialTab, isFood]);
 
   // 360 Spin State
   const spinFrames = useMemo(() => {
@@ -88,12 +97,64 @@ export default function ProductDetailModal({
   const [videoMuted, setVideoMuted] = useState(true);
   const videoRef = useRef<HTMLVideoElement | null>(null);
 
-  // AR Try-On State
-  const tryOnGarment = useMemo(() => {
-    return product.tryOnImage || DEFAULT_TRYON_GARMENT;
-  }, [product.tryOnImage]);
+  // AR Try-On State (with real-time Firestore synchronization)
+  const [dbModels, setDbModels] = useState<any[]>([]);
+  const [dbDresses, setDbDresses] = useState<any[]>([]);
+  const [selectedGarmentUrl, setSelectedGarmentUrl] = useState<string>("");
+
+  useEffect(() => {
+    const unsubModels = onSnapshot(collection(db, "ar_mannequins"), (snapshot) => {
+      const list: any[] = [];
+      snapshot.forEach((doc) => {
+        list.push({ id: doc.id, ...doc.data() });
+      });
+      setDbModels(list);
+    }, (error) => {
+      console.error("Error reading db ar_mannequins:", error);
+    });
+
+    const unsubDresses = onSnapshot(collection(db, "ar_dresses"), (snapshot) => {
+      const list: any[] = [];
+      snapshot.forEach((doc) => {
+        list.push({ id: doc.id, ...doc.data() });
+      });
+      setDbDresses(list);
+    }, (error) => {
+      console.error("Error reading db ar_dresses:", error);
+    });
+
+    return () => {
+      unsubModels();
+      unsubDresses();
+    };
+  }, []);
+
+  const selectableModels = useMemo(() => {
+    return dbModels.length > 0 ? dbModels : FASHION_MODELS;
+  }, [dbModels]);
+
+  const [customModels, setCustomModels] = useState<any[]>([]);
+
+  const combinedModels = useMemo(() => {
+    return [...customModels, ...selectableModels];
+  }, [customModels, selectableModels]);
+
+  const activeGarmentUrl = useMemo(() => {
+    return selectedGarmentUrl || product.tryOnImage || DEFAULT_TRYON_GARMENT;
+  }, [selectedGarmentUrl, product.tryOnImage]);
+
   const [tryOnMode, setTryOnMode] = useState<'model' | 'camera'>('model');
   const [selectedModel, setSelectedModel] = useState(FASHION_MODELS[0]);
+
+  useEffect(() => {
+    if (combinedModels.length > 0) {
+      const exists = combinedModels.some(m => m.id === selectedModel?.id || m.name === selectedModel?.name);
+      if (!exists) {
+        setSelectedModel(combinedModels[0]);
+      }
+    }
+  }, [combinedModels, selectedModel]);
+
   const [cameraStream, setCameraStream] = useState<MediaStream | null>(null);
   const [cameraError, setCameraError] = useState<string | null>(null);
   const webcamRef = useRef<HTMLVideoElement | null>(null);
@@ -111,20 +172,62 @@ export default function ProductDetailModal({
   const [snapshotDataUrl, setSnapshotDataUrl] = useState<string | null>(null);
   const tryOnContainerRef = useRef<HTMLDivElement | null>(null);
 
-  // Category-based suggested items
-  const suggestedProducts = useMemo(() => {
-    if (!product || !allProducts) return [];
-    const sameCategoryItems = allProducts.filter(
-      (item) => item.id !== product.id && item.category.toLowerCase() === product.category.toLowerCase() && item.stock > 0
-    );
-    if (sameCategoryItems.length >= 3) {
-      return sameCategoryItems.slice(0, 3);
+  // Category-based recommendation engine for "Complete the Look" / "Recommended Accessories"
+  const recommendationData = useMemo(() => {
+    if (!product || !allProducts) return { title: "Complete the Look", subtitle: "Curated pairings for your style", items: [] };
+
+    const cat = product.category.toLowerCase();
+    let targetCategories: string[] = [];
+    let title = "Complete the Look";
+    let subtitle = "Handpicked pairings to elevate your style";
+
+    if (cat === "dresses") {
+      targetCategories = ["accessories", "bags", "shoes"];
+      title = "Recommended Accessories & Bags";
+      subtitle = "Pair your elegant gown with these premium hand-crafted accents";
+    } else if (cat === "shoes") {
+      targetCategories = ["bags", "accessories", "dresses"];
+      title = "Complete the Look";
+      subtitle = "Matching accessories and luxury gowns to complete your outfit";
+    } else if (cat === "bags") {
+      targetCategories = ["shoes", "accessories", "dresses"];
+      title = "Complete the Look";
+      subtitle = "Chic shoes and traditional accents to pair with your designer bag";
+    } else if (cat === "accessories") {
+      targetCategories = ["dresses", "bags", "shoes"];
+      title = "Style Matches";
+      subtitle = "Stunning gowns and elegant leatherwear to complement your jewelry";
+    } else if (cat === "food") {
+      targetCategories = ["food"];
+      title = "Complete the Feast";
+      subtitle = "Add complementary traditional Ghanaian delicacies to perfect your meal";
+    } else {
+      targetCategories = [cat];
+      title = "Recommended For You";
+      subtitle = "You might also be interested in these items";
     }
-    const otherItems = allProducts.filter(
-      (item) => item.id !== product.id && item.category.toLowerCase() !== product.category.toLowerCase() && item.stock > 0
+
+    // Filter items belonging to target categories, excluding current product
+    let items = allProducts.filter(
+      (item) => item.id !== product.id && targetCategories.includes(item.category.toLowerCase()) && item.stock > 0
     );
-    return [...sameCategoryItems, ...otherItems].slice(0, 3);
+
+    // If we don't have enough items (we need at least 3), pad with other available items from matching or other lines
+    if (items.length < 3) {
+      const otherItems = allProducts.filter(
+        (item) => item.id !== product.id && !targetCategories.includes(item.category.toLowerCase()) && !items.some(existing => existing.id === item.id) && item.stock > 0
+      );
+      items = [...items, ...otherItems];
+    }
+
+    return {
+      title,
+      subtitle,
+      items: items.slice(0, 3)
+    };
   }, [product, allProducts]);
+
+  const suggestedProducts = useMemo(() => recommendationData.items, [recommendationData]);
 
   // Clean up camera stream on unmount or tab switch
   useEffect(() => {
@@ -179,6 +282,41 @@ export default function ProductDetailModal({
     if (cameraStream) {
       cameraStream.getTracks().forEach(track => track.stop());
       setCameraStream(null);
+    }
+  };
+
+  // Capture webcam video frame and set as the active custom mannequin backdrop
+  const captureWebcamAsMannequin = () => {
+    if (tryOnMode === 'camera' && webcamRef.current) {
+      try {
+        const canvas = document.createElement("canvas");
+        canvas.width = 600;
+        canvas.height = 750;
+        const ctx = canvas.getContext("2d");
+        if (ctx) {
+          // Draw camera frame with horizontal mirror scale-x-[-1]
+          ctx.save();
+          ctx.translate(600, 0);
+          ctx.scale(-1, 1);
+          ctx.drawImage(webcamRef.current, 0, 0, 600, 750);
+          ctx.restore();
+          
+          const dataUrl = canvas.toDataURL("image/jpeg");
+          const newModel = {
+            id: `custom-${Date.now()}`,
+            name: "My Personal Mannequin (Webcam Capture)",
+            image: dataUrl,
+            style: "User Custom Face & Body Silhouette"
+          };
+          
+          setCustomModels(prev => [newModel, ...prev]);
+          setSelectedModel(newModel);
+          setTryOnMode('model');
+          stopCamera();
+        }
+      } catch (err) {
+        console.error("Failed to capture webcam for mannequin backdrop:", err);
+      }
     }
   };
 
@@ -255,8 +393,6 @@ export default function ProductDetailModal({
   const captureSnapshot = () => {
     if (!tryOnContainerRef.current) return;
     
-    // We can simulate an beautiful instant boutique Polaroid-styled snapshot using a canvas composite
-    // Or capture from the webcam stream/image overlay elegantly
     try {
       const canvas = document.createElement("canvas");
       canvas.width = 600;
@@ -268,21 +404,12 @@ export default function ProductDetailModal({
         ctx.fillStyle = "#0f172a"; // Deep slate
         ctx.fillRect(0, 0, 600, 750);
         
-        // Draw background model or camera video frame
-        const tempImg = new Image();
-        tempImg.crossOrigin = "anonymous";
-        
-        // Use active mannequin or a stylish backdrop
-        tempImg.src = tryOnMode === 'model' ? selectedModel.image : "https://images.unsplash.com/photo-1558769132-cb1aea458c5e?w=600";
-        
-        tempImg.onload = () => {
-          // Draw model scaled to canvas
-          ctx.drawImage(tempImg, 0, 0, 600, 750);
-          
+        const drawGarmentAndFinish = () => {
           // Draw the overlay dress with corresponding translate and scaling
           const overlayImg = new Image();
           overlayImg.crossOrigin = "anonymous";
-          overlayImg.src = tryOnGarment;
+          const isLocalGarment = activeGarmentUrl.startsWith('/') || activeGarmentUrl.startsWith('data:');
+          overlayImg.src = isLocalGarment ? activeGarmentUrl : `/api/proxy-image?url=${encodeURIComponent(activeGarmentUrl)}`;
           
           overlayImg.onload = () => {
             ctx.save();
@@ -316,7 +443,59 @@ export default function ProductDetailModal({
             setSnapshotDataUrl(dataUrl);
             setShowSnapshotModal(true);
           };
+          
+          overlayImg.onerror = (e) => {
+            console.error("Failed to load garment overlay image:", e);
+            // Export data URI even without garment if it fails
+            const dataUrl = canvas.toDataURL("image/jpeg");
+            setSnapshotDataUrl(dataUrl);
+            setShowSnapshotModal(true);
+          };
         };
+
+        if (tryOnMode === 'camera' && webcamRef.current) {
+          try {
+            // Draw camera frame with horizontal mirror scale-x-[-1]
+            ctx.save();
+            ctx.translate(600, 0);
+            ctx.scale(-1, 1);
+            ctx.drawImage(webcamRef.current, 0, 0, 600, 750);
+            ctx.restore();
+            
+            // Proceed to garment
+            drawGarmentAndFinish();
+          } catch (vidErr) {
+            console.error("Error drawing video to canvas:", vidErr);
+            // Fallback to drawing a nice background if video fails
+            const tempImg = new Image();
+            tempImg.crossOrigin = "anonymous";
+            const fallbackUrl = "https://images.unsplash.com/photo-1558769132-cb1aea458c5e?w=600";
+            tempImg.src = `/api/proxy-image?url=${encodeURIComponent(fallbackUrl)}`;
+            tempImg.onload = () => {
+              ctx.drawImage(tempImg, 0, 0, 600, 750);
+              drawGarmentAndFinish();
+            };
+            tempImg.onerror = () => {
+              drawGarmentAndFinish();
+            };
+          }
+        } else {
+          // Draw background model
+          const tempImg = new Image();
+          tempImg.crossOrigin = "anonymous";
+          const isLocalModel = selectedModel.image.startsWith('/') || selectedModel.image.startsWith('data:');
+          tempImg.src = isLocalModel ? selectedModel.image : `/api/proxy-image?url=${encodeURIComponent(selectedModel.image)}`;
+          
+          tempImg.onload = () => {
+            ctx.drawImage(tempImg, 0, 0, 600, 750);
+            drawGarmentAndFinish();
+          };
+          
+          tempImg.onerror = () => {
+            console.error("Failed to load selected model image.");
+            drawGarmentAndFinish();
+          };
+        }
       }
     } catch (err) {
       console.error("Failed to generate canvas snapshot:", err);
@@ -505,6 +684,20 @@ export default function ProductDetailModal({
                           muted
                           className="w-full h-full object-cover scale-x-[-1]" // mirror effect
                         />
+                        
+                        {!cameraError && (
+                          <div className="absolute bottom-4 left-4 z-10">
+                            <button
+                              type="button"
+                              onClick={captureWebcamAsMannequin}
+                              className="bg-indigo-600 hover:bg-indigo-500 text-white px-4 py-2.5 rounded-xl text-[10px] font-black uppercase tracking-widest shadow-lg flex items-center gap-1.5 cursor-pointer border border-indigo-400/30 transition-transform active:scale-95 animate-pulse"
+                            >
+                              <Camera className="w-3.5 h-3.5" />
+                              Capture My Look As Mannequin
+                            </button>
+                          </div>
+                        )}
+
                         {cameraError && (
                           <div className="absolute inset-0 bg-black/95 p-6 flex flex-col items-center justify-center text-center text-rose-400 z-10 space-y-4">
                             <X className="w-8 h-8 text-rose-500 animate-bounce" />
@@ -522,7 +715,7 @@ export default function ProductDetailModal({
                     ) : (
                       <div className="w-full h-full relative bg-slate-900 flex items-center justify-center">
                         <img
-                          src={selectedModel.image}
+                          src={selectedModel.image.startsWith('/') || selectedModel.image.startsWith('data:') ? selectedModel.image : `/api/proxy-image?url=${encodeURIComponent(selectedModel.image)}`}
                           alt={selectedModel.name}
                           className="w-full h-full object-cover brightness-[0.9]"
                           referrerPolicy="no-referrer"
@@ -545,7 +738,7 @@ export default function ProductDetailModal({
                       }}
                     >
                       <img
-                        src={tryOnGarment}
+                        src={activeGarmentUrl.startsWith('/') || activeGarmentUrl.startsWith('data:') ? activeGarmentUrl : `/api/proxy-image?url=${encodeURIComponent(activeGarmentUrl)}`}
                         alt="Garment overlay"
                         className="w-full h-full object-contain"
                         referrerPolicy="no-referrer"
@@ -583,7 +776,7 @@ export default function ProductDetailModal({
               </div>
 
               {/* Media Selection Hub Bar */}
-              <div className="grid grid-cols-4 gap-2 bg-neutral-100 p-1.5 rounded-2xl border border-neutral-200" id="media-selectors-bar">
+              <div className={`grid ${isFood ? 'grid-cols-3' : 'grid-cols-4'} gap-2 bg-neutral-100 p-1.5 rounded-2xl border border-neutral-200`} id="media-selectors-bar">
                 <button
                   type="button"
                   onClick={() => {
@@ -629,24 +822,26 @@ export default function ProductDetailModal({
                   🎬 Runway
                 </button>
 
-                <button
-                  type="button"
-                  onClick={() => {
-                    setActiveMediaTab('tryon');
-                    // auto trigger camera or model setup
-                    if (tryOnMode === 'camera') {
-                      startCamera();
-                    }
-                  }}
-                  className={`py-2 rounded-xl text-[10px] font-black uppercase tracking-wider transition-all cursor-pointer flex items-center justify-center gap-1 ${
-                    activeMediaTab === 'tryon' 
-                      ? 'bg-gradient-to-r from-amber-500 to-pink-500 text-white shadow-md font-bold' 
-                      : 'text-neutral-500 hover:text-indigo-600 hover:bg-neutral-50'
-                  }`}
-                >
-                  💅 Try On
-                  <span className="text-[7px] bg-amber-400 text-neutral-900 px-1 rounded-sm uppercase tracking-tight font-black animate-pulse">AR</span>
-                </button>
+                {!isFood && (
+                  <button
+                    type="button"
+                    onClick={() => {
+                      setActiveMediaTab('tryon');
+                      // auto trigger camera or model setup
+                      if (tryOnMode === 'camera') {
+                        startCamera();
+                      }
+                    }}
+                    className={`py-2 rounded-xl text-[10px] font-black uppercase tracking-wider transition-all cursor-pointer flex items-center justify-center gap-1 ${
+                      activeMediaTab === 'tryon' 
+                        ? 'bg-gradient-to-r from-amber-500 to-pink-500 text-white shadow-md font-bold' 
+                        : 'text-neutral-500 hover:text-indigo-600 hover:bg-neutral-50'
+                    }`}
+                  >
+                    💅 Try On
+                    <span className="text-[7px] bg-amber-400 text-neutral-900 px-1 rounded-sm uppercase tracking-tight font-black animate-pulse">AR</span>
+                  </button>
+                )}
               </div>
 
               {/* DYNAMIC FIT SETTINGS DRAWER FOR AR TRY-ON */}
@@ -679,7 +874,7 @@ export default function ProductDetailModal({
                     <div className="space-y-1.5">
                       <span className="text-[9px] font-mono text-neutral-400 font-bold block uppercase tracking-wider">Select Fashion Model Backdrop:</span>
                       <div className="grid grid-cols-3 gap-2">
-                        {FASHION_MODELS.map((m) => (
+                        {combinedModels.map((m) => (
                           <button
                             key={m.id}
                             type="button"
@@ -690,13 +885,71 @@ export default function ProductDetailModal({
                                 : 'bg-white border-neutral-200 hover:border-neutral-300'
                             }`}
                           >
-                            <span className="font-bold text-[10px] text-neutral-800 block leading-tight">{m.name.split(" ")[0]}</span>
+                            <span className="font-bold text-[10px] text-neutral-800 block leading-tight truncate">{m.name.split(" ")[0]}</span>
                             <span className="text-[8px] text-neutral-400 truncate block">{m.style}</span>
                           </button>
                         ))}
                       </div>
                     </div>
                   )}
+
+                  {/* Dress Picker (Select try-on gown overlay) */}
+                  <div className="space-y-1.5 border-t border-neutral-150 pt-3">
+                    <div className="flex justify-between items-center">
+                      <span className="text-[9px] font-mono text-neutral-400 font-bold block uppercase tracking-wider">Select Designer Dress Overlay:</span>
+                      {selectedGarmentUrl && (
+                        <button
+                          type="button"
+                          onClick={() => setSelectedGarmentUrl("")}
+                          className="text-[9px] text-indigo-600 hover:text-indigo-800 font-bold uppercase tracking-wider cursor-pointer"
+                        >
+                          Reset to Product Gown
+                        </button>
+                      )}
+                    </div>
+                    <div className="flex gap-2 overflow-x-auto pb-1 max-w-full scrollbar-thin scrollbar-thumb-neutral-200">
+                      {/* Product's Default design */}
+                      <button
+                        type="button"
+                        onClick={() => setSelectedGarmentUrl("")}
+                        className={`flex items-center gap-2 p-1.5 rounded-xl border text-left shrink-0 transition-all cursor-pointer ${
+                          !selectedGarmentUrl 
+                            ? 'bg-indigo-50 border-indigo-400 shadow-sm' 
+                            : 'bg-white border-neutral-200 hover:border-neutral-300'
+                        }`}
+                      >
+                        <div className="w-8 h-8 rounded-lg bg-neutral-100 flex items-center justify-center overflow-hidden border border-neutral-200">
+                          <img src={product.tryOnImage || DEFAULT_TRYON_GARMENT} alt="Product default design" className="w-full h-full object-contain" />
+                        </div>
+                        <div>
+                          <span className="font-bold text-[10px] text-neutral-800 block max-w-[100px] truncate font-serif">Product Design</span>
+                          <span className="text-[8px] text-neutral-400 block">Default Gown</span>
+                        </div>
+                      </button>
+
+                      {/* DB Dresses list */}
+                      {dbDresses.map((dress) => (
+                        <button
+                          key={dress.id}
+                          type="button"
+                          onClick={() => setSelectedGarmentUrl(dress.image)}
+                          className={`flex items-center gap-2 p-1.5 rounded-xl border text-left shrink-0 transition-all cursor-pointer ${
+                            selectedGarmentUrl === dress.image
+                              ? 'bg-indigo-50 border-indigo-400 shadow-sm' 
+                              : 'bg-white border-neutral-200 hover:border-neutral-300'
+                          }`}
+                        >
+                          <div className="w-8 h-8 rounded-lg bg-neutral-100 flex items-center justify-center overflow-hidden border border-neutral-200">
+                            <img src={dress.image} alt={dress.name} className="w-full h-full object-contain animate-fade-in" referrerPolicy="no-referrer" />
+                          </div>
+                          <div>
+                            <span className="font-bold text-[10px] text-neutral-800 block max-w-[120px] truncate font-serif">{dress.name}</span>
+                            <span className="text-[8px] text-neutral-400 block capitalize">{dress.category || "Dress"}</span>
+                          </div>
+                        </button>
+                      ))}
+                    </div>
+                  </div>
 
                   {/* calibration sliders */}
                   <div className="space-y-3.5 pt-1">
@@ -861,14 +1114,14 @@ export default function ProductDetailModal({
                   </div>
                   <div className="bg-neutral-50 p-3 rounded-xl border border-neutral-100">
                     <span className="text-[9px] font-mono text-neutral-400 block uppercase font-bold mb-0.5">Bespoke Options</span>
-                    <span className="font-bold text-green-600 uppercase tracking-wider text-[10px] flex items-center gap-1">
-                      <Sparkles className="w-3.5 h-3.5 animate-pulse" /> Try-On Supported
+                    <span className="font-bold text-amber-600 uppercase tracking-wider text-[10px] flex items-center gap-1.5">
+                      <Ribbon className="w-3.5 h-3.5 animate-pulse text-amber-500" /> Try-On Supported
                     </span>
                   </div>
                 </div>
 
-                <div className="p-3 bg-indigo-50/50 rounded-xl border border-indigo-100 text-[11px] text-indigo-700 flex items-start gap-2.5">
-                  <Sparkles className="w-4 h-4 text-indigo-500 shrink-0 mt-0.5" />
+                <div className="p-3 bg-amber-50/50 rounded-xl border border-amber-100 text-[11px] text-amber-800 flex items-start gap-2.5">
+                  <Ribbon className="w-4 h-4 text-amber-500 shrink-0 mt-0.5" />
                   <div>
                     <span className="font-black uppercase tracking-wider block mb-0.5">Accra Virtual Showroom Live</span>
                     Ella's Store supports 3D rotational views, inline catwalk video showcase, and custom browser webcam AR try-ons for this couture product. Choose your visualizer on the left.
@@ -892,25 +1145,30 @@ export default function ProductDetailModal({
 
           </div>
 
-          {/* Bottom Half: "You Might Also Like" Recommendation Section */}
-          {suggestedProducts.length > 0 && (
+          {/* Bottom Half: Complete the Look & Recommended Accessories Section */}
+          {recommendationData.items.length > 0 && (
             <div className="pt-8 border-t border-neutral-100 space-y-5" id="suggested-products-section">
-              <div className="flex items-center justify-between">
+              <div className="flex items-center justify-between flex-wrap gap-2">
                 <div className="flex items-center gap-2">
-                  <div className="p-1.5 bg-pink-50 rounded-lg text-pink-500 border border-pink-100">
-                    <Sparkles className="w-4 h-4 animate-pulse" />
+                  <div className="p-1.5 bg-indigo-50 text-indigo-600 rounded-lg border border-indigo-100 animate-pulse">
+                    {product.category === 'food' ? (
+                      <Ribbon className="w-4 h-4" />
+                    ) : (
+                      <Sparkles className="w-4 h-4" />
+                    )}
                   </div>
                   <div>
-                    <h3 className="text-xs font-black text-slate-900 uppercase tracking-wider">
-                      You Might Also Like
+                    <h3 className="text-xs font-black text-slate-900 uppercase tracking-wider flex items-center gap-1.5">
+                      {recommendationData.title}
                     </h3>
                     <p className="text-[10px] text-neutral-400 font-mono">
-                      Curated recommendations from our matching <span className="text-indigo-600 font-bold">{product.category}</span> line
+                      {recommendationData.subtitle}
                     </p>
                   </div>
                 </div>
-                <span className="text-[10px] bg-neutral-100 text-neutral-600 font-bold font-mono uppercase tracking-widest px-2.5 py-1 rounded-full">
-                  Similar Items
+                <span className="text-[10px] bg-indigo-50 text-indigo-700 font-bold font-mono uppercase tracking-widest px-2.5 py-1 rounded-full border border-indigo-100 flex items-center gap-1">
+                  <Layers className="w-3 h-3" />
+                  {product.category === 'food' ? "Menu Pairings" : "Complete Look"}
                 </span>
               </div>
 
@@ -994,7 +1252,7 @@ export default function ProductDetailModal({
 
               <div className="text-center space-y-1.5">
                 <div className="p-2 bg-amber-500/10 text-amber-500 w-fit mx-auto rounded-xl border border-amber-500/20">
-                  <Sparkles className="w-5 h-5 animate-pulse" />
+                  <Ribbon className="w-5 h-5 animate-bounce" />
                 </div>
                 <h3 className="text-sm font-black uppercase tracking-wider text-white">Your Ella's Fitting Snapshot!</h3>
                 <p className="text-xs text-neutral-400">Your custom fitting composition is prepared below.</p>
