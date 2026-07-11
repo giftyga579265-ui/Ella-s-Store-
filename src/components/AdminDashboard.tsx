@@ -59,6 +59,7 @@ interface AdminDashboardProps {
   onAddNotification?: (title: string, message: string, type: 'info' | 'success' | 'warning' | 'promo', targetEmail: string) => void;
   onSeedDemoData?: () => void;
   onClearAllData?: () => void;
+  onDeleteCustomersAndActivities?: () => Promise<void>;
 }
 
 export default function AdminDashboard({
@@ -66,10 +67,12 @@ export default function AdminDashboard({
   activityLogs, discountCodes, charityData, charityDonations = [], mediaFiles, homepageSettings, adminMessages, events, reviews, deliveries, onDeleteReview, onUpdateDelivery, onCreateDelivery,
   onClose, onSetProducts, onSetOrders, onSetLocations, onSetInquiries, 
   onSetDiscountCodes, onSetCharityData, onSetMediaFiles, onSetHomepageSettings, onSetAdminMessages,
-  onSetActivityLogs, onSetEvents, onShowToast, onLogActivity, onAddNotification, onSeedDemoData, onClearAllData
+  onSetActivityLogs, onSetEvents, onShowToast, onLogActivity, onAddNotification, onSeedDemoData, onClearAllData,
+  onDeleteCustomersAndActivities
 }: AdminDashboardProps) {
   
   const [activeTab, setActiveTab] = useState("dashboard");
+  const [showDeleteConfirm, setShowDeleteConfirm] = useState(false);
   
   // AR Try-On states and listeners
   const [arMannequins, setArMannequins] = useState<ArMannequin[]>([]);
@@ -1242,6 +1245,16 @@ export default function AdminDashboard({
                   >
                     Clear All Firestore Collections
                   </button>
+                  {onDeleteCustomersAndActivities && (
+                    <button
+                      type="button"
+                      onClick={() => setShowDeleteConfirm(true)}
+                      className="px-4 py-2.5 rounded-xl text-xs font-bold bg-rose-50 text-rose-600 border border-rose-200 hover:bg-rose-100 transition-colors cursor-pointer flex items-center gap-1.5"
+                    >
+                      <Users className="w-3.5 h-3.5 text-rose-500" />
+                      Delete All Customers & Activities
+                    </button>
+                  )}
                   <button
                     type="button"
                     onClick={onSeedDemoData}
@@ -2308,7 +2321,19 @@ export default function AdminDashboard({
                   <h2 className="font-serif text-2xl text-neutral-900 font-medium">Customer Relationship Management (CRM)</h2>
                   <p className="text-xs text-neutral-500">Track registration statistics, order frequencies, and lifetime value metrics. Click on any row to view and extract user data.</p>
                 </div>
-                <PageToggleBtn />
+                <div className="flex items-center gap-3 self-end sm:self-auto">
+                  {onDeleteCustomersAndActivities && (
+                    <button
+                      type="button"
+                      onClick={() => setShowDeleteConfirm(true)}
+                      className="px-4 py-2 rounded-xl text-xs font-bold bg-rose-50 text-rose-600 border border-rose-200 hover:bg-rose-100 transition-colors cursor-pointer flex items-center gap-1.5 shadow-sm"
+                    >
+                      <Trash2 className="w-3.5 h-3.5 text-rose-500" />
+                      Delete All Accounts & Activities
+                    </button>
+                  )}
+                  <PageToggleBtn />
+                </div>
               </div>
 
               <div className="grid grid-cols-1 lg:grid-cols-3 gap-6 items-start">
@@ -4902,6 +4927,49 @@ export default function AdminDashboard({
         </main>
       </div>
     </div>
+
+    {/* Custom Account Deletion Confirmation Modal */}
+    {showDeleteConfirm && (
+      <div className="fixed inset-0 bg-slate-950/85 backdrop-blur-md z-[150] flex items-center justify-center p-4">
+        <div className="bg-white rounded-3xl p-6 max-w-md w-full shadow-2xl border border-neutral-150 space-y-6 text-center animate-in zoom-in-95 duration-200">
+          <div className="w-12 h-12 rounded-full bg-rose-50 text-rose-600 flex items-center justify-center mx-auto border border-rose-100">
+            <Trash2 className="w-6 h-6 animate-pulse" />
+          </div>
+          <div className="space-y-2">
+            <h3 className="text-base font-bold text-neutral-900 tracking-tight">
+              Confirm Account Purge
+            </h3>
+            <p className="text-xs text-neutral-500 leading-relaxed">
+              You are about to delete <span className="font-bold text-rose-600">all customer accounts</span> and <span className="font-bold text-rose-600">all activity logs</span> in Ella's database. This will also log out any currently active clients, forcing them to re-register.
+            </p>
+            <p className="text-[10px] text-neutral-400 font-mono bg-neutral-50 p-2.5 rounded-xl border border-neutral-100 leading-normal">
+              Warning: This action is permanent and cannot be undone. Product data, orders, and charity files will remain untouched.
+            </p>
+          </div>
+          <div className="flex gap-3">
+            <button
+              type="button; cursor-pointer"
+              onClick={() => setShowDeleteConfirm(false)}
+              className="flex-1 px-4 py-2.5 bg-neutral-100 hover:bg-neutral-200 text-neutral-700 rounded-xl text-xs font-bold transition-colors cursor-pointer"
+            >
+              Cancel
+            </button>
+            <button
+              type="button"
+              onClick={async () => {
+                setShowDeleteConfirm(false);
+                if (onDeleteCustomersAndActivities) {
+                  await onDeleteCustomersAndActivities();
+                }
+              }}
+              className="flex-1 px-4 py-2.5 bg-rose-600 hover:bg-rose-700 text-white rounded-xl text-xs font-bold shadow-sm transition-colors cursor-pointer"
+            >
+              Yes, Purge Accounts
+            </button>
+          </div>
+        </div>
+      </div>
+    )}
   </>
 );
 }

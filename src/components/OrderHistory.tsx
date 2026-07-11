@@ -1,5 +1,5 @@
 import { useState, useMemo } from "react";
-import { Order, Payment } from "../types";
+import { Order, Payment, Customer } from "../types";
 import { 
   X, 
   ShoppingBag, 
@@ -21,6 +21,7 @@ import autoTable from "jspdf-autotable";
 interface OrderHistoryProps {
   orders: Order[];
   payments: Payment[];
+  customers: Customer[];
   currentUser: string;
   currentUserEmail: string;
   onClose: () => void;
@@ -32,6 +33,7 @@ interface OrderHistoryProps {
 export default function OrderHistory({ 
   orders, 
   payments, 
+  customers,
   currentUser, 
   currentUserEmail, 
   onClose,
@@ -120,6 +122,398 @@ export default function OrderHistory({
     doc.text(`Total Charged Amount: GH₵ ${payment.amount.toLocaleString()}`, 14, finalY + 10);
     
     doc.save(`Payment_Invoice_${payment.id.slice(-6).toUpperCase()}.pdf`);
+  };
+
+  const matchedCustomer = useMemo(() => {
+    return customers.find(c => 
+      c.name.toLowerCase() === currentUser.toLowerCase() ||
+      (currentUserEmail && c.email.toLowerCase() === currentUserEmail.toLowerCase())
+    );
+  }, [customers, currentUser, currentUserEmail]);
+
+  const printOrderInvoice = (order: Order) => {
+    const iframe = document.createElement('iframe');
+    iframe.style.position = 'absolute';
+    iframe.style.width = '0px';
+    iframe.style.height = '0px';
+    iframe.style.border = 'none';
+    document.body.appendChild(iframe);
+
+    const itemsHtml = order.items.map(item => `
+      <tr style="border-bottom: 1px solid #e5e7eb;">
+        <td style="padding: 12px 0; font-size: 14px; color: #374151;">${item}</td>
+        <td style="padding: 12px 0; font-size: 14px; color: #111827; text-align: right; font-weight: bold;">Included</td>
+      </tr>
+    `).join("");
+
+    const htmlContent = `
+      <!DOCTYPE html>
+      <html>
+      <head>
+        <title>Invoice - #${order.id.slice(-6).toUpperCase()}</title>
+        <style>
+          @import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap');
+          body {
+            font-family: 'Inter', sans-serif;
+            margin: 0;
+            padding: 40px;
+            color: #1f2937;
+            background-color: #ffffff;
+          }
+          .invoice-container {
+            max-w: 800px;
+            margin: 0 auto;
+            border: 1px solid #e5e7eb;
+            padding: 40px;
+            border-radius: 12px;
+          }
+          .header {
+            display: flex;
+            justify-content: space-between;
+            align-items: flex-start;
+            border-bottom: 2px solid #f3f4f6;
+            padding-bottom: 24px;
+            margin-bottom: 30px;
+          }
+          .logo-area h1 {
+            font-size: 24px;
+            font-weight: 800;
+            letter-spacing: 0.1em;
+            margin: 0;
+            color: #111827;
+          }
+          .logo-area p {
+            font-size: 10px;
+            color: #6b7280;
+            text-transform: uppercase;
+            margin: 4px 0 0 0;
+            font-family: monospace;
+          }
+          .invoice-title {
+            text-align: right;
+          }
+          .invoice-title h2 {
+            font-size: 28px;
+            font-weight: 800;
+            color: #4f46e5;
+            margin: 0;
+          }
+          .invoice-title p {
+            font-size: 12px;
+            color: #6b7280;
+            margin: 6px 0 0 0;
+          }
+          .details-grid {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 24px;
+            margin-bottom: 40px;
+          }
+          .details-block h3 {
+            font-size: 12px;
+            text-transform: uppercase;
+            color: #9ca3af;
+            margin-bottom: 8px;
+            letter-spacing: 0.05em;
+          }
+          .details-block p {
+            font-size: 14px;
+            margin: 4px 0;
+            font-weight: 500;
+          }
+          .table-container {
+            margin-bottom: 40px;
+          }
+          table {
+            width: 100%;
+            border-collapse: collapse;
+          }
+          th {
+            text-align: left;
+            padding-bottom: 12px;
+            border-bottom: 2px solid #e5e7eb;
+            font-size: 12px;
+            text-transform: uppercase;
+            color: #6b7280;
+            letter-spacing: 0.05em;
+          }
+          .total-section {
+            border-top: 2px solid #f3f4f6;
+            padding-top: 20px;
+            display: flex;
+            justify-content: flex-end;
+          }
+          .total-box {
+            width: 250px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+          }
+          .total-box span {
+            font-size: 16px;
+            font-weight: 600;
+            color: #4b5563;
+          }
+          .total-box .price {
+            font-size: 24px;
+            font-weight: 800;
+            color: #111827;
+          }
+          .footer {
+            text-align: center;
+            margin-top: 60px;
+            font-size: 12px;
+            color: #9ca3af;
+            border-top: 1px solid #f3f4f6;
+            padding-top: 20px;
+          }
+          @media print {
+            body {
+              padding: 0;
+            }
+            .invoice-container {
+              border: none;
+              padding: 0;
+            }
+          }
+        </style>
+      </head>
+      <body>
+        <div class="invoice-container">
+          <div class="header" style="display: flex; justify-content: space-between;">
+            <div class="logo-area">
+              <h1>ELLA'S STORE</h1>
+              <p>Couture & Alterations • Accra</p>
+            </div>
+            <div class="invoice-title" style="text-align: right;">
+              <h2 style="margin: 0; color: #4f46e5;">INVOICE</h2>
+              <p>Invoice No: #INV-${order.id.slice(-6).toUpperCase()}</p>
+            </div>
+          </div>
+          
+          <div class="details-grid" style="display: flex; justify-content: space-between; margin-top: 20px;">
+            <div class="details-block">
+              <h3>Billed To:</h3>
+              <p style="font-size: 16px; font-weight: 700; color: #111827; margin: 0;">${order.customer}</p>
+              <p style="color: #4b5563; margin: 4px 0;">Accra, Ghana</p>
+            </div>
+            <div class="details-block" style="text-align: right;">
+              <h3>Invoice Details:</h3>
+              <p style="margin: 2px 0;">Date: <strong>${order.date}</strong></p>
+              <p style="margin: 2px 0;">Payment Mode: <strong>MTN Mobile Money</strong></p>
+              <p style="margin: 2px 0;">Status: <strong style="color: #10b981; text-transform: uppercase;">${order.status}</strong></p>
+            </div>
+          </div>
+          
+          <div class="table-container" style="margin-top: 30px;">
+            <table style="width: 100%; border-collapse: collapse;">
+              <thead>
+                <tr style="border-bottom: 2px solid #e5e7eb;">
+                  <th style="width: 70%; text-align: left; padding-bottom: 10px;">Style Item / Description</th>
+                  <th style="width: 30%; text-align: right; padding-bottom: 10px;">Price Status</th>
+                </tr>
+              </thead>
+              <tbody>
+                ${itemsHtml}
+              </tbody>
+            </table>
+          </div>
+          
+          <div class="total-section" style="display: flex; justify-content: flex-end; margin-top: 30px; border-top: 2px solid #f3f4f6; padding-top: 20px;">
+            <div class="total-box" style="display: flex; justify-content: space-between; width: 300px; align-items: center;">
+              <span style="font-size: 16px; font-weight: 600; color: #4b5563;">Grand Total:</span>
+              <span style="font-size: 24px; font-weight: 800; color: #111827;">GH₵ ${order.total.toLocaleString()}</span>
+            </div>
+          </div>
+          
+          <div class="footer" style="text-align: center; margin-top: 60px; font-size: 12px; color: #9ca3af; border-top: 1px solid #f3f4f6; padding-top: 20px;">
+            <p>Thank you for choosing Ella's Bespoke Couture!</p>
+            <p style="font-size: 10px; margin-top: 5px;">If you have any questions about this invoice, please contact 0276747037.</p>
+          </div>
+        </div>
+      </body>
+      </html>
+    `;
+
+    const doc = iframe.contentWindow?.document || iframe.contentDocument;
+    if (doc) {
+      doc.open();
+      doc.write(htmlContent);
+      doc.close();
+      
+      setTimeout(() => {
+        iframe.contentWindow?.focus();
+        iframe.contentWindow?.print();
+        setTimeout(() => {
+          document.body.removeChild(iframe);
+        }, 1000);
+      }, 300);
+    }
+  };
+
+  const printPaymentReceipt = (payment: Payment) => {
+    const iframe = document.createElement('iframe');
+    iframe.style.position = 'absolute';
+    iframe.style.width = '0px';
+    iframe.style.height = '0px';
+    iframe.style.border = 'none';
+    document.body.appendChild(iframe);
+
+    const htmlContent = `
+      <!DOCTYPE html>
+      <html>
+      <head>
+        <title>Payment Receipt - #${payment.id.slice(-6).toUpperCase()}</title>
+        <style>
+          @import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap');
+          body {
+            font-family: 'Inter', sans-serif;
+            margin: 0;
+            padding: 40px;
+            color: #1f2937;
+            background-color: #ffffff;
+          }
+          .receipt-container {
+            max-w: 600px;
+            margin: 0 auto;
+            border: 1px solid #e5e7eb;
+            padding: 40px;
+            border-radius: 12px;
+          }
+          .header {
+            text-align: center;
+            border-bottom: 2px solid #f3f4f6;
+            padding-bottom: 24px;
+            margin-bottom: 30px;
+          }
+          .header h1 {
+            font-size: 22px;
+            font-weight: 800;
+            letter-spacing: 0.1em;
+            margin: 0;
+            color: #111827;
+          }
+          .header p {
+            font-size: 10px;
+            color: #6b7280;
+            text-transform: uppercase;
+            margin: 4px 0 0 0;
+          }
+          .receipt-title {
+            font-size: 14px;
+            font-weight: 800;
+            color: #10b981;
+            margin-top: 10px;
+            text-transform: uppercase;
+            letter-spacing: 0.05em;
+          }
+          .details-list {
+            margin-bottom: 30px;
+          }
+          .details-row {
+            display: flex;
+            justify-content: space-between;
+            padding: 10px 0;
+            border-bottom: 1px solid #f3f4f6;
+            font-size: 14px;
+          }
+          .details-label {
+            color: #6b7280;
+            font-weight: 500;
+          }
+          .details-value {
+            color: #111827;
+            font-weight: 600;
+          }
+          .total-section {
+            background-color: #f9fafb;
+            padding: 16px;
+            border-radius: 8px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+          }
+          .total-label {
+            font-size: 14px;
+            font-weight: 700;
+            color: #374151;
+          }
+          .total-value {
+            font-size: 20px;
+            font-weight: 800;
+            color: #10b981;
+          }
+          .footer {
+            text-align: center;
+            margin-top: 40px;
+            font-size: 11px;
+            color: #9ca3af;
+          }
+        </style>
+      </head>
+      <body>
+        <div class="receipt-container">
+          <div class="header">
+            <h1>ELLA'S STORE</h1>
+            <p>Couture & Alterations • Accra</p>
+            <div class="receipt-title">Payment Receipt</div>
+          </div>
+          
+          <div class="details-list">
+            <div class="details-row">
+              <span class="details-label">Transaction ID</span>
+              <span class="details-value">#${payment.id.toUpperCase()}</span>
+            </div>
+            <div class="details-row">
+              <span class="details-label">Order Reference ID</span>
+              <span class="details-value">#${payment.orderId ? payment.orderId.toUpperCase() : 'N/A'}</span>
+            </div>
+            <div class="details-row">
+              <span class="details-label">Customer Account</span>
+              <span class="details-value">${payment.customer}</span>
+            </div>
+            <div class="details-row">
+              <span class="details-label">Payment Method</span>
+              <span class="details-value" style="text-transform: uppercase;">${payment.method}</span>
+            </div>
+            <div class="details-row">
+              <span class="details-label">Transaction Date</span>
+              <span class="details-value">${payment.date}</span>
+            </div>
+            <div class="details-row">
+              <span class="details-label">Transaction Status</span>
+              <span class="details-value" style="color: #10b981; text-transform: uppercase;">${payment.status}</span>
+            </div>
+          </div>
+          
+          <div class="total-section">
+            <span class="total-label">Total Amount Charged</span>
+            <span class="total-value">GH₵ ${payment.amount.toLocaleString()}</span>
+          </div>
+          
+          <div class="footer">
+            <p>Thank you for your secure payment to Ella's Store!</p>
+            <p style="font-size: 9px; margin-top: 5px;">Momo Gateway Ref: ${payment.id.slice(-8).toUpperCase()}</p>
+          </div>
+        </div>
+      </body>
+      </html>
+    `;
+
+    const doc = iframe.contentWindow?.document || iframe.contentDocument;
+    if (doc) {
+      doc.open();
+      doc.write(htmlContent);
+      doc.close();
+      
+      setTimeout(() => {
+        iframe.contentWindow?.focus();
+        iframe.contentWindow?.print();
+        setTimeout(() => {
+          document.body.removeChild(iframe);
+        }, 1000);
+      }, 300);
+    }
   };
 
   return (
@@ -224,12 +618,23 @@ export default function OrderHistory({
               )}
             </div>
             
-            <div className="space-y-0.5">
+            <div className="space-y-0.5 w-full">
               <span className="text-[8px] font-black text-indigo-600 bg-indigo-50 border border-indigo-100/60 px-2 py-0.5 rounded-full uppercase tracking-wider font-mono">
                 Bespoke Customer
               </span>
               <h3 className="font-sans text-xs font-black text-neutral-800 uppercase tracking-wide">{currentUser}</h3>
               <p className="text-[10px] text-neutral-500 font-semibold truncate max-w-[200px]">{currentUserEmail}</p>
+              
+              {/* Loyalty Points display in the Profile Sidebar Card */}
+              <div className="mt-2 pt-1.5 border-t border-dashed border-neutral-200 flex items-center justify-between">
+                <div className="flex items-center gap-1">
+                  <span className="text-xs">🪙</span>
+                  <span className="text-[10px] font-bold text-neutral-500 uppercase tracking-wide">Loyalty Balance:</span>
+                </div>
+                <span className="text-xs font-extrabold text-amber-600 font-mono bg-amber-50 px-2 py-0.5 rounded-full border border-amber-100">
+                  {matchedCustomer?.loyaltyPoints ?? 0} Points
+                </span>
+              </div>
             </div>
           </div>
 
@@ -283,8 +688,8 @@ export default function OrderHistory({
                             </div>
                             {isCustomerOnly && (
                               <button 
-                                onClick={() => generateInvoicePDF(order)}
-                                className="flex items-center gap-1 text-[10px] bg-neutral-100 hover:bg-neutral-200 text-neutral-600 px-2 py-1 rounded-md transition-colors cursor-pointer"
+                                onClick={() => printOrderInvoice(order)}
+                                className="flex items-center gap-1 text-[10px] bg-neutral-900 hover:bg-amber-500 hover:text-neutral-900 text-white font-bold px-2.5 py-1.5 rounded-md transition-colors cursor-pointer shadow-sm active:scale-95"
                               >
                                 <Printer className="w-3 h-3" />
                                 Print Invoice
@@ -437,10 +842,10 @@ export default function OrderHistory({
                         </span>
                         {isCustomerOnly && (
                           <button 
-                            onClick={() => generatePaymentInvoicePDF(payment)}
-                            className="mt-2 flex items-center gap-1 text-[9px] bg-white hover:bg-neutral-100 text-neutral-600 border border-neutral-200 px-2.5 py-1 rounded-md transition-colors cursor-pointer ml-auto justify-end shadow-sm"
+                            onClick={() => printPaymentReceipt(payment)}
+                            className="mt-2 flex items-center gap-1 text-[9px] bg-neutral-900 hover:bg-emerald-500 hover:text-neutral-900 text-white font-bold border border-neutral-800 px-2.5 py-1.5 rounded-md transition-all cursor-pointer ml-auto justify-end shadow-sm active:scale-95 animate-pulse"
                           >
-                            <Printer className="w-2.5 h-2.5 text-neutral-500" />
+                            <Printer className="w-2.5 h-2.5 text-white hover:text-neutral-900" />
                             <span>Print Receipt</span>
                           </button>
                         )}

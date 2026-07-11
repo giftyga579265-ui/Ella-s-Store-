@@ -450,6 +450,10 @@ export default function App() {
   const [adminMessages, setAdminMessages] = useState<any[]>([]);
   const [notifications, setNotifications] = useState<NotificationItem[]>([]);
   const [showNotifications, setShowNotifications] = useState(false);
+  const [siteLoading, setSiteLoading] = useState(false);
+  const [loadingMessage, setLoadingMessage] = useState("");
+  const [isSlowLoading, setIsSlowLoading] = useState(false);
+  const [isCustomersLoaded, setIsCustomersLoaded] = useState(false);
   const [homepageSettings, setHomepageSettings] = useState<HomepageSettings>({
     heroBackground: "https://images.unsplash.com/photo-1441986300917-64674bd600d8?w=1600",
     productLayout: "grid",
@@ -477,6 +481,13 @@ export default function App() {
   const [currentUserAvatar, setCurrentUserAvatar] = useState(() => {
     return localStorage.getItem("currentUserAvatar") || "";
   });
+
+  const isAuthorizedAdmin = useMemo(() => {
+    return (
+      AUTHORIZED_ADMIN_USERS.some(admin => admin.toLowerCase() === currentUser.trim().toLowerCase()) ||
+      AUTHORIZED_ADMIN_USERS.some(admin => admin.toLowerCase() === currentUserEmail.trim().toLowerCase())
+    );
+  }, [currentUser, currentUserEmail]);
   const [selectedAvatarUrl, setSelectedAvatarUrl] = useState<string>(AVATAR_PRESETS[0].url);
 
   // Computed notification count for user
@@ -813,6 +824,41 @@ export default function App() {
     return () => clearTimeout(timer);
   }, [currentUser, isLoggedIn, currentUserEmail]);
 
+  // Monitor if customer account gets deleted by admin
+  useEffect(() => {
+    if (isCustomersLoaded && isLoggedIn && !isAuthorizedAdmin) {
+      const userExists = customers.some(
+        c => c.name.toLowerCase() === currentUser.trim().toLowerCase() ||
+             (currentUserEmail && c.email.toLowerCase() === currentUserEmail.trim().toLowerCase())
+      );
+      if (!userExists) {
+        setIsLoggedIn(false);
+        setCurrentUser("");
+        setCurrentUserEmail("");
+        setCurrentUserAvatar("");
+        localStorage.removeItem("isLoggedIn");
+        localStorage.removeItem("currentUser");
+        localStorage.removeItem("currentUserEmail");
+        localStorage.removeItem("currentUserAvatar");
+        showToast("Session Expired", "Your customer account was deleted. Please re-register to continue.", "info");
+        setShowLogin(true);
+      }
+    }
+  }, [isCustomersLoaded, customers, isLoggedIn, isAuthorizedAdmin, currentUser, currentUserEmail]);
+
+  // Handle slow activity timer for loader overlay
+  useEffect(() => {
+    let timer: NodeJS.Timeout;
+    if (siteLoading) {
+      timer = setTimeout(() => {
+        setIsSlowLoading(true);
+      }, 1200);
+    } else {
+      setIsSlowLoading(false);
+    }
+    return () => clearTimeout(timer);
+  }, [siteLoading]);
+
   // REAL-TIME FIRESTORE SYNCHRONIZATION
   useEffect(() => {
     // 1. PRODUCTS
@@ -858,6 +904,10 @@ export default function App() {
         items.sort((a, b) => a.id - b.id);
         setCustomers(items);
       }
+      setIsCustomersLoaded(true);
+    }, (error) => {
+      console.error("Error subscribing to customers collection:", error);
+      setIsCustomersLoaded(true);
     });
 
     // 4. PAYMENTS
@@ -1172,6 +1222,8 @@ export default function App() {
   };
 
   const handleSeedDemoData = async () => {
+    setSiteLoading(true);
+    setLoadingMessage("Seeding Ella's boutique showroom data...");
     try {
       showToast("Seeding Database", "Populating high-fidelity sample listings...", "info");
       
@@ -1214,10 +1266,15 @@ export default function App() {
     } catch (err) {
       console.error("Error seeding demo data:", err);
       showToast("Seeding Failed", "Could not complete seeding operations.", "error");
+    } finally {
+      setSiteLoading(false);
+      setLoadingMessage("");
     }
   };
 
   const handleClearAllData = async () => {
+    setSiteLoading(true);
+    setLoadingMessage("Purging all live records from database collections...");
     try {
       showToast("Clearing Data", "Purging all live records from database collections...", "info");
       
@@ -1245,74 +1302,112 @@ export default function App() {
     } catch (err) {
       console.error("Error clearing database collections:", err);
       showToast("Purge Failed", "Could not complete clear operations.", "error");
+    } finally {
+      setSiteLoading(false);
+      setLoadingMessage("");
+    }
+  };
+
+  const handleDeleteAllCustomersAndActivities = async () => {
+    setSiteLoading(true);
+    setLoadingMessage("Deleting all customer accounts and logs securely...");
+    try {
+      const purgeCollection = async (colName: string) => {
+        const querySnapshot = await getDocs(collection(db, colName));
+        for (const docSnap of querySnapshot.docs) {
+          await deleteDoc(doc(db, colName, docSnap.id));
+        }
+      };
+
+      await purgeCollection("customers");
+      await purgeCollection("activity_logs");
+
+      // Small delay so that the user sees the beautiful loader working
+      await new Promise((resolve) => setTimeout(resolve, 1500));
+
+      showToast("Accounts & Logs Purged", "All customer profiles and activity trackers have been removed from the live database.", "success");
+      logActivity("Purged all customer accounts and their respective system logs", "admin_action");
+    } catch (err) {
+      console.error("Error deleting customers and activities:", err);
+      showToast("Operation Failed", "Could not complete account deletion.", "error");
+    } finally {
+      setSiteLoading(false);
+      setLoadingMessage("");
     }
   };
 
   // Form handlers
-  const handleClientLogin = (e: React.FormEvent) => {
+  const handleClientLogin = async (e: React.FormEvent) => {
     e.preventDefault();
     if (!loginUsername.trim() || !loginPassword.trim()) {
       showToast("Error", "Please fill in credentials.", "error");
       return;
     }
 
-    setIsLoggedIn(true);
-    setCurrentUser(loginUsername.trim());
-    localStorage.setItem("isLoggedIn", "true");
-    localStorage.setItem("currentUser", loginUsername.trim());
-    setCurrentUserAvatar(selectedAvatarUrl);
-    localStorage.setItem("currentUserAvatar", selectedAvatarUrl);
-    
-    // CRM synchronization
-    const existing = customers.find(c => c.name.toLowerCase() === loginUsername.trim().toLowerCase());
-    const matchedEmail = loginEmail.trim() || (existing ? existing.email : `${loginUsername.toLowerCase().replace(/\s+/g, '')}@example.com`);
-    setCurrentUserEmail(matchedEmail);
-    localStorage.setItem("currentUserEmail", matchedEmail);
+    setSiteLoading(true);
+    setLoadingMessage("Securing customer session & synchronizing custom preferences...");
+    try {
+      setIsLoggedIn(true);
+      setCurrentUser(loginUsername.trim());
+      localStorage.setItem("isLoggedIn", "true");
+      localStorage.setItem("currentUser", loginUsername.trim());
+      setCurrentUserAvatar(selectedAvatarUrl);
+      localStorage.setItem("currentUserAvatar", selectedAvatarUrl);
+      
+      // CRM synchronization
+      const existing = customers.find(c => c.name.toLowerCase() === loginUsername.trim().toLowerCase());
+      const matchedEmail = loginEmail.trim() || (existing ? existing.email : `${loginUsername.toLowerCase().replace(/\s+/g, '')}@example.com`);
+      setCurrentUserEmail(matchedEmail);
+      localStorage.setItem("currentUserEmail", matchedEmail);
 
-    setShowLogin(false);
-    showToast("Welcome to Ella's Store!", `Hello ${loginUsername}, enjoy your tailored experience.`, "success");
+      setShowLogin(false);
+      showToast("Welcome to Ella's Store!", `Hello ${loginUsername}, enjoy your tailored experience.`, "success");
 
-    addNotification(
-      "Welcome to Ella's Store! 👗",
-      `Hello ${loginUsername.trim()}, enjoy your personalized space. Explore our exclusive designer collections and master-tailored garments with express delivery!`,
-      "info",
-      matchedEmail
-    );
-    if (!existing) {
-      const newC: Customer = {
-        id: customers.length > 0 ? Math.max(...customers.map(c => c.id)) + 1 : 1,
-        name: loginUsername.trim(),
-        email: loginEmail.trim() || `${loginUsername.toLowerCase().replace(/\s+/g, '')}@example.com`,
-        phone: loginPhone.trim() || "024" + Math.floor(1000000 + Math.random() * 8999999),
-        registrationDate: new Date().toISOString().split('T')[0],
-        orders: 0,
-        totalSpent: 0,
-        signedUp: true,
-        avatarUrl: selectedAvatarUrl
-      };
-      setDoc(doc(db, "customers", String(newC.id)), newC).catch(err => {
-        console.error("Error saving customer to Firestore:", err);
-      });
-    } else {
-      const updatedC = {
-        ...existing,
-        email: loginEmail.trim() || existing.email,
-        phone: loginPhone.trim() || existing.phone,
-        signedUp: true,
-        avatarUrl: selectedAvatarUrl || existing?.avatarUrl
-      };
-      setDoc(doc(db, "customers", String(existing.id)), updatedC).catch(err => {
-        console.error("Error updating customer in Firestore:", err);
-      });
+      addNotification(
+        "Welcome to Ella's Store! 👗",
+        `Hello ${loginUsername.trim()}, enjoy your personalized space. Explore our exclusive designer collections and master-tailored garments with express delivery!`,
+        "info",
+        matchedEmail
+      );
+      if (!existing) {
+        const newC: Customer = {
+          id: customers.length > 0 ? Math.max(...customers.map(c => c.id)) + 1 : 1,
+          name: loginUsername.trim(),
+          email: loginEmail.trim() || `${loginUsername.toLowerCase().replace(/\s+/g, '')}@example.com`,
+          phone: loginPhone.trim() || "024" + Math.floor(1000000 + Math.random() * 8999999),
+          registrationDate: new Date().toISOString().split('T')[0],
+          orders: 0,
+          totalSpent: 0,
+          signedUp: true,
+          avatarUrl: selectedAvatarUrl
+        };
+        await setDoc(doc(db, "customers", String(newC.id)), newC);
+      } else {
+        const updatedC = {
+          ...existing,
+          email: loginEmail.trim() || existing.email,
+          phone: loginPhone.trim() || existing.phone,
+          signedUp: true,
+          avatarUrl: selectedAvatarUrl || existing?.avatarUrl
+        };
+        await setDoc(doc(db, "customers", String(existing.id)), updatedC);
+      }
+
+      // Set greeting log
+      setTimeout(() => {
+        logActivity("Logged in to the customer storefront", "login");
+      }, 100);
+    } catch (err) {
+      console.error("Login error:", err);
+    } finally {
+      setSiteLoading(false);
+      setLoadingMessage("");
     }
-
-    // Set greeting log
-    setTimeout(() => {
-      logActivity("Logged in to the customer storefront", "login");
-    }, 100);
   };
 
   const handleAddOrder = async (order: any) => {
+    setSiteLoading(true);
+    setLoadingMessage("Authorizing mobile payment & processing your couture order...");
     try {
       // 1. Save order to Firestore
       await setDoc(doc(db, "orders", String(order.id)), order);
@@ -1321,11 +1416,18 @@ export default function App() {
       const customerName = order.customer.trim();
       const existingCust = customers.find(c => c.name.toLowerCase() === customerName.toLowerCase());
 
+      const pointsRedeemed = Number(order.pointsRedeemed || 0);
+      const earnedPoints = Math.floor(order.total / 10); // 1 point for every ₵10 spent
+
       if (existingCust) {
+        const currentPoints = existingCust.loyaltyPoints ?? 0;
+        const newPoints = Math.max(0, currentPoints - pointsRedeemed + earnedPoints);
+
         const updatedCust = {
           ...existingCust,
           orders: (existingCust.orders || 0) + 1,
-          totalSpent: (existingCust.totalSpent || 0) + order.total
+          totalSpent: (existingCust.totalSpent || 0) + order.total,
+          loyaltyPoints: newPoints
         };
         await setDoc(doc(db, "customers", String(existingCust.id)), updatedCust);
       } else {
@@ -1338,7 +1440,8 @@ export default function App() {
           registrationDate: new Date().toISOString().split('T')[0],
           orders: 1,
           totalSpent: order.total,
-          signedUp: true
+          signedUp: true,
+          loyaltyPoints: earnedPoints
         };
         await setDoc(doc(db, "customers", String(newId)), newCust);
       }
@@ -1356,6 +1459,9 @@ export default function App() {
       );
     } catch (err) {
       console.error("Error saving order & syncing customer:", err);
+    } finally {
+      setSiteLoading(false);
+      setLoadingMessage("");
     }
   };
 
@@ -1374,6 +1480,8 @@ export default function App() {
   };
 
   const handleGoogleLogin = async () => {
+    setSiteLoading(true);
+    setLoadingMessage("Authenticating secure login with Google Accounts...");
     try {
       const result = await signInWithPopup(auth, googleProvider);
       const user = result.user;
@@ -1431,6 +1539,9 @@ export default function App() {
     } catch (err: any) {
       console.error("Google login error:", err);
       showToast("Google Sign-In Failed", err.message || "Could not authenticate with Google.", "error");
+    } finally {
+      setSiteLoading(false);
+      setLoadingMessage("");
     }
   };
 
@@ -1534,13 +1645,6 @@ export default function App() {
     setInquiryMessage("");
     e.currentTarget.reset();
   };
-
-  const isAuthorizedAdmin = useMemo(() => {
-    return (
-      AUTHORIZED_ADMIN_USERS.some(admin => admin.toLowerCase() === currentUser.trim().toLowerCase()) ||
-      AUTHORIZED_ADMIN_USERS.some(admin => admin.toLowerCase() === currentUserEmail.trim().toLowerCase())
-    );
-  }, [currentUser, currentUserEmail]);
 
   const storeFeatures = useMemo(() => [
     {
@@ -1974,6 +2078,85 @@ export default function App() {
                   className="w-full pl-4 pr-10 py-2 rounded-full border border-neutral-200 text-xs focus:outline-none focus:ring-2 focus:ring-indigo-500 bg-white"
                 />
                 <Search className="absolute right-3.5 top-2.5 w-3.5 h-3.5 text-neutral-400 pointer-events-none" />
+
+                {/* Live Suggestions Dropdown */}
+                {searchQuery.trim() && (
+                  <div className="absolute top-full left-0 right-0 mt-2 bg-white/95 backdrop-blur-md rounded-2xl shadow-2xl border border-neutral-150 z-50 max-h-80 overflow-y-auto divide-y divide-neutral-100 animate-in fade-in slide-in-from-top-2 duration-200">
+                    {/* Products suggestions */}
+                    {filteredProducts.length > 0 && (
+                      <div className="p-3 text-left">
+                        <div className="text-[9px] font-mono font-bold tracking-wider text-pink-600 uppercase mb-2 px-2">
+                          Matching Showroom Products ({filteredProducts.length})
+                        </div>
+                        <div className="space-y-1">
+                          {filteredProducts.map((prod) => (
+                            <div
+                              key={prod.id}
+                              onClick={() => {
+                                handleViewDetail(prod, 'classic');
+                                setSearchQuery(""); // Close dropdown cleanly on select
+                                logActivity(`Clicked matching suggestion "${prod.name}" in dropdown`, "user_action");
+                              }}
+                              className="flex items-center gap-2.5 p-2 rounded-xl hover:bg-neutral-50 transition-colors cursor-pointer"
+                            >
+                              <img
+                                src={prod.image}
+                                alt={prod.name}
+                                className="w-8 h-8 rounded-lg object-cover bg-neutral-100"
+                              />
+                              <div className="flex-1 min-w-0">
+                                <h4 className="text-[11px] font-bold text-neutral-800 truncate leading-tight uppercase">
+                                  {prod.name}
+                                </h4>
+                                <span className="text-[9px] font-mono text-neutral-400">
+                                  {prod.category} • ₵{prod.price.toFixed(2)}
+                                </span>
+                              </div>
+                            </div>
+                          ))}
+                        </div>
+                      </div>
+                    )}
+                    
+                    {/* Features shortcuts */}
+                    {filteredFeatures.length > 0 && (
+                      <div className="p-3 text-left">
+                        <div className="text-[9px] font-mono font-bold tracking-wider text-indigo-600 uppercase mb-2 px-2">
+                          Feature Shortcuts ({filteredFeatures.length})
+                        </div>
+                        <div className="space-y-1">
+                          {filteredFeatures.slice(0, 4).map((feat) => (
+                            <div
+                              key={feat.name}
+                              onClick={() => {
+                                feat.action();
+                                setSearchQuery(""); // Close dropdown cleanly on select
+                                logActivity(`Launched feature shortcut "${feat.name}" from dropdown`, "user_action");
+                              }}
+                              className="flex items-center gap-2 p-1.5 rounded-xl hover:bg-indigo-50/50 transition-colors cursor-pointer"
+                            >
+                              <span className="text-sm shrink-0">{feat.icon}</span>
+                              <div className="flex-1 min-w-0">
+                                <h4 className="text-[11px] font-bold text-neutral-800 truncate leading-none uppercase">
+                                  {feat.name}
+                                </h4>
+                                <p className="text-[9px] text-neutral-500 truncate mt-0.5 font-medium leading-none">
+                                  {feat.description}
+                                </p>
+                              </div>
+                            </div>
+                          ))}
+                        </div>
+                      </div>
+                    )}
+                    
+                    {filteredProducts.length === 0 && filteredFeatures.length === 0 && (
+                      <div className="p-4 text-center text-[11px] text-neutral-400 font-medium">
+                        No matches found. Try "momo", "review", or "charity".
+                      </div>
+                    )}
+                  </div>
+                )}
               </div>
               <button
                 onClick={() => {
@@ -3070,6 +3253,8 @@ export default function App() {
           onShowToast={showToast}
           customerNameDefault={currentUser}
           homepageSettings={homepageSettings}
+          customers={customers}
+          currentUserEmail={currentUserEmail}
         />
       )}
 
@@ -3141,6 +3326,7 @@ export default function App() {
           onAddNotification={addNotification}
           onSeedDemoData={handleSeedDemoData}
           onClearAllData={handleClearAllData}
+          onDeleteCustomersAndActivities={handleDeleteAllCustomersAndActivities}
         />
       )}
 
@@ -3159,6 +3345,7 @@ export default function App() {
         <OrderHistory
           orders={orders}
           payments={payments}
+          customers={customers}
           currentUser={currentUser}
           currentUserEmail={currentUserEmail}
           currentUserAvatar={currentUserAvatar}
@@ -3384,6 +3571,74 @@ export default function App() {
             onViewProduct={handleViewDetail}
             initialTab={detailInitialTab}
           />
+        )}
+      </AnimatePresence>
+
+      {/* 12. HIGH-FIDELITY BRANDED LOADER OVERLAY */}
+      <AnimatePresence>
+        {siteLoading && (
+          <motion.div 
+            initial={{ opacity: 0 }}
+            animate={{ opacity: 1 }}
+            exit={{ opacity: 0 }}
+            className="fixed inset-0 bg-white/95 backdrop-blur-md z-[100] flex flex-col items-center justify-center p-6"
+          >
+            <motion.div 
+              initial={{ scale: 0.9, opacity: 0 }}
+              animate={{ scale: 1, opacity: 1 }}
+              exit={{ scale: 0.9, opacity: 0 }}
+              className="relative flex flex-col items-center max-w-sm w-full text-center space-y-6"
+            >
+              {/* Spinning / pulsing luxury ring loader */}
+              <div className="relative w-40 h-40 flex items-center justify-center">
+                <div className="absolute inset-0 rounded-full border-2 border-neutral-100 border-t-neutral-800 animate-spin" style={{ animationDuration: '1.5s' }} />
+                <div className="absolute inset-2 rounded-full border border-dashed border-neutral-300 animate-spin" style={{ animationDuration: '4s', animationDirection: 'reverse' }} />
+                <div className="absolute inset-4 rounded-full bg-white shadow-xl overflow-hidden p-2 flex items-center justify-center">
+                  <img 
+                    src={Logo} 
+                    alt="Ella's Store Logo" 
+                    className="w-full h-full object-contain rounded-full"
+                    referrerPolicy="no-referrer"
+                  />
+                </div>
+              </div>
+
+              {/* Typography */}
+              <div className="space-y-2">
+                <h2 className="font-sans text-lg font-black tracking-widest text-neutral-900 uppercase">
+                  ELLA'S STORE
+                </h2>
+                <div className="h-[2px] w-12 bg-neutral-900 mx-auto rounded-full" />
+                <p className="text-[10px] text-neutral-500 font-mono tracking-wider uppercase">
+                  {loadingMessage || "Synchronizing Showroom..."}
+                </p>
+              </div>
+
+              {/* Progress Indicator */}
+              <div className="w-full bg-neutral-100 h-1 rounded-full overflow-hidden max-w-[200px]">
+                <div className="bg-neutral-900 h-full rounded-full animate-pulse" style={{ width: '60%' }} />
+              </div>
+
+              {/* Slow Loading Notice */}
+              <AnimatePresence>
+                {isSlowLoading && (
+                  <motion.div 
+                    initial={{ opacity: 0, y: 10 }}
+                    animate={{ opacity: 1, y: 0 }}
+                    exit={{ opacity: 0, y: -10 }}
+                    className="p-3 bg-neutral-50 rounded-2xl border border-neutral-100 space-y-1.5"
+                  >
+                    <p className="text-[11px] text-neutral-600 font-medium leading-relaxed">
+                      Ella's network is taking a moment to process.
+                    </p>
+                    <p className="text-[9px] text-neutral-400 font-mono leading-normal">
+                      Securing transaction channels & tailors' workstation... Thank you for your patience!
+                    </p>
+                  </motion.div>
+                )}
+              </AnimatePresence>
+            </motion.div>
+          </motion.div>
         )}
       </AnimatePresence>
 

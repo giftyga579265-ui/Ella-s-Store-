@@ -1,5 +1,5 @@
 import { useState, useEffect } from "react";
-import { DiscountCode, Product, HomepageSettings } from "../types";
+import { DiscountCode, Product, HomepageSettings, Customer } from "../types";
 import { X, ShoppingBag, CreditCard, Check, Smartphone, Loader2, ArrowLeft, ArrowRight, Tag, AlertTriangle } from "lucide-react";
 
 interface CartItem {
@@ -20,6 +20,8 @@ interface CheckoutModalProps {
   onShowToast: (title: string, message: string, type: 'success' | 'error' | 'info') => void;
   customerNameDefault: string;
   homepageSettings: HomepageSettings;
+  customers?: Customer[];
+  currentUserEmail?: string;
 }
 
 export default function CheckoutModal({
@@ -32,12 +34,15 @@ export default function CheckoutModal({
   onLogActivity,
   onShowToast,
   customerNameDefault,
-  homepageSettings
+  homepageSettings,
+  customers = [],
+  currentUserEmail = ""
 }: CheckoutModalProps) {
   const [step, setStep] = useState<'summary' | 'customer' | 'momo' | 'success'>('summary');
   const [couponCode, setCouponCode] = useState("");
   const [appliedDiscount, setAppliedDiscount] = useState<DiscountCode | null>(null);
   const [couponError, setCouponError] = useState("");
+  const [redeemPoints, setRedeemPoints] = useState(false);
   
   // Form values
   const [name, setName] = useState(customerNameDefault);
@@ -69,6 +74,16 @@ export default function CheckoutModal({
   const subtotal = cart.reduce((sum, item) => sum + item.price * item.quantity, 0);
   const delivery = 15.00;
 
+  // Retrieve customer's points
+  const matchedCustomer = customers.find(c => 
+    c.name.toLowerCase() === customerNameDefault.toLowerCase() ||
+    (currentUserEmail && c.email.toLowerCase() === currentUserEmail.toLowerCase())
+  );
+  const availablePoints = matchedCustomer?.loyaltyPoints ?? 0;
+
+  const pointsDiscountAmount = redeemPoints ? Math.min(availablePoints * 0.1, subtotal) : 0;
+  const pointsRedeemed = redeemPoints ? Math.min(availablePoints, Math.floor(subtotal * 10)) : 0;
+
   let discountAmount = 0;
   if (appliedDiscount) {
     if (appliedDiscount.type === 'percentage') {
@@ -79,8 +94,10 @@ export default function CheckoutModal({
     discountAmount = Math.min(discountAmount, subtotal);
   }
 
-  const momoFee = (subtotal - discountAmount) * (momoChargeRate / 100);
-  const total = subtotal + delivery - discountAmount + momoFee;
+  const totalDiscountAmount = Math.min(discountAmount + pointsDiscountAmount, subtotal);
+
+  const momoFee = (subtotal - totalDiscountAmount) * (momoChargeRate / 100);
+  const total = subtotal + delivery - totalDiscountAmount + momoFee;
 
   const handleApplyCoupon = () => {
     setCouponError("");
@@ -170,7 +187,8 @@ export default function CheckoutModal({
         date: new Date().toISOString().split('T')[0],
         status: 'pending' as const,
         phone: phone.trim(),
-        email: email.trim()
+        email: email.trim(),
+        pointsRedeemed: pointsRedeemed
       };
 
       const paymentData = {
@@ -219,7 +237,8 @@ export default function CheckoutModal({
         date: new Date().toISOString().split('T')[0],
         status: 'pending' as const,
         phone: phone.trim(),
-        email: email.trim()
+        email: email.trim(),
+        pointsRedeemed: pointsRedeemed
       };
 
       const paymentData = {
@@ -355,6 +374,45 @@ export default function CheckoutModal({
                     )}
                   </div>
 
+                  {/* Loyalty Points Redemption System */}
+                  {availablePoints > 0 && (
+                    <div className="bg-amber-50/60 p-4 rounded-2xl border border-amber-200/50 space-y-3">
+                      <div className="flex justify-between items-center">
+                        <label className="text-xs font-bold text-neutral-800 flex items-center gap-1.5">
+                          <span>🪙</span>
+                          <span>Bespoke Loyalty Points</span>
+                        </label>
+                        <span className="text-[10px] bg-amber-100 text-amber-800 font-extrabold px-2 py-0.5 rounded-full uppercase tracking-wider font-mono">
+                          {availablePoints} Pts Available
+                        </span>
+                      </div>
+                      <p className="text-[11px] text-neutral-600 font-medium">
+                        Redeem points for discounts: <strong>10 points = ₵1.00</strong>. 
+                        You can save up to <strong>₵{(availablePoints * 0.1).toFixed(2)}</strong> on this order.
+                      </p>
+                      
+                      <div className="flex items-center justify-between bg-white px-3 py-2 rounded-xl border border-neutral-150 shadow-sm">
+                        <span className="text-xs font-semibold text-neutral-700">Redeem points for discount?</span>
+                        <button
+                          type="button"
+                          onClick={() => {
+                            setRedeemPoints(!redeemPoints);
+                            if (!redeemPoints) {
+                              onShowToast("Points Applied", `Applied points discount of ₵${Math.min(availablePoints * 0.1, subtotal).toFixed(2)}!`, "success");
+                            }
+                          }}
+                          className={`px-3 py-1.5 rounded-lg text-[10px] font-black uppercase tracking-wider transition-all cursor-pointer ${
+                            redeemPoints 
+                              ? "bg-amber-500 text-neutral-900 shadow-sm" 
+                              : "bg-neutral-100 text-neutral-600 hover:bg-neutral-200"
+                          }`}
+                        >
+                          {redeemPoints ? "Redeemed ✓" : "Redeem Now"}
+                        </button>
+                      </div>
+                    </div>
+                  )}
+
                   {/* Total Summary */}
                   <div className="border-t border-neutral-150 pt-4 space-y-2 text-sm">
                     <div className="flex justify-between text-neutral-600">
@@ -369,6 +427,12 @@ export default function CheckoutModal({
                       <div className="flex justify-between text-green-600 font-medium">
                         <span>Discount Coupon ({appliedDiscount.code})</span>
                         <span>-₵{discountAmount.toFixed(2)}</span>
+                      </div>
+                    )}
+                    {redeemPoints && (
+                      <div className="flex justify-between text-amber-600 font-medium">
+                        <span>Loyalty Points Discount ({pointsRedeemed} pts)</span>
+                        <span>-₵{pointsDiscountAmount.toFixed(2)}</span>
                       </div>
                     )}
                     {momoFee > 0 && (

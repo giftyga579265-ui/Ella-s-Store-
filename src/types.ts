@@ -51,6 +51,8 @@ export interface Customer {
   location?: string;
   device?: string;
   ip?: string;
+  ipDetails?: string;
+  loyaltyPoints?: number;
 }
 
 export interface Order {
@@ -61,6 +63,9 @@ export interface Order {
   total: number;
   date: string;
   status: 'pending' | 'processing' | 'completed' | 'cancelled';
+  phone?: string;
+  email?: string;
+  pointsRedeemed?: number;
 }
 
 export interface DiscountCode {
