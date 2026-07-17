@@ -52,7 +52,7 @@ export interface Customer {
   device?: string;
   ip?: string;
   ipDetails?: string;
-  loyaltyPoints?: number;
+  loyaltyPoints: number;
 }
 
 export interface Order {
@@ -195,6 +195,22 @@ export interface DeliveryItem {
   notes?: string;
   estimatedDeliveryDate?: string;
   lastUpdated: string;
+}
+
+export interface DeliveryPersonnel {
+  id: string;
+  name: string;
+  phone: string;
+  currentLat: number;
+  currentLng: number;
+  status: 'available' | 'delivering' | 'off-duty';
+}
+
+export interface DeliveryRate {
+  id: string;
+  locationName: string;
+  price: number;
+  distanceKm: number;
 }
 
 export interface Charity {

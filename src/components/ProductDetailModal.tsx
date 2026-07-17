@@ -147,7 +147,7 @@ export default function ProductDetailModal({
   const [selectedModel, setSelectedModel] = useState(FASHION_MODELS[0]);
 
   useEffect(() => {
-    if (combinedModels.length > 0) {
+    if (combinedModels && combinedModels.length > 0) {
       const exists = combinedModels.some(m => m.id === selectedModel?.id || m.name === selectedModel?.name);
       if (!exists) {
         setSelectedModel(combinedModels[0]);
@@ -176,7 +176,7 @@ export default function ProductDetailModal({
   const recommendationData = useMemo(() => {
     if (!product || !allProducts) return { title: "Complete the Look", subtitle: "Curated pairings for your style", items: [] };
 
-    const cat = product.category.toLowerCase();
+    const cat = (product.category || '').toLowerCase();
     let targetCategories: string[] = [];
     let title = "Complete the Look";
     let subtitle = "Handpicked pairings to elevate your style";
@@ -209,13 +209,13 @@ export default function ProductDetailModal({
 
     // Filter items belonging to target categories, excluding current product
     let items = allProducts.filter(
-      (item) => item.id !== product.id && targetCategories.includes(item.category.toLowerCase()) && item.stock > 0
+      (item) => item.id !== product.id && targetCategories.includes((item.category || '').toLowerCase()) && item.stock > 0
     );
 
     // If we don't have enough items (we need at least 3), pad with other available items from matching or other lines
     if (items.length < 3) {
       const otherItems = allProducts.filter(
-        (item) => item.id !== product.id && !targetCategories.includes(item.category.toLowerCase()) && !items.some(existing => existing.id === item.id) && item.stock > 0
+        (item) => item.id !== product.id && !targetCategories.includes((item.category || '').toLowerCase()) && !(items || []).some(existing => existing.id === item.id) && item.stock > 0
       );
       items = [...items, ...otherItems];
     }
@@ -432,7 +432,7 @@ export default function ProductDetailModal({
             
             ctx.fillStyle = "#ffffff";
             ctx.font = "bold 16px 'Space Grotesk', sans-serif";
-            ctx.fillText(`ELLA'S COUTURE FIT: ${product.name.toUpperCase()}`, 30, 712);
+            ctx.fillText(`ELLA'S COUTURE FIT: ${(product.name || '').toUpperCase()}`, 30, 712);
             
             ctx.fillStyle = "#fbbf24";
             ctx.font = "bold 12px monospace";
@@ -885,7 +885,7 @@ export default function ProductDetailModal({
                                 : 'bg-white border-neutral-200 hover:border-neutral-300'
                             }`}
                           >
-                            <span className="font-bold text-[10px] text-neutral-800 block leading-tight truncate">{m.name.split(" ")[0]}</span>
+                            <span className="font-bold text-[10px] text-neutral-800 block leading-tight truncate">{(m.name || "Model").split(" ")[0]}</span>
                             <span className="text-[8px] text-neutral-400 truncate block">{m.style}</span>
                           </button>
                         ))}

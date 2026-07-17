@@ -1,5 +1,5 @@
 import { useState, useMemo } from "react";
-import { Order, Payment, Customer } from "../types";
+import { Order, Payment, Customer, DeliveryItem } from "../types";
 import { 
   X, 
   ShoppingBag, 
@@ -12,7 +12,8 @@ import {
   ArrowRight,
   PackageCheck,
   Truck,
-  Printer
+  Printer,
+  MapPin
 } from "lucide-react";
 import { motion, AnimatePresence } from "motion/react";
 import jsPDF from "jspdf";
@@ -22,32 +23,67 @@ interface OrderHistoryProps {
   orders: Order[];
   payments: Payment[];
   customers: Customer[];
+  deliveries: DeliveryItem[];
   currentUser: string;
   currentUserEmail: string;
   onClose: () => void;
   isCustomerOnly?: boolean;
   currentUserAvatar?: string;
   onUpdateAvatar?: (url: string) => Promise<void>;
+  onRedeemPoints: (customerId: number) => void;
 }
 
 export default function OrderHistory({ 
   orders, 
   payments, 
   customers,
+  deliveries,
   currentUser, 
   currentUserEmail, 
   onClose,
   isCustomerOnly = true,
   currentUserAvatar = "",
-  onUpdateAvatar
+  onUpdateAvatar,
+  onRedeemPoints
 }: OrderHistoryProps) {
   const [activeTab, setActiveTab] = useState<"orders" | "payments">("orders");
+  const [selectedOrders, setSelectedOrders] = useState<string[]>([]);
+
+  const toggleOrderSelection = (orderId: string) => {
+    setSelectedOrders(prev => 
+      prev.includes(orderId) ? prev.filter(id => id !== orderId) : [...prev, orderId]
+    );
+  };
+
+  const handleBulkPrint = () => {
+    const selected = filteredOrders.filter(o => selectedOrders.includes(o.id));
+    // Create a consolidated PDF
+    const doc = new jsPDF();
+    selected.forEach((order, index) => {
+      if (index > 0) doc.addPage();
+      doc.text(`Invoice - Order #${order.id.slice(-6).toUpperCase()}`, 14, 20);
+      doc.text(`Date: ${order.date}`, 14, 30);
+      doc.text(`Customer: ${order.customer}`, 14, 40);
+      
+      autoTable(doc, {
+        head: [['Item']],
+        body: order.items.map(item => [item]),
+        startY: 50,
+      });
+
+      // @ts-ignore
+      const finalY = (doc as any).lastAutoTable.finalY || 60;
+      doc.text(`Total: GH₵ ${order.total.toLocaleString()}`, 14, finalY + 10);
+    });
+    doc.save(`Bulk_Invoices_${new Date().toISOString().slice(0,10)}.pdf`);
+    setSelectedOrders([]);
+  };
 
   // Filter orders by current user (match name or email)
   const filteredOrders = useMemo(() => {
     return orders.filter(order => {
-      const matchName = order.customer.toLowerCase() === currentUser.toLowerCase();
-      const matchEmail = currentUserEmail && order.customer.toLowerCase() === currentUserEmail.toLowerCase();
+      const matchName = (order.customer || '').toLowerCase() === (currentUser || '').toLowerCase();
+      const matchEmail = currentUserEmail && (order.customer || '').toLowerCase() === (currentUserEmail || '').toLowerCase();
       return matchName || matchEmail;
     }).sort((a, b) => new Date(b.date).getTime() - new Date(a.date).getTime());
   }, [orders, currentUser, currentUserEmail]);
@@ -55,8 +91,8 @@ export default function OrderHistory({
   // Filter payments by current user (match name or email)
   const filteredPayments = useMemo(() => {
     return payments.filter(payment => {
-      const matchName = payment.customer.toLowerCase() === currentUser.toLowerCase();
-      const matchEmail = currentUserEmail && payment.customer.toLowerCase() === currentUserEmail.toLowerCase();
+      const matchName = (payment.customer || '').toLowerCase() === (currentUser || '').toLowerCase();
+      const matchEmail = currentUserEmail && (payment.customer || '').toLowerCase() === (currentUserEmail || '').toLowerCase();
       return matchName || matchEmail;
     }).sort((a, b) => new Date(b.date).getTime() - new Date(a.date).getTime());
   }, [payments, currentUser, currentUserEmail]);
@@ -80,7 +116,7 @@ export default function OrderHistory({
     doc.text(`Invoice - Order #${order.id.slice(-6).toUpperCase()}`, 14, 20);
     doc.text(`Date: ${order.date}`, 14, 30);
     doc.text(`Customer: ${order.customer}`, 14, 40);
-    doc.text(`Status: ${order.status.toUpperCase()}`, 14, 50);
+    doc.text(`Status: ${(order.status || '').toUpperCase()}`, 14, 50);
 
     autoTable(doc, {
       head: [['Item']],
@@ -100,8 +136,8 @@ export default function OrderHistory({
     doc.text(`Payment Invoice - Ref #${payment.id.slice(-6).toUpperCase()}`, 14, 20);
     doc.text(`Date: ${payment.date}`, 14, 30);
     doc.text(`Customer: ${payment.customer}`, 14, 40);
-    doc.text(`Payment Method: ${payment.method.toUpperCase()}`, 14, 50);
-    doc.text(`Status: ${payment.status.toUpperCase()}`, 14, 60);
+    doc.text(`Payment Method: ${(payment.method || '').toUpperCase()}`, 14, 50);
+    doc.text(`Status: ${(payment.status || '').toUpperCase()}`, 14, 60);
 
     autoTable(doc, {
       head: [['Payment Transaction Detail', 'Value']],
@@ -109,9 +145,9 @@ export default function OrderHistory({
         ['Transaction ID', payment.id],
         ['Reference Order ID', payment.orderId || 'N/A'],
         ['Customer Account', payment.customer],
-        ['Payment Method', payment.method.toUpperCase()],
+        ['Payment Method', (payment.method || '').toUpperCase()],
         ['Transaction Date', payment.date],
-        ['Transaction Status', payment.status.toUpperCase()],
+        ['Transaction Status', (payment.status || '').toUpperCase()],
         ['Total Paid Amount', `GH₵ ${payment.amount.toLocaleString()}`],
       ],
       startY: 70,
@@ -126,8 +162,8 @@ export default function OrderHistory({
 
   const matchedCustomer = useMemo(() => {
     return customers.find(c => 
-      c.name.toLowerCase() === currentUser.toLowerCase() ||
-      (currentUserEmail && c.email.toLowerCase() === currentUserEmail.toLowerCase())
+      (c.name || '').toLowerCase() === (currentUser || '').toLowerCase() ||
+      (currentUserEmail && (c.email || '').toLowerCase() === (currentUserEmail || '').toLowerCase())
     );
   }, [customers, currentUser, currentUserEmail]);
 
@@ -462,11 +498,11 @@ export default function OrderHistory({
           <div class="details-list">
             <div class="details-row">
               <span class="details-label">Transaction ID</span>
-              <span class="details-value">#${payment.id.toUpperCase()}</span>
+              <span class="details-value">#${(payment.id || '').toUpperCase()}</span>
             </div>
             <div class="details-row">
               <span class="details-label">Order Reference ID</span>
-              <span class="details-value">#${payment.orderId ? payment.orderId.toUpperCase() : 'N/A'}</span>
+              <span class="details-value">#${payment.orderId ? (payment.orderId || '').toUpperCase() : 'N/A'}</span>
             </div>
             <div class="details-row">
               <span class="details-label">Customer Account</span>
@@ -523,7 +559,7 @@ export default function OrderHistory({
         
         {/* Header */}
         <header className="p-6 border-b border-neutral-100 flex items-center justify-between bg-neutral-50/50">
-          <div className="flex items-center gap-2.5">
+            <div className="flex items-center gap-2.5">
             <div className="w-10 h-10 rounded-full bg-indigo-50 border border-indigo-100 flex items-center justify-center text-indigo-600">
               <ShoppingBag className="w-5 h-5" />
             </div>
@@ -532,14 +568,25 @@ export default function OrderHistory({
               <p className="text-[11px] text-neutral-500 font-medium">View all your previous shopping & payment records</p>
             </div>
           </div>
-          <button 
-            onClick={onClose}
-            className="w-9 h-9 rounded-full hover:bg-neutral-100 flex items-center justify-center text-neutral-500 hover:text-black transition-colors border border-neutral-200/60 cursor-pointer"
-            title="Close Panel"
-            id="close-order-history-btn"
-          >
-            <X className="w-4 h-4" />
-          </button>
+          <div className="flex items-center gap-2">
+            {selectedOrders.length > 0 && (
+              <button 
+                onClick={handleBulkPrint}
+                className="flex items-center gap-1.5 text-[10px] bg-amber-500 hover:bg-amber-600 text-neutral-900 font-black px-3 py-2 rounded-lg transition-all cursor-pointer shadow-sm active:scale-95"
+              >
+                <Printer className="w-3.5 h-3.5" />
+                Bulk Print ({selectedOrders.length})
+              </button>
+            )}
+            <button 
+              onClick={onClose}
+              className="w-9 h-9 rounded-full hover:bg-neutral-100 flex items-center justify-center text-neutral-500 hover:text-black transition-colors border border-neutral-200/60 cursor-pointer"
+              title="Close Panel"
+              id="close-order-history-btn"
+            >
+              <X className="w-4 h-4" />
+            </button>
+          </div>
         </header>
 
         {/* Tab Switcher */}
@@ -635,6 +682,14 @@ export default function OrderHistory({
                   {matchedCustomer?.loyaltyPoints ?? 0} Points
                 </span>
               </div>
+              {matchedCustomer && matchedCustomer.loyaltyPoints >= 10 && (
+                <button
+                  onClick={() => onRedeemPoints(matchedCustomer.id)}
+                  className="mt-2 w-full bg-amber-500 hover:bg-amber-600 text-neutral-900 font-black text-[10px] uppercase py-1.5 rounded-lg shadow-sm transition-all"
+                >
+                  Redeem 30% Off
+                </button>
+              )}
             </div>
           </div>
 
@@ -662,13 +717,22 @@ export default function OrderHistory({
                 ) : (
                   filteredOrders.map(order => {
                     const step = getStatusStep(order.status);
+                    const delivery = deliveries.find(d => d.orderId === order.id);
                     return (
                       <div 
                         key={order.id} 
                         className="bg-white border border-neutral-200/80 rounded-2xl p-5 shadow-sm space-y-4 hover:shadow-md transition-shadow relative overflow-hidden"
                       >
+                        <div className="absolute top-4 left-4 z-10">
+                          <input 
+                            type="checkbox" 
+                            checked={selectedOrders.includes(order.id)}
+                            onChange={() => toggleOrderSelection(order.id)}
+                            className="w-4 h-4 rounded border-neutral-300 text-indigo-600 focus:ring-indigo-500 cursor-pointer"
+                          />
+                        </div>
                         {/* Card Header */}
-                        <div className="flex justify-between items-start border-b border-neutral-100 pb-3">
+                        <div className="flex justify-between items-start border-b border-neutral-100 pb-3 pl-6">
                           <div className="space-y-0.5">
                             <span className="text-[10px] font-mono font-bold text-indigo-600 uppercase">
                               Order ID: #{order.id.slice(-6).toUpperCase()}
@@ -710,6 +774,22 @@ export default function OrderHistory({
                             ))}
                           </ul>
                         </div>
+                        
+                        {/* Delivery Tracking */}
+                        {delivery && (
+                          <div className="bg-indigo-50 border border-indigo-100 p-4 rounded-xl space-y-2">
+                            <div className="flex justify-between items-center text-xs">
+                              <p className="font-bold flex items-center gap-1.5"><Truck className="w-4 h-4"/> Delivery Status: <span className="text-indigo-700 capitalize">{(delivery.status || "").replace('_', ' ')}</span></p>
+                              <p className="flex items-center gap-1.5"><MapPin className="w-4 h-4"/> {delivery.address}</p>
+                            </div>
+                            <div className="w-full bg-indigo-200 rounded-full h-2">
+                              <div 
+                                className="bg-indigo-600 h-2 rounded-full transition-all duration-500" 
+                                style={{ width: delivery.status === 'delivered' ? '100%' : delivery.status === 'in_transit' ? '70%' : delivery.status === 'dispatched' ? '30%' : '10%' }}
+                              />
+                            </div>
+                          </div>
+                        )}
 
                         {/* Visual Progress Status Indicator */}
                         <div className="pt-3 border-t border-neutral-100 space-y-3">
@@ -819,7 +899,7 @@ export default function OrderHistory({
                         </div>
                         <div className="space-y-0.5">
                           <p className="text-xs font-black text-neutral-800 uppercase tracking-tight">
-                            {payment.method.toUpperCase()} Payment
+                            {(payment.method || '').toUpperCase()} Payment
                           </p>
                           <div className="flex items-center gap-1.5 text-[10px] text-neutral-500 font-medium">
                             <span className="font-mono">ID: #{payment.id.slice(-6).toUpperCase()}</span>

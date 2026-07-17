@@ -2,7 +2,8 @@ import React, { useState, useEffect, useMemo, useRef } from "react";
 import { motion, AnimatePresence } from "motion/react";
 import { 
   Product, Order, Customer, Payment, CustomerLocation, 
-  CustomerInquiry, ActivityLog, DiscountCode, Charity, MediaFile, HomepageSettings, ChatMessage, NotificationItem, StoreEvent, CustomerReview, DeliveryItem
+  CustomerInquiry, ActivityLog, DiscountCode, Charity, MediaFile, HomepageSettings, ChatMessage, NotificationItem, StoreEvent, CustomerReview, DeliveryItem,
+  DeliveryRate, DeliveryPersonnel
 } from "./types";
 import { 
   ShoppingBag, Phone, MapPin, Mail, Clock, HelpCircle, 
@@ -144,7 +145,8 @@ const INITIAL_CUSTOMERS: Customer[] = [
     registrationDate: "2026-06-10",
     orders: 3,
     totalSpent: 850,
-    signedUp: true
+    signedUp: true,
+    loyaltyPoints: 0
   },
   {
     id: 2,
@@ -154,7 +156,8 @@ const INITIAL_CUSTOMERS: Customer[] = [
     registrationDate: "2026-06-12",
     orders: 1,
     totalSpent: 150,
-    signedUp: true
+    signedUp: true,
+    loyaltyPoints: 0
   },
   {
     id: 3,
@@ -164,7 +167,8 @@ const INITIAL_CUSTOMERS: Customer[] = [
     registrationDate: "2026-06-15",
     orders: 2,
     totalSpent: 350,
-    signedUp: true
+    signedUp: true,
+    loyaltyPoints: 0
   }
 ];
 
@@ -269,7 +273,7 @@ const INITIAL_LOCATIONS: CustomerLocation[] = [
     id: 1,
     customerId: 1,
     customerName: "Ama Mensah",
-    address: "Lapaz, Accra, near Lapaz Market",
+    address: "Ashaiman, Accra, near Ashaiman Market",
     lat: 5.6037,
     lng: -0.2270
   },
@@ -308,7 +312,7 @@ const INITIAL_INQUIRIES: CustomerInquiry[] = [
     customerEmail: "kofi.asante@example.com",
     customerPhone: "0272345678",
     service: "alterations",
-    message: "I purchased some suit trousers that are too long. Do you do bespoke hemming and taper alterations at your Lapaz shop?",
+    message: "I purchased some suit trousers that are too long. Do you do bespoke hemming and taper alterations at your Ashaiman shop?",
     date: "2026-06-26",
     status: "in-progress"
   }
@@ -318,8 +322,8 @@ const INITIAL_MEDIA: MediaFile[] = [
   {
     id: 1,
     type: "image",
-    title: "Lapaz Boutique Storefront",
-    description: "Welcome to Ella's Store! Visit our showroom in Lapaz, Accra for custom tailoring fittings and retail catalog rows.",
+    title: "Ashaiman Boutique Storefront",
+    description: "Welcome to Ella's Store! Visit our showroom in Ashaiman, Accra for custom tailoring fittings and retail catalog rows.",
     url: "https://images.unsplash.com/photo-1441986300917-64674bd600d8?w=800",
     uploadDate: "2026-06-01"
   },
@@ -340,7 +344,7 @@ const INITIAL_EVENTS: StoreEvent[] = [
     description: "Join us for an exclusive showroom presentation of our latest Ankara flare gowns, custom lace designs, and vibrant Ghanaian cuts.",
     date: "2026-07-12",
     time: "14:00",
-    location: "Ella's Store, Lapaz, Accra",
+    location: "Ella's Store, Ashaiman, Accra",
     imageUrl: "https://images.unsplash.com/photo-1511578314322-379afb476865?w=800",
     status: "upcoming"
   },
@@ -350,7 +354,7 @@ const INITIAL_EVENTS: StoreEvent[] = [
     description: "Vibrant Kente designs and custom bridal styling exhibitions curated directly by Ella. Free fashion consultations for early arrivals.",
     date: "2026-08-05",
     time: "10:00",
-    location: "Lapaz Showroom, Accra",
+    location: "Ashaiman Showroom, Accra",
     imageUrl: "https://images.unsplash.com/photo-1492684223066-81342ee5ff30?w=800",
     status: "upcoming"
   }
@@ -484,8 +488,8 @@ export default function App() {
 
   const isAuthorizedAdmin = useMemo(() => {
     return (
-      AUTHORIZED_ADMIN_USERS.some(admin => admin.toLowerCase() === currentUser.trim().toLowerCase()) ||
-      AUTHORIZED_ADMIN_USERS.some(admin => admin.toLowerCase() === currentUserEmail.trim().toLowerCase())
+      AUTHORIZED_ADMIN_USERS.some(admin => (admin || '').toLowerCase() === (currentUser || '').trim().toLowerCase()) ||
+      AUTHORIZED_ADMIN_USERS.some(admin => (admin || '').toLowerCase() === (currentUserEmail || '').trim().toLowerCase())
     );
   }, [currentUser, currentUserEmail]);
   const [selectedAvatarUrl, setSelectedAvatarUrl] = useState<string>(AVATAR_PRESETS[0].url);
@@ -495,7 +499,7 @@ export default function App() {
     return notifications.filter(n => {
       const email = (n as any).customerEmail;
       if (!email || email === "all") return true;
-      if (isLoggedIn && currentUserEmail && email.toLowerCase() === currentUserEmail.toLowerCase()) return true;
+      if (isLoggedIn && currentUserEmail && (email || '').toLowerCase() === (currentUserEmail || '').toLowerCase()) return true;
       return false;
     }).length;
   }, [notifications, currentUserEmail, isLoggedIn]);
@@ -526,6 +530,8 @@ export default function App() {
   const [adminAuthPassword, setAdminAuthPassword] = useState("");
   const [reviews, setReviews] = useState<CustomerReview[]>([]);
   const [deliveries, setDeliveries] = useState<DeliveryItem[]>([]);
+  const [deliveryRates, setDeliveryRates] = useState<DeliveryRate[]>([]);
+  const [deliveryPersonnel, setDeliveryPersonnel] = useState<DeliveryPersonnel[]>([]);
   const [showOrderHistory, setShowOrderHistory] = useState(false);
   const [showReviewModal, setShowReviewModal] = useState(false);
   const [showSearchDialog, setShowSearchDialog] = useState(false);
@@ -717,8 +723,8 @@ export default function App() {
       
       // If no ID exists, check if there's an existing customer with this name or email
       if (!visitorId) {
-        const existingByEmail = customers.find(c => emailToUse && c.email.toLowerCase() === emailToUse.toLowerCase());
-        const existingByName = customers.find(c => c.name.toLowerCase() === nameToUse.toLowerCase());
+        const existingByEmail = customers.find(c => emailToUse && (c.email || '').toLowerCase() === (emailToUse || '').toLowerCase());
+        const existingByName = customers.find(c => (c.name || '').toLowerCase() === (nameToUse || '').toLowerCase());
         
         if (existingByEmail) {
           visitorId = existingByEmail.id;
@@ -769,7 +775,7 @@ export default function App() {
       const isSignedUp = isLoggedInUser || (existingRecord ? existingRecord.signedUp : false);
       const ordersCount = existingRecord ? existingRecord.orders : 0;
       const totalSpentCount = existingRecord ? existingRecord.totalSpent : 0;
-      const regDate = existingRecord ? existingRecord.registrationDate : new Date().toISOString().split('T')[0];
+      const regDate = (existingRecord && existingRecord.registrationDate) ? existingRecord.registrationDate : new Date().toISOString().split('T')[0];
 
       // Keep temporary guest names fresh if they change session names
       const finalName = isLoggedInUser ? nameToUse : (existingRecord ? existingRecord.name : nameToUse);
@@ -777,7 +783,7 @@ export default function App() {
       const updatedCustomer: Customer = {
         id: visitorId,
         name: finalName,
-        email: emailToUse || (existingRecord ? existingRecord.email : `${finalName.toLowerCase().replace(/\s+/g, '')}_guest@ellastore.com`),
+        email: emailToUse || (existingRecord ? existingRecord.email : `${(finalName || '').toLowerCase().replace(/\s+/g, '')}_guest@ellastore.com`),
         phone: existingRecord ? existingRecord.phone : "024" + Math.floor(1000000 + Math.random() * 8999999),
         registrationDate: regDate,
         orders: ordersCount,
@@ -787,7 +793,8 @@ export default function App() {
         location: locationStr,
         device: device,
         ip: ipAddress,
-        avatarUrl: existingRecord?.avatarUrl || ""
+        avatarUrl: existingRecord?.avatarUrl || "",
+        loyaltyPoints: existingRecord?.loyaltyPoints || 0
       };
 
       // 5. Persist to Firestore database
@@ -827,9 +834,9 @@ export default function App() {
   // Monitor if customer account gets deleted by admin
   useEffect(() => {
     if (isCustomersLoaded && isLoggedIn && !isAuthorizedAdmin) {
-      const userExists = customers.some(
-        c => c.name.toLowerCase() === currentUser.trim().toLowerCase() ||
-             (currentUserEmail && c.email.toLowerCase() === currentUserEmail.trim().toLowerCase())
+      const userExists = (customers || []).some(
+        c => (c.name || '').toLowerCase() === (currentUser || '').trim().toLowerCase() ||
+             (currentUserEmail && (c.email || '').toLowerCase() === (currentUserEmail || '').trim().toLowerCase())
       );
       if (!userExists) {
         setIsLoggedIn(false);
@@ -870,7 +877,7 @@ export default function App() {
         const items = snapshot.docs.map(doc => doc.data() as Product);
         
         // Ensure food items exist in database
-        const hasFood = items.some(item => item.category === 'food');
+        const hasFood = (items || []).some(item => item.category === 'food');
         if (!hasFood) {
           console.log("No food products found in existing Firestore. Seeding food items...");
           INITIAL_PRODUCTS.forEach(async (item) => {
@@ -1355,8 +1362,8 @@ export default function App() {
       localStorage.setItem("currentUserAvatar", selectedAvatarUrl);
       
       // CRM synchronization
-      const existing = customers.find(c => c.name.toLowerCase() === loginUsername.trim().toLowerCase());
-      const matchedEmail = loginEmail.trim() || (existing ? existing.email : `${loginUsername.toLowerCase().replace(/\s+/g, '')}@example.com`);
+      const existing = customers.find(c => (c.name || '').toLowerCase() === (loginUsername || '').trim().toLowerCase());
+      const matchedEmail = loginEmail.trim() || (existing ? existing.email : `${(loginUsername || '').toLowerCase().replace(/\s+/g, '')}@example.com`);
       setCurrentUserEmail(matchedEmail);
       localStorage.setItem("currentUserEmail", matchedEmail);
 
@@ -1373,13 +1380,14 @@ export default function App() {
         const newC: Customer = {
           id: customers.length > 0 ? Math.max(...customers.map(c => c.id)) + 1 : 1,
           name: loginUsername.trim(),
-          email: loginEmail.trim() || `${loginUsername.toLowerCase().replace(/\s+/g, '')}@example.com`,
+          email: loginEmail.trim() || `${(loginUsername || '').toLowerCase().replace(/\s+/g, '')}@example.com`,
           phone: loginPhone.trim() || "024" + Math.floor(1000000 + Math.random() * 8999999),
           registrationDate: new Date().toISOString().split('T')[0],
           orders: 0,
           totalSpent: 0,
           signedUp: true,
-          avatarUrl: selectedAvatarUrl
+          avatarUrl: selectedAvatarUrl,
+          loyaltyPoints: 0
         };
         await setDoc(doc(db, "customers", String(newC.id)), newC);
       } else {
@@ -1388,7 +1396,8 @@ export default function App() {
           email: loginEmail.trim() || existing.email,
           phone: loginPhone.trim() || existing.phone,
           signedUp: true,
-          avatarUrl: selectedAvatarUrl || existing?.avatarUrl
+          avatarUrl: selectedAvatarUrl || existing?.avatarUrl,
+          loyaltyPoints: existing.loyaltyPoints || 0
         };
         await setDoc(doc(db, "customers", String(existing.id)), updatedC);
       }
@@ -1405,6 +1414,15 @@ export default function App() {
     }
   };
 
+  const handleRedeemPoints = async (customerId: number) => {
+    const customer = customers.find(c => c.id === customerId);
+    if (customer && customer.loyaltyPoints >= 10) {
+      const updatedCustomer = { ...customer, loyaltyPoints: customer.loyaltyPoints - 10 };
+      await setDoc(doc(db, "customers", String(customer.id)), updatedCustomer);
+      logActivity(`Customer ${customer.name} redeemed 10 loyalty points for a discount.`, 'user_action');
+    }
+  };
+
   const handleAddOrder = async (order: any) => {
     setSiteLoading(true);
     setLoadingMessage("Authorizing mobile payment & processing your couture order...");
@@ -1414,7 +1432,7 @@ export default function App() {
 
       // 2. Locate or create customer record
       const customerName = order.customer.trim();
-      const existingCust = customers.find(c => c.name.toLowerCase() === customerName.toLowerCase());
+      const existingCust = customers.find(c => (c.name || '').toLowerCase() === (customerName || '').toLowerCase());
 
       const pointsRedeemed = Number(order.pointsRedeemed || 0);
       const earnedPoints = Math.floor(order.total / 10); // 1 point for every ₵10 spent
@@ -1435,7 +1453,7 @@ export default function App() {
         const newCust: Customer = {
           id: newId,
           name: customerName,
-          email: order.email || `${customerName.toLowerCase().replace(/\s+/g, '')}@example.com`,
+          email: order.email || `${(customerName || '').toLowerCase().replace(/\s+/g, '')}@example.com`,
           phone: order.phone || "024" + Math.floor(1000000 + Math.random() * 8999999),
           registrationDate: new Date().toISOString().split('T')[0],
           orders: 1,
@@ -1510,7 +1528,7 @@ export default function App() {
         const userName = user.displayName || user.email || "Google User";
         const userPhone = user.phoneNumber || "024" + Math.floor(1000000 + Math.random() * 8999999);
         
-        const existing = customers.find(c => (c.email && c.email.toLowerCase() === userEmail.toLowerCase()) || c.name.toLowerCase() === userName.toLowerCase());
+        const existing = customers.find(c => (c.email && (c.email || '').toLowerCase() === (userEmail || '').toLowerCase()) || (c.name || '').toLowerCase() === (userName || '').toLowerCase());
         if (!existing) {
           const newC: Customer = {
             id: customers.length > 0 ? Math.max(...customers.map(c => c.id)) + 1 : 1,
@@ -1521,7 +1539,8 @@ export default function App() {
             orders: 0,
             totalSpent: 0,
             signedUp: true,
-            avatarUrl: photo
+            avatarUrl: photo,
+            loyaltyPoints: 0
           };
           await setDoc(doc(db, "customers", String(newC.id)), newC);
         } else {
@@ -1529,7 +1548,8 @@ export default function App() {
             ...existing,
             email: userEmail,
             signedUp: true,
-            avatarUrl: existing.avatarUrl || photo
+            avatarUrl: existing.avatarUrl || photo,
+            loyaltyPoints: existing.loyaltyPoints || 0
           };
           await setDoc(doc(db, "customers", String(existing.id)), updatedC);
         }
@@ -1550,8 +1570,8 @@ export default function App() {
       const result = await signInWithPopup(auth, googleProvider);
       const user = result.user;
       if (user && user.email) {
-        const userEmail = user.email.toLowerCase();
-        if (AUTHORIZED_ADMIN_USERS.map(e => e.toLowerCase()).includes(userEmail)) {
+        const userEmail = (user.email || '').toLowerCase();
+        if (AUTHORIZED_ADMIN_USERS.map(e => (e || '').toLowerCase()).includes(userEmail)) {
           setIsLoggedIn(true);
           setCurrentUser(user.displayName || user.email || "Google Admin");
           setCurrentUserEmail(user.email || "");
@@ -1716,7 +1736,7 @@ export default function App() {
       }
     },
     {
-      name: "Premium Lapaz Showroom & Events Hub",
+      name: "Premium Ashaiman Showroom & Events Hub",
       category: "Exhibitions & trunk shows",
       description: "Read about our upcoming live product trunk shows, fashion design exhibitions, and cultural runway runway showcases.",
       tags: ["event", "showroom", "exhibition", "trunk show", "lapaz", "accra", "runway", "dates", "tickets"],
@@ -1734,7 +1754,7 @@ export default function App() {
     {
       name: "Contact & Location details",
       category: "Showroom Info",
-      description: "Get physical directions to our Lapaz market showroom, operating hours, direct phone numbers, and WhatsApp channels.",
+      description: "Get physical directions to our Ashaiman market showroom, operating hours, direct phone numbers, and WhatsApp channels.",
       tags: ["contact", "location", "showroom", "phone", "email", "hours", "address", "map", "whatsapp"],
       icon: "📍",
       action: () => {
@@ -1749,22 +1769,22 @@ export default function App() {
 
   const filteredFeatures = useMemo(() => {
     if (!searchQuery.trim()) return storeFeatures;
-    const q = searchQuery.toLowerCase();
+    const q = (searchQuery || '').toLowerCase();
     return storeFeatures.filter(f => 
-      f.name.toLowerCase().includes(q) ||
-      f.category.toLowerCase().includes(q) ||
-      f.description.toLowerCase().includes(q) ||
-      f.tags.some(t => t.toLowerCase().includes(q))
+      (f.name || '').toLowerCase().includes(q) ||
+      (f.category || '').toLowerCase().includes(q) ||
+      (f.description || '').toLowerCase().includes(q) ||
+      (f.tags || []).some(t => (t || '').toLowerCase().includes(q))
     );
   }, [searchQuery, storeFeatures]);
 
   const filteredProducts = useMemo(() => {
     if (!searchQuery.trim()) return products.slice(0, 4); // show first 4 featured items
-    const q = searchQuery.toLowerCase();
+    const q = (searchQuery || '').toLowerCase();
     return products.filter(p => 
-      p.name.toLowerCase().includes(q) ||
-      p.category.toLowerCase().includes(q) ||
-      p.description.toLowerCase().includes(q)
+      (p.name || '').toLowerCase().includes(q) ||
+      (p.category || '').toLowerCase().includes(q) ||
+      (p.description || '').toLowerCase().includes(q)
     );
   }, [searchQuery, products]);
 
@@ -1817,7 +1837,7 @@ export default function App() {
                 E
               </div>
               <h2 className="font-sans text-2xl text-slate-100 font-bold pt-3 tracking-tight">Welcome to Ella's</h2>
-              <p className="text-xs text-slate-400">Lapaz's premium fashion, dressmaking & styling showroom</p>
+              <p className="text-xs text-slate-400">Ashaiman's premium fashion, dressmaking & styling showroom</p>
             </div>
 
             <div className="space-y-3.5 text-left">
@@ -2629,7 +2649,7 @@ export default function App() {
               <p className="text-[9px] font-mono tracking-widest text-indigo-600 font-bold uppercase">COUTURE & LUXURY ALTERATIONS</p>
               <div className="flex items-center justify-center gap-1.5 pt-1">
                 <span className="w-1.5 h-1.5 rounded-full bg-emerald-500 animate-ping" />
-                <span className="text-[8px] font-sans font-bold text-neutral-500 uppercase tracking-wider">Premium Lapaz Showroom</span>
+                <span className="text-[8px] font-sans font-bold text-neutral-500 uppercase tracking-wider">Premium Ashaiman Showroom</span>
               </div>
             </div>
           </motion.div>
@@ -2692,7 +2712,7 @@ export default function App() {
           <div className="space-y-6">
             <h2 className="font-sans text-3xl md:text-4xl text-black font-bold tracking-tight">Bespoke Heritage Since 2021</h2>
             <p className="text-neutral-700 text-sm leading-relaxed">
-              Located in the heart of Lapaz, Accra, Ella's Store has emerged as a beloved showroom for traditional Ghanaian dressmaking and retail styles. Over five years of tailoring expertise, we deliver stunning couture collections blending vibrant Ankara prints and delicate laces.
+              Located in the heart of Ashaiman, Accra, Ella's Store has emerged as a beloved showroom for traditional Ghanaian dressmaking and retail styles. Over five years of tailoring expertise, we deliver stunning couture collections blending vibrant Ankara prints and delicate laces.
             </p>
             <blockquote className="border-l-4 border-indigo-600 bg-white p-6 rounded-r-3xl italic font-sans text-neutral-800 text-base leading-relaxed border border-neutral-200 shadow-sm">
               "We believe fashion is a profound language of self-expression. Every design at Ella's is engineered to highlight your heritage, silhouette, and unique confidence."
@@ -2742,7 +2762,7 @@ export default function App() {
             <span className="text-4xl">🗓️</span>
             <h3 className="font-sans text-lg font-bold text-black mt-4">No Active Schedules</h3>
             <p className="text-neutral-500 text-xs mt-1.5 leading-relaxed">
-              We are currently designing our next seasonal collection lines in the Lapaz showroom. Please join our SMS updates for future events!
+              We are currently designing our next seasonal collection lines in the Ashaiman showroom. Please join our SMS updates for future events!
             </p>
           </div>
         ) : (
@@ -2860,7 +2880,7 @@ export default function App() {
           {/* Dynamic grid wrapping with empty states */}
           {products.filter(p => 
             (activeCategory === 'all' || p.category === activeCategory) &&
-            (p.name.toLowerCase().includes(searchQuery.toLowerCase()) || p.category.toLowerCase().includes(searchQuery.toLowerCase()))
+            ((p.name || '').toLowerCase().includes((searchQuery || '').toLowerCase()) || (p.category || '').toLowerCase().includes((searchQuery || '').toLowerCase()))
           ).length === 0 ? (
             <div className="text-center py-16 bg-white rounded-3xl border border-neutral-200 shadow-sm max-w-md mx-auto space-y-3 animate-in fade-in">
               <span className="text-4xl">🍽️</span>
@@ -2889,7 +2909,7 @@ export default function App() {
               {products
                 .filter(p => 
                   (activeCategory === 'all' || p.category === activeCategory) &&
-                  (p.name.toLowerCase().includes(searchQuery.toLowerCase()) || p.category.toLowerCase().includes(searchQuery.toLowerCase()))
+                  ((p.name || '').toLowerCase().includes((searchQuery || '').toLowerCase()) || (p.category || '').toLowerCase().includes((searchQuery || '').toLowerCase()))
                 )
                 .map(prod => (
                   <motion.div
@@ -2960,7 +2980,7 @@ export default function App() {
               </div>
               <div className="text-xs space-y-0.5">
                 <strong className="block text-black">Showroom Address</strong>
-                <span className="text-neutral-600 font-medium">Lapaz Showroom, Accra, Ghana (Near Market)</span>
+                <span className="text-neutral-600 font-medium">Ashaiman Showroom, Accra, Ghana (Near Market)</span>
               </div>
             </div>
 
@@ -3091,7 +3111,7 @@ export default function App() {
         <div className="bg-white border border-neutral-200/80 rounded-2xl p-5 shadow-sm">
           {notifications.filter(n => {
             if (!n.customerEmail || n.customerEmail === "all") return true;
-            if (isLoggedIn && currentUserEmail && n.customerEmail.toLowerCase() === currentUserEmail.toLowerCase()) return true;
+            if (isLoggedIn && currentUserEmail && (n.customerEmail || '').toLowerCase() === (currentUserEmail || '').toLowerCase()) return true;
             return false;
           }).length === 0 ? (
             <div className="text-center py-6 text-neutral-400 text-xs">
@@ -3103,7 +3123,7 @@ export default function App() {
             <div className="space-y-3 max-h-[250px] overflow-y-auto pr-1">
               {notifications.filter(n => {
                 if (!n.customerEmail || n.customerEmail === "all") return true;
-                if (isLoggedIn && currentUserEmail && n.customerEmail.toLowerCase() === currentUserEmail.toLowerCase()) return true;
+                if (isLoggedIn && currentUserEmail && (n.customerEmail || '').toLowerCase() === (currentUserEmail || '').toLowerCase()) return true;
                 return false;
               }).map(n => (
                 <div 
@@ -3149,7 +3169,7 @@ export default function App() {
               <ProfessionalLogo />
             </div>
             <p className="text-neutral-600 text-xs leading-relaxed font-medium">
-              Your favorite bespoke fashion design, Ankara wax prints boutique and alterations clinic based in Lapaz, Accra.
+              Your favorite bespoke fashion design, Ankara wax prints boutique and alterations clinic based in Ashaiman, Accra.
             </p>
           </div>
           
@@ -3165,7 +3185,7 @@ export default function App() {
           <div className="space-y-3">
             <h4 className="font-sans text-sm text-black font-extrabold uppercase tracking-wider">Showroom Contacts</h4>
             <div className="text-xs text-neutral-600 space-y-1 font-medium">
-              <p>Lapaz Market Area, Accra</p>
+              <p>Ashaiman Market Area, Accra</p>
               <p className="font-mono text-neutral-600 font-medium">0276747037</p>
               <p>info@ellastore.com</p>
             </div>
@@ -3245,12 +3265,14 @@ export default function App() {
         <CheckoutModal
           cart={cart}
           discountCodes={discountCodes}
+          deliveryRates={deliveryRates}
           onClose={() => setShowCheckout(false)}
           onClearCart={clearCart}
           onAddOrder={handleAddOrder}
           onAddPayment={p => setDoc(doc(db, "payments", String(p.id)), p)}
           onLogActivity={logActivity}
           onShowToast={showToast}
+          onRedeemPoints={handleRedeemPoints}
           customerNameDefault={currentUser}
           homepageSettings={homepageSettings}
           customers={customers}
@@ -3303,9 +3325,13 @@ export default function App() {
           events={events}
           reviews={reviews}
           deliveries={deliveries}
+          deliveryRates={deliveryRates}
+          deliveryPersonnel={deliveryPersonnel}
           onDeleteReview={handleDeleteReview}
           onUpdateDelivery={handleUpdateDelivery}
           onCreateDelivery={handleCreateDelivery}
+          onSetDeliveryRates={updated => syncCollection("delivery_rates", updated)}
+          onSetDeliveryPersonnel={updated => syncCollection("delivery_personnel", updated)}
           onClose={() => {
             setShowAdminConsole(false);
             logActivity("Exited Admin Operations Dashboard", "admin_action");
@@ -3345,6 +3371,7 @@ export default function App() {
         <OrderHistory
           orders={orders}
           payments={payments}
+          deliveries={deliveries}
           customers={customers}
           currentUser={currentUser}
           currentUserEmail={currentUserEmail}
@@ -3352,7 +3379,7 @@ export default function App() {
           onUpdateAvatar={async (newUrl) => {
             setCurrentUserAvatar(newUrl);
             localStorage.setItem("currentUserAvatar", newUrl);
-            const existing = customers.find(c => c.name.toLowerCase() === currentUser.toLowerCase() || (currentUserEmail && c.email.toLowerCase() === currentUserEmail.toLowerCase()));
+            const existing = customers.find(c => (c.name || '').toLowerCase() === (currentUser || '').toLowerCase() || (currentUserEmail && (c.email || '').toLowerCase() === (currentUserEmail || '').toLowerCase()));
             if (existing) {
               const updatedC = {
                 ...existing,
@@ -3364,6 +3391,7 @@ export default function App() {
             }
           }}
           onClose={() => setShowOrderHistory(false)}
+          onRedeemPoints={handleRedeemPoints}
           isCustomerOnly={!isAuthorizedAdmin}
         />
       )}

@@ -28,7 +28,7 @@ export default function ProductCard({ product, allProducts = [], onAddToCart, is
     if (!allProducts || allProducts.length === 0 || isFood) return [];
     
     let targetCategories: string[] = [];
-    const cat = product.category.toLowerCase();
+    const cat = (product.category || '').toLowerCase();
     
     if (cat === "dresses") {
       targetCategories = ["bags", "shoes", "accessories"];
@@ -43,7 +43,7 @@ export default function ProductCard({ product, allProducts = [], onAddToCart, is
     }
 
     return allProducts
-      .filter(p => p.id !== product.id && targetCategories.includes(p.category.toLowerCase()) && p.stock > 0)
+      .filter(p => p.id !== product.id && targetCategories.includes((p.category || '').toLowerCase()) && p.stock > 0)
       .slice(0, 2);
   }, [allProducts, product]);
 

@@ -1,6 +1,6 @@
 import { useState, useEffect } from "react";
-import { DiscountCode, Product, HomepageSettings, Customer } from "../types";
-import { X, ShoppingBag, CreditCard, Check, Smartphone, Loader2, ArrowLeft, ArrowRight, Tag, AlertTriangle } from "lucide-react";
+import { DiscountCode, Product, HomepageSettings, Customer, DeliveryRate } from "../types";
+import { X, ShoppingBag, CreditCard, Check, Smartphone, Loader2, ArrowLeft, ArrowRight, Tag, AlertTriangle, MapPin } from "lucide-react";
 
 interface CartItem {
   id: number;
@@ -12,12 +12,14 @@ interface CartItem {
 interface CheckoutModalProps {
   cart: CartItem[];
   discountCodes: DiscountCode[];
+  deliveryRates: DeliveryRate[];
   onClose: () => void;
   onClearCart: () => void;
   onAddOrder: (order: any) => void;
   onAddPayment: (payment: any) => void;
   onLogActivity: (activity: string, type: 'login' | 'cart_addition' | 'purchase' | 'product_view' | 'inquiry' | 'admin_action' | 'user_action') => void;
   onShowToast: (title: string, message: string, type: 'success' | 'error' | 'info') => void;
+  onRedeemPoints: (customerId: number) => void;
   customerNameDefault: string;
   homepageSettings: HomepageSettings;
   customers?: Customer[];
@@ -27,18 +29,21 @@ interface CheckoutModalProps {
 export default function CheckoutModal({
   cart,
   discountCodes,
+  deliveryRates,
   onClose,
   onClearCart,
   onAddOrder,
   onAddPayment,
   onLogActivity,
   onShowToast,
+  onRedeemPoints,
   customerNameDefault,
   homepageSettings,
   customers = [],
   currentUserEmail = ""
 }: CheckoutModalProps) {
   const [step, setStep] = useState<'summary' | 'customer' | 'momo' | 'success'>('summary');
+  const [selectedRateId, setSelectedRateId] = useState<string>(deliveryRates[0]?.id || "");
   const [couponCode, setCouponCode] = useState("");
   const [appliedDiscount, setAppliedDiscount] = useState<DiscountCode | null>(null);
   const [couponError, setCouponError] = useState("");
@@ -72,17 +77,19 @@ export default function CheckoutModal({
   const momoChargeRate = homepageSettings.momoChargeRate ?? 0.5;
 
   const subtotal = cart.reduce((sum, item) => sum + item.price * item.quantity, 0);
-  const delivery = 15.00;
+  
+  const selectedRate = deliveryRates.find(r => r.id === selectedRateId);
+  const delivery = selectedRate ? selectedRate.price : 15.00;
 
   // Retrieve customer's points
   const matchedCustomer = customers.find(c => 
-    c.name.toLowerCase() === customerNameDefault.toLowerCase() ||
-    (currentUserEmail && c.email.toLowerCase() === currentUserEmail.toLowerCase())
+    (c.name || '').toLowerCase() === (customerNameDefault || '').toLowerCase() ||
+    (currentUserEmail && (c.email || '').toLowerCase() === (currentUserEmail || '').toLowerCase())
   );
   const availablePoints = matchedCustomer?.loyaltyPoints ?? 0;
 
-  const pointsDiscountAmount = redeemPoints ? Math.min(availablePoints * 0.1, subtotal) : 0;
-  const pointsRedeemed = redeemPoints ? Math.min(availablePoints, Math.floor(subtotal * 10)) : 0;
+  const pointsDiscountAmount = redeemPoints && availablePoints >= 10 ? subtotal * 0.3 : 0;
+  const pointsRedeemed = redeemPoints && availablePoints >= 10 ? 10 : 0;
 
   let discountAmount = 0;
   if (appliedDiscount) {
@@ -332,16 +339,35 @@ export default function CheckoutModal({
                     Review Items in Bag
                   </h4>
                   
-                  <div className="space-y-2.5">
-                    {cart.map(item => (
-                      <div key={item.id} className="flex justify-between items-center bg-neutral-50 p-3 rounded-xl border border-neutral-100">
-                        <div>
-                          <h5 className="text-sm font-semibold text-neutral-850">{item.name}</h5>
-                          <span className="text-xs text-neutral-500">₵{item.price} each &bull; Qty: {item.quantity}</span>
+                  <div className="space-y-4">
+                    <div className="bg-neutral-50 p-4 rounded-2xl border border-neutral-200">
+                      <label className="text-xs font-bold text-neutral-700 flex items-center gap-1.5 mb-3">
+                        <MapPin className="w-3.5 h-3.5 text-indigo-600" />
+                        Select Delivery Zone
+                      </label>
+                      <select 
+                        className="w-full p-2 border rounded-xl text-sm"
+                        value={selectedRateId}
+                        onChange={e => setSelectedRateId(e.target.value)}
+                      >
+                        {deliveryRates.map(rate => (
+                          <option key={rate.id} value={rate.id}>
+                            {rate.locationName} - ₵{rate.price} ({rate.distanceKm} km)
+                          </option>
+                        ))}
+                      </select>
+                    </div>
+                    <div className="space-y-2.5">
+                      {cart.map(item => (
+                        <div key={item.id} className="flex justify-between items-center bg-neutral-50 p-3 rounded-xl border border-neutral-100">
+                          <div>
+                            <h5 className="text-sm font-semibold text-neutral-850">{item.name}</h5>
+                            <span className="text-xs text-neutral-500">₵{item.price} each &bull; Qty: {item.quantity}</span>
+                          </div>
+                          <span className="text-sm font-bold text-neutral-900">₵{(item.price * item.quantity).toFixed(2)}</span>
                         </div>
-                        <span className="text-sm font-bold text-neutral-900">₵{(item.price * item.quantity).toFixed(2)}</span>
-                      </div>
-                    ))}
+                      ))}
+                    </div>
                   </div>
 
                   {/* Coupon System */}
@@ -387,8 +413,8 @@ export default function CheckoutModal({
                         </span>
                       </div>
                       <p className="text-[11px] text-neutral-600 font-medium">
-                        Redeem points for discounts: <strong>10 points = ₵1.00</strong>. 
-                        You can save up to <strong>₵{(availablePoints * 0.1).toFixed(2)}</strong> on this order.
+                        Redeem points for discounts: <strong>10 points = 30% Off</strong>. 
+                        You have {availablePoints} points.
                       </p>
                       
                       <div className="flex items-center justify-between bg-white px-3 py-2 rounded-xl border border-neutral-150 shadow-sm">
@@ -396,13 +422,18 @@ export default function CheckoutModal({
                         <button
                           type="button"
                           onClick={() => {
-                            setRedeemPoints(!redeemPoints);
-                            if (!redeemPoints) {
-                              onShowToast("Points Applied", `Applied points discount of ₵${Math.min(availablePoints * 0.1, subtotal).toFixed(2)}!`, "success");
+                            if (availablePoints >= 10 && matchedCustomer) {
+                              setRedeemPoints(!redeemPoints);
+                              if (!redeemPoints) {
+                                onRedeemPoints(matchedCustomer.id);
+                                onShowToast("Points Applied", "Applied 30% discount!", "success");
+                              }
+                            } else if (availablePoints < 10) {
+                              onShowToast("Insufficient Points", "You need 10 points to redeem a discount.", "error");
                             }
                           }}
                           className={`px-3 py-1.5 rounded-lg text-[10px] font-black uppercase tracking-wider transition-all cursor-pointer ${
-                            redeemPoints 
+                            redeemPoints && availablePoints >= 10
                               ? "bg-amber-500 text-neutral-900 shadow-sm" 
                               : "bg-neutral-100 text-neutral-600 hover:bg-neutral-200"
                           }`}
@@ -420,7 +451,7 @@ export default function CheckoutModal({
                       <span>₵{subtotal.toFixed(2)}</span>
                     </div>
                     <div className="flex justify-between text-neutral-600">
-                      <span>Lapaz Delivery Fee</span>
+                      <span>Ashaiman Delivery Fee</span>
                       <span>₵{delivery.toFixed(2)}</span>
                     </div>
                     {appliedDiscount && (
@@ -431,7 +462,7 @@ export default function CheckoutModal({
                     )}
                     {redeemPoints && (
                       <div className="flex justify-between text-amber-600 font-medium">
-                        <span>Loyalty Points Discount ({pointsRedeemed} pts)</span>
+                        <span>Loyalty Points Discount (30% Off)</span>
                         <span>-₵{pointsDiscountAmount.toFixed(2)}</span>
                       </div>
                     )}
@@ -509,7 +540,7 @@ export default function CheckoutModal({
                   <textarea
                     value={address}
                     onChange={e => setAddress(e.target.value)}
-                    placeholder="Street name, landmark, house number, area (e.g. Near Lapaz Market)"
+                    placeholder="Street name, landmark, house number, area (e.g. Near Ashaiman Market)"
                     rows={3}
                     className="w-full px-4 py-3 border border-neutral-200 rounded-xl focus:outline-none focus:border-amber-500"
                     required

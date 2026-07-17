@@ -139,18 +139,18 @@ export default function CharityManager({
   // Filtered lists based on search bar
   const filteredDonors = useMemo(() => {
     if (!searchQuery.trim()) return donorStats;
-    const query = searchQuery.toLowerCase().trim();
+    const query = (searchQuery || '').toLowerCase().trim();
     return donorStats.filter(
       donor => 
-        donor.name.toLowerCase().includes(query) || 
-        donor.email.toLowerCase().includes(query)
+        (donor.name || '').toLowerCase().includes(query) || 
+        (donor.email || '').toLowerCase().includes(query)
     );
   }, [donorStats, searchQuery]);
 
   const filteredLedger = useMemo(() => {
     const sorted = [...charityDonations].sort((a, b) => new Date(b.date).getTime() - new Date(a.date).getTime());
     if (!searchQuery.trim()) return sorted;
-    const query = searchQuery.toLowerCase().trim();
+    const query = (searchQuery || '').toLowerCase().trim();
     return sorted.filter(
       d => 
         (d.customerName || "").toLowerCase().includes(query) || 
@@ -384,7 +384,7 @@ export default function CharityManager({
                 <label className="text-neutral-500">Project Name</label>
                 <input 
                   type="text" 
-                  placeholder="e.g. Lapaz Children Study Fund" 
+                  placeholder="e.g. Ashaiman Children Study Fund" 
                   value={name} 
                   onChange={e => setName(e.target.value)} 
                   className="w-full p-2.5 border rounded-xl text-black bg-neutral-50" 
@@ -559,11 +559,11 @@ export default function CharityManager({
                 // Generate CSV summarizing each customer total raised
                 const headers = ["Customer Name", "Customer Email", "Total Contribution (GH₵)", "Donation Actions", "Distinct Charities Supported", "Last Transaction Date"];
                 const rows = donorStats.map(d => [
-                  `"${d.name.replace(/"/g, '""')}"`,
+                  `"${(d.name || "Unknown").replace(/"/g, '""')}"`,
                   d.email,
                   d.totalDonated,
                   d.donationCount,
-                  `"${Array.from(d.supportedCharities).join(", ").replace(/"/g, '""')}"`,
+                  `"${Array.from(d.supportedCharities || []).join(", ").replace(/"/g, '""')}"`,
                   d.lastDonationDate
                 ]);
                 const csvContent = [headers.join(","), ...rows.map(e => e.join(","))].join("\n");

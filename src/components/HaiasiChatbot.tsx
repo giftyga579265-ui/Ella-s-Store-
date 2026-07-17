@@ -4,11 +4,11 @@ import { Bot, Send, X, Sparkles, Trash2, Maximize2, Minimize2 } from "lucide-rea
 
 // A luxurious formatter component to beautifully render Haiasi AI's responses
 function FormattedMessage({ text }: { text: string }) {
-  const lines = text.split("\n");
+  const lines = (text || "").split("\n");
 
   const parseInlineStyles = (str: string) => {
     // Splits on markdown bold (**text**) and italic (*text*)
-    const parts = str.split(/(\*\*.*?\*\*|\*.*?\*)/g);
+    const parts = (str || "").split(/(\*\*.*?\*\*|\*.*?\*)/g);
     return parts.map((part, index) => {
       if (part.startsWith("**") && part.endsWith("**")) {
         return (
@@ -213,7 +213,7 @@ export default function HaiasiChatbot({ onLogActivity, username }: HaiasiChatbot
       setMessages(prev => [...prev, {
         id: `msg-${Date.now()}-bot`,
         sender: 'bot',
-        text: "I'm having a bit of trouble connecting to our tailoring database right now. Please try again in a moment, or visit Ella's Store in Lapaz for direct consultation!"
+        text: "I'm having a bit of trouble connecting to our tailoring database right now. Please try again in a moment, or visit Ella's Store in Ashaiman for direct consultation!"
       }]);
     }
   };

@@ -2,9 +2,11 @@ import React, { useState, useMemo, useEffect } from "react";
 import { 
   Product, Order, Customer, Payment, CustomerLocation, 
   CustomerInquiry, ActivityLog, DiscountCode, Charity, MediaFile, HomepageSettings, StoreEvent, CustomerReview, DeliveryItem,
+  DeliveryRate, DeliveryPersonnel,
   ArMannequin, ArDress
 } from "../types";
 import CustomerLiveMap from "./CustomerLiveMap";
+import DeliveryPage from "./DeliveryPage";
 import CharityManager from "./CharityManager";
 import GarmentExtractor from "./GarmentExtractor";
 import { 
@@ -38,9 +40,13 @@ interface AdminDashboardProps {
   events: StoreEvent[];
   reviews: CustomerReview[];
   deliveries: DeliveryItem[];
+  deliveryRates: DeliveryRate[];
+  deliveryPersonnel: DeliveryPersonnel[];
   onDeleteReview?: (id: string) => void;
   onUpdateDelivery: (id: string, fields: Partial<DeliveryItem>) => void;
   onCreateDelivery: (delivery: Omit<DeliveryItem, 'lastUpdated'>) => void;
+  onSetDeliveryRates: (rates: DeliveryRate[]) => void;
+  onSetDeliveryPersonnel: (personnel: DeliveryPersonnel[]) => void;
   
   onClose: () => void;
   onSetProducts: (products: Product[]) => void;
@@ -64,7 +70,9 @@ interface AdminDashboardProps {
 
 export default function AdminDashboard({
   products, orders, customers, payments, locations, inquiries, 
-  activityLogs, discountCodes, charityData, charityDonations = [], mediaFiles, homepageSettings, adminMessages, events, reviews, deliveries, onDeleteReview, onUpdateDelivery, onCreateDelivery,
+  activityLogs, discountCodes, charityData, charityDonations = [], mediaFiles, homepageSettings, adminMessages, events, reviews, deliveries, 
+  deliveryRates, deliveryPersonnel, 
+  onDeleteReview, onUpdateDelivery, onCreateDelivery, onSetDeliveryRates, onSetDeliveryPersonnel,
   onClose, onSetProducts, onSetOrders, onSetLocations, onSetInquiries, 
   onSetDiscountCodes, onSetCharityData, onSetMediaFiles, onSetHomepageSettings, onSetAdminMessages,
   onSetActivityLogs, onSetEvents, onShowToast, onLogActivity, onAddNotification, onSeedDemoData, onClearAllData,
@@ -283,7 +291,7 @@ export default function AdminDashboard({
   const dailyData = useMemo(() => {
     const data: Record<string, number> = {};
     orders.forEach(o => {
-      const date = o.date.split('T')[0];
+      const date = (o.date || "").split('T')[0] || "Unknown";
       data[date] = (data[date] || 0) + o.total;
     });
     return Object.entries(data).map(([date, amount]) => ({ date, amount })).sort((a,b) => a.date.localeCompare(b.date));
@@ -311,11 +319,11 @@ export default function AdminDashboard({
     const rows = payments.map(p => [
       p.id,
       p.orderId || "N/A",
-      `"${p.customer.replace(/"/g, '""')}"`,
-      p.method.toUpperCase(),
+      `"${(p.customer || "Unknown").replace(/"/g, '""')}"`,
+      (p.method || "").toUpperCase(),
       p.amount,
       p.date,
-      p.status.toUpperCase()
+      (p.status || "").toUpperCase()
     ]);
 
     const csvContent = [
@@ -502,12 +510,12 @@ export default function AdminDashboard({
 
   // Food Metrics
   const foodProducts = useMemo(() => products.filter(p => p.category === 'food'), [products]);
-  const foodProductNames = useMemo(() => foodProducts.map(p => p.name.toLowerCase()), [foodProducts]);
+  const foodProductNames = useMemo(() => foodProducts.map(p => (p.name || '').toLowerCase()), [foodProducts]);
   const foodOrders = useMemo(() => {
     return orders.filter(order => {
-      return order.items.some(item => {
-        const lowerItem = item.toLowerCase();
-        return foodProductNames.some(foodName => lowerItem.includes(foodName)) || 
+      return (order.items || []).some(item => {
+        const lowerItem = (item || '').toLowerCase();
+        return (foodProductNames || []).some(foodName => lowerItem.includes(foodName)) || 
                lowerItem.includes("jollof") || 
                lowerItem.includes("fufu") || 
                lowerItem.includes("waakye") || 
@@ -569,7 +577,7 @@ export default function AdminDashboard({
       mostActiveCount,
       peakHour: `${peakHour}:00 - ${peakHour + 1}:00`,
       peakHourCount: hourCounts[peakHour] || 0,
-      topType: topType.replace('_', ' '),
+      topType: (topType || "").replace('_', ' '),
       topTypePercent: activityLogs.length > 0 ? Math.round((topTypeCount / activityLogs.length) * 100) : 0,
       hourCounts,
       userCounts: Object.entries(userCounts).sort((a,b) => b[1] - a[1]).slice(0, 5),
@@ -580,8 +588,8 @@ export default function AdminDashboard({
   const filteredLogs = useMemo(() => {
     return activityLogs.filter(log => {
       const matchFilter = activityFilter === "all" || log.type === activityFilter;
-      const matchSearch = log.username.toLowerCase().includes(activitySearch.toLowerCase()) || 
-                          log.description.toLowerCase().includes(activitySearch.toLowerCase());
+      const matchSearch = (log.username || '').toLowerCase().includes((activitySearch || '').toLowerCase()) || 
+                          (log.description || '').toLowerCase().includes((activitySearch || '').toLowerCase());
       return matchFilter && matchSearch;
     });
   }, [activityLogs, activityFilter, activitySearch]);
@@ -741,7 +749,7 @@ export default function AdminDashboard({
     }
 
     const cleaned = discCode.trim().toUpperCase();
-    if (discountCodes.some(d => d.code === cleaned)) {
+    if ((discountCodes || []).some(d => d.code === cleaned)) {
       onShowToast("Duplicate Code", "This coupon code already exists.", "error");
       return;
     }
@@ -785,7 +793,7 @@ export default function AdminDashboard({
       return i;
     });
     onSetInquiries(updated);
-    onShowToast("Inquiry Updated", `Status is now ${status.replace('-', ' ')}`, "success");
+    onShowToast("Inquiry Updated", `Status is now ${(status || "").replace('-', ' ')}`, "success");
     onLogActivity(`Updated customer inquiry status to '${status}' (ID: ${id})`, "admin_action");
   };
 
@@ -964,7 +972,7 @@ export default function AdminDashboard({
     doc.text(`Customer: ${order.customer}`, 14, 30);
     doc.text(`Phone: ${customer?.phone || 'N/A'}`, 14, 40);
     doc.text(`Date: ${order.date}`, 14, 50);
-    doc.text(`Status: ${order.status.toUpperCase()}`, 14, 60);
+    doc.text(`Status: ${(order.status || '').toUpperCase()}`, 14, 60);
 
     autoTable(doc, {
       head: [['Item']],
@@ -2126,11 +2134,11 @@ export default function AdminDashboard({
                         return true;
                       })
                       .filter(f => {
-                        const s = fileSearch.toLowerCase();
+                        const s = (fileSearch || '').toLowerCase();
                         return (
-                          f.name?.toLowerCase().includes(s) ||
-                          f.sender?.toLowerCase().includes(s) ||
-                          f.conferenceId?.toLowerCase().includes(s)
+                          (f.name || '').toLowerCase().includes(s) ||
+                          (f.sender || '').toLowerCase().includes(s) ||
+                          (f.conferenceId || '').toLowerCase().includes(s)
                         );
                       });
 
@@ -2459,14 +2467,14 @@ export default function AdminDashboard({
                       <h4 className="text-[11px] font-bold text-neutral-700 uppercase tracking-wider font-sans border-b border-neutral-100 pb-1.5 flex justify-between items-center">
                         <span>Fulfillment Orders</span>
                         <span className="font-mono text-[10px] px-2 py-0.5 bg-neutral-100 text-neutral-600 rounded-md font-bold">
-                          {orders.filter(o => o.customer.toLowerCase() === selectedCustomer.name.toLowerCase()).length}
+                          {orders.filter(o => (o.customer || '').toLowerCase() === (selectedCustomer?.name || '').toLowerCase()).length}
                         </span>
                       </h4>
                       <div className="max-h-36 overflow-y-auto space-y-2 pr-1 text-xs">
-                        {orders.filter(o => o.customer.toLowerCase() === selectedCustomer.name.toLowerCase()).length === 0 ? (
+                        {orders.filter(o => (o.customer || '').toLowerCase() === (selectedCustomer?.name || '').toLowerCase()).length === 0 ? (
                           <p className="text-[11px] text-neutral-400 italic">No checkout orders registered yet.</p>
                         ) : (
-                          orders.filter(o => o.customer.toLowerCase() === selectedCustomer.name.toLowerCase()).map(order => (
+                          orders.filter(o => (o.customer || '').toLowerCase() === (selectedCustomer?.name || '').toLowerCase()).map(order => (
                             <div key={order.id} className="p-2 border border-neutral-150/65 rounded-lg flex justify-between items-center bg-white shadow-sm hover:border-amber-500/30 transition-colors">
                               <div>
                                 <span className="font-mono font-bold text-amber-600">{order.id}</span>
@@ -2492,14 +2500,14 @@ export default function AdminDashboard({
                       <h4 className="text-[11px] font-bold text-neutral-700 uppercase tracking-wider font-sans border-b border-neutral-100 pb-1.5 flex justify-between items-center">
                         <span>Delivery Addresses</span>
                         <span className="font-mono text-[10px] px-2 py-0.5 bg-neutral-100 text-neutral-600 rounded-md font-bold">
-                          {locations.filter(l => l.customerName.toLowerCase() === selectedCustomer.name.toLowerCase()).length}
+                          {locations.filter(l => (l.customerName || '').toLowerCase() === (selectedCustomer?.name || '').toLowerCase()).length}
                         </span>
                       </h4>
                       <div className="max-h-32 overflow-y-auto space-y-1.5 pr-1 text-[11px] text-neutral-600">
-                        {locations.filter(l => l.customerName.toLowerCase() === selectedCustomer.name.toLowerCase()).length === 0 ? (
+                        {locations.filter(l => (l.customerName || '').toLowerCase() === (selectedCustomer?.name || '').toLowerCase()).length === 0 ? (
                           <p className="text-[11px] text-neutral-400 italic">No logistics addresses mapped.</p>
                         ) : (
-                          locations.filter(l => l.customerName.toLowerCase() === selectedCustomer.name.toLowerCase()).map(loc => (
+                          locations.filter(l => (l.customerName || '').toLowerCase() === (selectedCustomer?.name || '').toLowerCase()).map(loc => (
                             <div key={loc.id} className="p-2 border border-neutral-150/50 rounded-lg flex gap-2 items-start bg-neutral-50/50">
                               <MapPin className="w-3.5 h-3.5 text-amber-600 shrink-0 mt-0.5" />
                               <div>
@@ -2517,14 +2525,14 @@ export default function AdminDashboard({
                       <h4 className="text-[11px] font-bold text-neutral-700 uppercase tracking-wider font-sans border-b border-neutral-100 pb-1.5 flex justify-between items-center">
                         <span>Recent Activity Events</span>
                         <span className="font-mono text-[10px] px-2 py-0.5 bg-neutral-100 text-neutral-600 rounded-md font-bold">
-                          {activityLogs.filter(log => log.username.toLowerCase() === selectedCustomer.name.toLowerCase()).length}
+                          {activityLogs.filter(log => (log.username || '').toLowerCase() === (selectedCustomer?.name || '').toLowerCase()).length}
                         </span>
                       </h4>
                       <div className="max-h-36 overflow-y-auto space-y-2 pr-1 text-xs">
-                        {activityLogs.filter(log => log.username.toLowerCase() === selectedCustomer.name.toLowerCase()).length === 0 ? (
+                        {activityLogs.filter(log => (log.username || '').toLowerCase() === (selectedCustomer?.name || '').toLowerCase()).length === 0 ? (
                           <p className="text-[11px] text-neutral-400 italic">No activity tracks registered.</p>
                         ) : (
-                          activityLogs.filter(log => log.username.toLowerCase() === selectedCustomer.name.toLowerCase()).slice(0, 10).map((log, idx) => (
+                          activityLogs.filter(log => (log.username || '').toLowerCase() === (selectedCustomer?.name || '').toLowerCase()).slice(0, 10).map((log, idx) => (
                             <div key={idx} className="p-2 border border-neutral-100 rounded-lg bg-neutral-50/40 text-[11px]">
                               <p className="font-medium text-neutral-800">{log.description}</p>
                               <div className="flex justify-between items-center text-[9px] text-neutral-400 mt-1 font-mono">
@@ -2541,10 +2549,10 @@ export default function AdminDashboard({
                     <div className="pt-2 border-t border-neutral-150">
                       <button
                         onClick={() => {
-                          const custOrders = orders.filter(o => o.customer.toLowerCase() === selectedCustomer.name.toLowerCase());
-                          const custPayments = payments.filter(p => p.customer.toLowerCase() === selectedCustomer.name.toLowerCase());
-                          const custLocations = locations.filter(l => l.customerName.toLowerCase() === selectedCustomer.name.toLowerCase());
-                          const custLogs = activityLogs.filter(log => log.username.toLowerCase() === selectedCustomer.name.toLowerCase());
+                          const custOrders = orders.filter(o => (o.customer || '').toLowerCase() === (selectedCustomer?.name || '').toLowerCase());
+                          const custPayments = payments.filter(p => (p.customer || '').toLowerCase() === (selectedCustomer?.name || '').toLowerCase());
+                          const custLocations = locations.filter(l => (l.customerName || '').toLowerCase() === (selectedCustomer?.name || '').toLowerCase());
+                          const custLogs = activityLogs.filter(log => (log.username || '').toLowerCase() === (selectedCustomer?.name || '').toLowerCase());
 
                           const dossier = {
                             customer: selectedCustomer,
@@ -2692,9 +2700,9 @@ export default function AdminDashboard({
                         className="w-full px-4 py-2.5 text-xs border border-neutral-200 rounded-xl focus:outline-none focus:border-amber-500 bg-white"
                         required
                       >
-                        <option value="">Select CRM User</option>
-                        {customers.filter(c => c.signedUp).map(c => (
-                          <option key={c.id} value={c.id}>{c.name}</option>
+                        <option key="default-customer" value="">Select CRM User</option>
+                        {(customers || []).filter(c => c.signedUp).map((c, idx) => (
+                          <option key={`cust-${c.id || idx}`} value={c.id}>{c.name}</option>
                         ))}
                       </select>
                     </div>
@@ -2705,7 +2713,7 @@ export default function AdminDashboard({
                         type="text"
                         value={locAddress}
                         onChange={e => setLocAddress(e.target.value)}
-                        placeholder="e.g. Lapaz Near market"
+                        placeholder="e.g. Ashaiman Near market"
                         className="w-full px-4 py-2.5 text-xs border border-neutral-200 rounded-xl focus:outline-none focus:border-amber-500"
                         required
                       />
@@ -2810,7 +2818,7 @@ export default function AdminDashboard({
                         inq.status === 'in-progress' ? 'bg-blue-100 text-blue-700' :
                         'bg-amber-100 text-amber-700'
                       }`}>
-                        {inq.status.replace('-', ' ')}
+                        {(inq.status || "").replace('-', ' ')}
                       </span>
                     </div>
 
@@ -3726,7 +3734,7 @@ export default function AdminDashboard({
                       <input
                         type="text"
                         required
-                        placeholder="e.g. Lapaz Showroom, Accra"
+                        placeholder="e.g. Ashaiman Showroom, Accra"
                         value={eventLocation}
                         onChange={e => setEventLocation(e.target.value)}
                         className="w-full px-4 py-2.5 border border-neutral-200 rounded-xl text-xs font-bold focus:outline-none focus:border-amber-500"
@@ -3922,12 +3930,12 @@ export default function AdminDashboard({
                   <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
                     {reviews
                       .filter(rev => {
-                        const q = reviewSearch.toLowerCase();
+                        const q = (reviewSearch || '').toLowerCase();
                         return (
-                          rev.customerName.toLowerCase().includes(q) ||
-                          rev.customerEmail.toLowerCase().includes(q) ||
-                          rev.feedback.toLowerCase().includes(q) ||
-                          rev.request.toLowerCase().includes(q)
+                          (rev.customerName || '').toLowerCase().includes(q) ||
+                          (rev.customerEmail || '').toLowerCase().includes(q) ||
+                          (rev.feedback || '').toLowerCase().includes(q) ||
+                          (rev.request || '').toLowerCase().includes(q)
                         );
                       })
                       .map(rev => (
@@ -4074,6 +4082,30 @@ export default function AdminDashboard({
                   {showCreateDeliveryForm ? "Hide Logistics Dispatch Form" : "Dispatch New Shipment"}
                 </button>
               </div>
+              <DeliveryPage 
+                 rates={deliveryRates}
+                 personnel={deliveryPersonnel}
+                 onSetRates={onSetDeliveryRates}
+                 onSetPersonnel={onSetDeliveryPersonnel}
+               />
+
+               {/* Delivery List */}
+               <div className="bg-white p-6 rounded-2xl border border-neutral-200">
+                 <h3 className="text-lg font-bold mb-4">Active Shipments</h3>
+                 <div className="space-y-2">
+                   {deliveries.map(d => (
+                     <div key={d.id} className="p-3 bg-neutral-50 rounded-xl flex justify-between items-center text-sm border border-neutral-100">
+                       <div>
+                         <p className="font-bold">{d.customerName}</p>
+                         <p className="text-xs text-neutral-500">{d.address} - Status: <span className="text-indigo-600">{d.status}</span></p>
+                       </div>
+                       <button onClick={() => onUpdateDelivery(d.id, { status: d.status === 'delivered' ? 'dispatched' : 'delivered' })} className="text-xs bg-neutral-900 text-white px-3 py-1 rounded-lg">
+                         Toggle Status
+                       </button>
+                     </div>
+                   ))}
+                 </div>
+               </div>
 
               {/* Delivery KPI Metrics */}
               <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-5">
@@ -4141,22 +4173,22 @@ export default function AdminDashboard({
                         onChange={(e) => {
                           const orderId = e.target.value;
                           setNewDeliveryOrderId(orderId);
-                          const ord = orders.find(o => o.id === orderId);
+                          const ord = (orders || []).find(o => o.id === orderId);
                           if (ord) {
                             setNewDeliveryName(ord.customer || "");
-                            const cust = customers.find(c => c.name === ord.customer || c.id === ord.customerId);
+                            const cust = (customers || []).find(c => c.name === ord.customer || c.id === ord.customerId);
                             setNewDeliveryEmail(cust?.email || "");
                             setNewDeliveryPhone(cust?.phone || "");
                             setNewDeliveryItems(ord.items || []);
-                            const loc = locations.find(l => l.customerId === ord.customerId);
+                            const loc = (locations || []).find(l => l.customerId === ord.customerId);
                             setNewDeliveryAddress(loc?.address || "");
                           }
                         }}
                         className="w-full px-4 py-2.5 bg-neutral-50 border border-neutral-200 rounded-xl text-xs focus:outline-none focus:border-indigo-500"
                       >
-                        <option value="">-- Choose Order ID --</option>
-                        {orders.map(o => (
-                          <option key={o.id} value={o.id}>
+                        <option key="default-order" value="">-- Choose Order ID --</option>
+                        {(orders || []).map((o, idx) => (
+                          <option key={`order-${o.id || idx}`} value={o.id}>
                             {o.id} - {o.customer} (${o.total}) [{o.status}]
                           </option>
                         ))}
@@ -4319,7 +4351,7 @@ export default function AdminDashboard({
                             : "bg-white border border-neutral-200 text-neutral-600 hover:bg-neutral-50"
                         }`}
                       >
-                        {statusVal.replace('_', ' ')}
+                        {(statusVal || "").replace('_', ' ')}
                       </button>
                     ))}
                   </div>
@@ -4340,14 +4372,14 @@ export default function AdminDashboard({
                   {deliveries
                     ?.filter(d => deliveryFilter === 'all' || d.status === deliveryFilter)
                     ?.filter(d => {
-                      const searchStr = deliverySearch.toLowerCase();
+                      const searchStr = (deliverySearch || '').toLowerCase();
                       return (
-                        d.customerName?.toLowerCase().includes(searchStr) ||
-                        d.customerEmail?.toLowerCase().includes(searchStr) ||
-                        d.address?.toLowerCase().includes(searchStr) ||
-                        d.orderId?.toLowerCase().includes(searchStr) ||
-                        d.dispatchRiderName?.toLowerCase().includes(searchStr) ||
-                        d.id?.toLowerCase().includes(searchStr)
+                        (d.customerName || '').toLowerCase().includes(searchStr) ||
+                        (d.customerEmail || '').toLowerCase().includes(searchStr) ||
+                        (d.address || '').toLowerCase().includes(searchStr) ||
+                        (d.orderId || '').toLowerCase().includes(searchStr) ||
+                        (d.dispatchRiderName || '').toLowerCase().includes(searchStr) ||
+                        (d.id || '').toLowerCase().includes(searchStr)
                       );
                     })
                     ?.map(del => {
@@ -4379,7 +4411,7 @@ export default function AdminDashboard({
                                   del.status === 'in_transit' ? 'bg-blue-50 text-blue-700 animate-pulse' :
                                   'bg-amber-50 text-amber-700'
                                 }`}>
-                                  {del.status.replace('_', ' ')}
+                                  {(del.status || "").replace('_', ' ')}
                                 </span>
                               </div>
 

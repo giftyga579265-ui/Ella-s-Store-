@@ -26,7 +26,7 @@ export default function NotificationInbox({
       // If notification is broadcast to all
       if (!n.customerEmail || n.customerEmail === "all") return true;
       // If it is targeted to the logged-in user
-      if (isLoggedIn && currentUserEmail && n.customerEmail.toLowerCase() === currentUserEmail.toLowerCase()) {
+      if (isLoggedIn && currentUserEmail && (n.customerEmail || '').toLowerCase() === (currentUserEmail || '').toLowerCase()) {
         return true;
       }
       return false;

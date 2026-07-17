@@ -27,7 +27,7 @@ const ACCRA_BOUNDS = {
 
 // Neighborhood reference points to make fallback map realistic
 const ACCRA_ZONES = [
-  { name: "Lapaz", x: 45, y: 35, desc: "Active hub, near Lapaz Market" },
+  { name: "Ashaiman", x: 45, y: 35, desc: "Active hub, near Ashaiman Market" },
   { name: "Achimota", x: 55, y: 25, desc: "Achimota Forest Area" },
   { name: "Dansoman", x: 25, y: 70, desc: "Dansoman Exhibition Zone" },
   { name: "East Legon", x: 80, y: 30, desc: "Upscale residential & commercial" },
@@ -325,7 +325,7 @@ export default function CustomerLiveMap({ locations, onShowToast }: CustomerLive
       <div className="bg-slate-950 px-6 py-4 border-t border-slate-850 flex flex-wrap justify-between items-center gap-3 text-xs font-mono text-slate-400">
         <span className="flex items-center gap-1.5">
           <Sparkles className="w-3.5 h-3.5 text-indigo-400" />
-          Accra Hub covers: Lapaz, Achimota, Dansoman, East Legon, Coastal Accra
+          Accra Hub covers: Ashaiman, Achimota, Dansoman, East Legon, Coastal Accra
         </span>
         <button
           onClick={() => {
