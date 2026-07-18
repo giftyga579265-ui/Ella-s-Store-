@@ -120,6 +120,7 @@ export default function NotificationInbox({
                 </div>
               ) : (
                 <div className="space-y-3.5">
+                  <AnimatePresence>
                   {filteredNotifications.map((n) => (
                     <motion.div
                       key={n.id}
@@ -162,6 +163,7 @@ export default function NotificationInbox({
                       </button>
                     </motion.div>
                   ))}
+                  </AnimatePresence>
                 </div>
               )}
             </div>

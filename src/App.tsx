@@ -20,7 +20,7 @@ import OrderHistory from "./components/OrderHistory";
 import ReviewModal from "./components/ReviewModal";
 import ConferenceRoom from "./components/ConferenceRoom";
 // @ts-ignore
-import Logo from "./assets/images/ellas_store_logo_1782860468627.jpg";
+import Logo from "./assets/images/ellas_store_logo_1784345363330.jpg";
 
 import { db, auth, googleProvider } from "./lib/firebase";
 import { signInWithPopup } from "firebase/auth";

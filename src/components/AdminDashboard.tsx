@@ -9,7 +9,7 @@ import CustomerLiveMap from "./CustomerLiveMap";
 import DeliveryPage from "./DeliveryPage";
 import CharityManager from "./CharityManager";
 // @ts-ignore
-import Logo from "../assets/images/ellas_store_logo_1782860468627.jpg";
+import Logo from "../assets/images/ellas_store_logo_1784345363330.jpg";
 import GarmentExtractor from "./GarmentExtractor";
 import { 
   LayoutDashboard, ShoppingCart, Shirt, Users, User, CreditCard, 
