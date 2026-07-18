@@ -5,7 +5,7 @@ import {
   RotateCw, Video, Camera, Sliders, User, RefreshCw, 
   Download, Image as ImageIcon, Play, Pause, Volume2, VolumeX,
   Sparkles, Layers
-} from "lucide-react";
+, Bell } from "lucide-react";
 import { motion, AnimatePresence } from "motion/react";
 import { db } from "../lib/firebase";
 import { collection, onSnapshot } from "firebase/firestore";
@@ -16,7 +16,8 @@ interface ProductDetailModalProps {
   onClose: () => void;
   onAddToCart: (product: Product) => void;
   isLoggedIn: boolean;
-  onShowLogin: () => void;
+  onShowLogin?: () => void;
+  onNotifyMe?: (product: Product) => void;
   onViewProduct: (product: Product) => void;
   initialTab?: 'classic' | 'spin360' | 'video' | 'tryon';
 }
@@ -65,7 +66,7 @@ export default function ProductDetailModal({
   onClose,
   onAddToCart,
   isLoggedIn,
-  onShowLogin,
+  onShowLogin, onNotifyMe,
   onViewProduct,
   initialTab,
 }: ProductDetailModalProps) {
@@ -251,7 +252,7 @@ export default function ProductDetailModal({
 
   const handleAddClick = () => {
     if (!isLoggedIn) {
-      onShowLogin();
+      if (onShowLogin) onShowLogin();
     } else {
       onAddToCart(product);
     }
@@ -521,7 +522,7 @@ export default function ProductDetailModal({
         exit={{ opacity: 0, scale: 0.95, y: 20 }}
         transition={{ duration: 0.3, ease: [0.16, 1, 0.3, 1] }}
         onClick={(e) => e.stopPropagation()}
-        className="bg-white text-slate-900 rounded-[2rem] shadow-2xl max-w-5xl w-full flex flex-col overflow-hidden border border-neutral-200/80 relative my-8"
+        className="bg-white dark:bg-slate-900 text-slate-900 rounded-[2rem] shadow-2xl max-w-5xl w-full flex flex-col overflow-hidden border border-neutral-200/80 relative my-8"
         id="product-detail-modal-container"
       >
         {/* Accent Top Line */}
@@ -533,7 +534,7 @@ export default function ProductDetailModal({
             stopCamera();
             onClose();
           }}
-          className="absolute top-5 right-5 z-40 p-2 rounded-full bg-slate-100 hover:bg-slate-200 text-slate-500 hover:text-black transition-all cursor-pointer border border-neutral-200/40"
+          className="absolute top-5 right-5 z-40 p-2 rounded-full bg-slate-100 hover:bg-slate-200 text-slate-500 hover:text-black dark:text-white transition-all cursor-pointer border border-neutral-200/40"
           title="Close Dialog"
           id="product-detail-modal-close-btn"
         >
@@ -552,13 +553,13 @@ export default function ProductDetailModal({
               {/* Main Media Showcase Box */}
               <div 
                 ref={tryOnContainerRef}
-                className="relative aspect-square sm:aspect-[4/5] rounded-2xl overflow-hidden bg-slate-950 border border-neutral-200 shadow-inner flex flex-col items-center justify-center select-none"
+                className="relative aspect-square sm:aspect-[4/5] rounded-2xl overflow-hidden bg-slate-950 border border-neutral-200 dark:border-slate-700 shadow-inner flex flex-col items-center justify-center select-none"
                 id="interactive-media-showcase-box"
               >
                 
                 {/* 1. CLASSIC PHOTO VIEW */}
                 {activeMediaTab === 'classic' && (
-                  <div className="w-full h-full relative flex items-center justify-center bg-white">
+                  <div className="w-full h-full relative flex items-center justify-center bg-white dark:bg-slate-900">
                     <img
                       src={product.image}
                       alt={product.name}
@@ -623,7 +624,7 @@ export default function ProductDetailModal({
                         onClick={() => setIsSpinAuto(!isSpinAuto)}
                         className={`text-[9px] font-mono font-black uppercase px-3 py-1 rounded-lg border cursor-pointer ${
                           isSpinAuto 
-                            ? 'bg-amber-400 text-neutral-900 border-amber-400' 
+                            ? 'bg-amber-400 text-neutral-900 dark:text-slate-100 border-amber-400' 
                             : 'bg-white/5 text-white border-white/10 hover:bg-white/10'
                         }`}
                       >
@@ -652,7 +653,7 @@ export default function ProductDetailModal({
                         <button
                           type="button"
                           onClick={toggleVideoPlayback}
-                          className="p-1.5 bg-white text-neutral-900 rounded-lg hover:bg-amber-400 transition cursor-pointer"
+                          className="p-1.5 bg-white dark:bg-slate-900 text-neutral-900 dark:text-slate-100 rounded-lg hover:bg-amber-400 transition cursor-pointer"
                         >
                           {videoPlaying ? <Pause className="w-3.5 h-3.5" /> : <Play className="w-3.5 h-3.5" />}
                         </button>
@@ -776,7 +777,7 @@ export default function ProductDetailModal({
               </div>
 
               {/* Media Selection Hub Bar */}
-              <div className={`grid ${isFood ? 'grid-cols-3' : 'grid-cols-4'} gap-2 bg-neutral-100 p-1.5 rounded-2xl border border-neutral-200`} id="media-selectors-bar">
+              <div className={`grid ${isFood ? 'grid-cols-3' : 'grid-cols-4'} gap-2 bg-neutral-100 dark:bg-slate-800 p-1.5 rounded-2xl border border-neutral-200 dark:border-slate-700`} id="media-selectors-bar">
                 <button
                   type="button"
                   onClick={() => {
@@ -785,8 +786,8 @@ export default function ProductDetailModal({
                   }}
                   className={`py-2 rounded-xl text-[10px] font-black uppercase tracking-wider transition-all cursor-pointer ${
                     activeMediaTab === 'classic' 
-                      ? 'bg-white text-indigo-600 shadow' 
-                      : 'text-neutral-500 hover:text-indigo-600 hover:bg-neutral-50'
+                      ? 'bg-white dark:bg-slate-900 text-indigo-600 shadow' 
+                      : 'text-neutral-500 dark:text-slate-400 hover:text-indigo-600 hover:bg-neutral-50 dark:bg-slate-950'
                   }`}
                 >
                   🖼️ Photo
@@ -800,8 +801,8 @@ export default function ProductDetailModal({
                   }}
                   className={`py-2 rounded-xl text-[10px] font-black uppercase tracking-wider transition-all cursor-pointer ${
                     activeMediaTab === 'spin360' 
-                      ? 'bg-white text-indigo-600 shadow' 
-                      : 'text-neutral-500 hover:text-indigo-600 hover:bg-neutral-50'
+                      ? 'bg-white dark:bg-slate-900 text-indigo-600 shadow' 
+                      : 'text-neutral-500 dark:text-slate-400 hover:text-indigo-600 hover:bg-neutral-50 dark:bg-slate-950'
                   }`}
                 >
                   🔄 360° Studio
@@ -815,8 +816,8 @@ export default function ProductDetailModal({
                   }}
                   className={`py-2 rounded-xl text-[10px] font-black uppercase tracking-wider transition-all cursor-pointer ${
                     activeMediaTab === 'video' 
-                      ? 'bg-white text-indigo-600 shadow' 
-                      : 'text-neutral-500 hover:text-indigo-600 hover:bg-neutral-50'
+                      ? 'bg-white dark:bg-slate-900 text-indigo-600 shadow' 
+                      : 'text-neutral-500 dark:text-slate-400 hover:text-indigo-600 hover:bg-neutral-50 dark:bg-slate-950'
                   }`}
                 >
                   🎬 Runway
@@ -835,34 +836,34 @@ export default function ProductDetailModal({
                     className={`py-2 rounded-xl text-[10px] font-black uppercase tracking-wider transition-all cursor-pointer flex items-center justify-center gap-1 ${
                       activeMediaTab === 'tryon' 
                         ? 'bg-gradient-to-r from-amber-500 to-pink-500 text-white shadow-md font-bold' 
-                        : 'text-neutral-500 hover:text-indigo-600 hover:bg-neutral-50'
+                        : 'text-neutral-500 dark:text-slate-400 hover:text-indigo-600 hover:bg-neutral-50 dark:bg-slate-950'
                     }`}
                   >
                     💅 Try On
-                    <span className="text-[7px] bg-amber-400 text-neutral-900 px-1 rounded-sm uppercase tracking-tight font-black animate-pulse">AR</span>
+                    <span className="text-[7px] bg-amber-400 text-neutral-900 dark:text-slate-100 px-1 rounded-sm uppercase tracking-tight font-black animate-pulse">AR</span>
                   </button>
                 )}
               </div>
 
               {/* DYNAMIC FIT SETTINGS DRAWER FOR AR TRY-ON */}
               {activeMediaTab === 'tryon' && (
-                <div className="bg-neutral-50 border border-neutral-200 rounded-2xl p-4.5 space-y-4 animate-in slide-in-from-bottom duration-300">
+                <div className="bg-neutral-50 dark:bg-slate-950 border border-neutral-200 dark:border-slate-700 rounded-2xl p-4.5 space-y-4 animate-in slide-in-from-bottom duration-300">
                   
                   {/* Mode Swapper */}
-                  <div className="flex justify-between items-center pb-2 border-b border-neutral-150">
+                  <div className="flex justify-between items-center pb-2 border-b border-neutral-150 dark:border-slate-800">
                     <span className="text-xs font-black text-slate-800 uppercase tracking-wider">AR Live Fitting Room</span>
                     <div className="flex bg-neutral-200 p-0.5 rounded-lg border border-neutral-300 text-[10px]">
                       <button
                         type="button"
                         onClick={() => toggleTryOnMode('model')}
-                        className={`px-2.5 py-1 rounded font-bold uppercase transition-all cursor-pointer ${tryOnMode === 'model' ? 'bg-white text-neutral-900 shadow-sm' : 'text-neutral-500'}`}
+                        className={`px-2.5 py-1 rounded font-bold uppercase transition-all cursor-pointer ${tryOnMode === 'model' ? 'bg-white dark:bg-slate-900 text-neutral-900 dark:text-slate-100 shadow-sm' : 'text-neutral-500 dark:text-slate-400'}`}
                       >
                         🧍 Virtual Model
                       </button>
                       <button
                         type="button"
                         onClick={() => toggleTryOnMode('camera')}
-                        className={`px-2.5 py-1 rounded font-bold uppercase transition-all cursor-pointer ${tryOnMode === 'camera' ? 'bg-white text-neutral-900 shadow-sm' : 'text-neutral-500'}`}
+                        className={`px-2.5 py-1 rounded font-bold uppercase transition-all cursor-pointer ${tryOnMode === 'camera' ? 'bg-white dark:bg-slate-900 text-neutral-900 dark:text-slate-100 shadow-sm' : 'text-neutral-500 dark:text-slate-400'}`}
                       >
                         📷 Webcam
                       </button>
@@ -882,10 +883,10 @@ export default function ProductDetailModal({
                             className={`p-2 rounded-xl text-left border transition-all cursor-pointer ${
                               selectedModel.id === m.id 
                                 ? 'bg-indigo-50 border-indigo-400 shadow-sm' 
-                                : 'bg-white border-neutral-200 hover:border-neutral-300'
+                                : 'bg-white dark:bg-slate-900 border-neutral-200 dark:border-slate-700 hover:border-neutral-300'
                             }`}
                           >
-                            <span className="font-bold text-[10px] text-neutral-800 block leading-tight truncate">{(m.name || "Model").split(" ")[0]}</span>
+                            <span className="font-bold text-[10px] text-neutral-800 dark:text-slate-200 block leading-tight truncate">{(m.name || "Model").split(" ")[0]}</span>
                             <span className="text-[8px] text-neutral-400 truncate block">{m.style}</span>
                           </button>
                         ))}
@@ -894,7 +895,7 @@ export default function ProductDetailModal({
                   )}
 
                   {/* Dress Picker (Select try-on gown overlay) */}
-                  <div className="space-y-1.5 border-t border-neutral-150 pt-3">
+                  <div className="space-y-1.5 border-t border-neutral-150 dark:border-slate-800 pt-3">
                     <div className="flex justify-between items-center">
                       <span className="text-[9px] font-mono text-neutral-400 font-bold block uppercase tracking-wider">Select Designer Dress Overlay:</span>
                       {selectedGarmentUrl && (
@@ -915,14 +916,14 @@ export default function ProductDetailModal({
                         className={`flex items-center gap-2 p-1.5 rounded-xl border text-left shrink-0 transition-all cursor-pointer ${
                           !selectedGarmentUrl 
                             ? 'bg-indigo-50 border-indigo-400 shadow-sm' 
-                            : 'bg-white border-neutral-200 hover:border-neutral-300'
+                            : 'bg-white dark:bg-slate-900 border-neutral-200 dark:border-slate-700 hover:border-neutral-300'
                         }`}
                       >
-                        <div className="w-8 h-8 rounded-lg bg-neutral-100 flex items-center justify-center overflow-hidden border border-neutral-200">
+                        <div className="w-8 h-8 rounded-lg bg-neutral-100 dark:bg-slate-800 flex items-center justify-center overflow-hidden border border-neutral-200 dark:border-slate-700">
                           <img src={product.tryOnImage || DEFAULT_TRYON_GARMENT} alt="Product default design" className="w-full h-full object-contain" />
                         </div>
                         <div>
-                          <span className="font-bold text-[10px] text-neutral-800 block max-w-[100px] truncate font-serif">Product Design</span>
+                          <span className="font-bold text-[10px] text-neutral-800 dark:text-slate-200 block max-w-[100px] truncate font-serif">Product Design</span>
                           <span className="text-[8px] text-neutral-400 block">Default Gown</span>
                         </div>
                       </button>
@@ -936,14 +937,14 @@ export default function ProductDetailModal({
                           className={`flex items-center gap-2 p-1.5 rounded-xl border text-left shrink-0 transition-all cursor-pointer ${
                             selectedGarmentUrl === dress.image
                               ? 'bg-indigo-50 border-indigo-400 shadow-sm' 
-                              : 'bg-white border-neutral-200 hover:border-neutral-300'
+                              : 'bg-white dark:bg-slate-900 border-neutral-200 dark:border-slate-700 hover:border-neutral-300'
                           }`}
                         >
-                          <div className="w-8 h-8 rounded-lg bg-neutral-100 flex items-center justify-center overflow-hidden border border-neutral-200">
+                          <div className="w-8 h-8 rounded-lg bg-neutral-100 dark:bg-slate-800 flex items-center justify-center overflow-hidden border border-neutral-200 dark:border-slate-700">
                             <img src={dress.image} alt={dress.name} className="w-full h-full object-contain animate-fade-in" referrerPolicy="no-referrer" />
                           </div>
                           <div>
-                            <span className="font-bold text-[10px] text-neutral-800 block max-w-[120px] truncate font-serif">{dress.name}</span>
+                            <span className="font-bold text-[10px] text-neutral-800 dark:text-slate-200 block max-w-[120px] truncate font-serif">{dress.name}</span>
                             <span className="text-[8px] text-neutral-400 block capitalize">{dress.category || "Dress"}</span>
                           </div>
                         </button>
@@ -962,7 +963,7 @@ export default function ProductDetailModal({
                     <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 text-xs">
                       {/* Scale Size */}
                       <div className="space-y-1">
-                        <div className="flex justify-between font-mono text-[9px] text-neutral-500">
+                        <div className="flex justify-between font-mono text-[9px] text-neutral-500 dark:text-slate-400">
                           <span>GARMENT SIZE</span>
                           <span className="font-bold text-indigo-600">{tryOnScale}%</span>
                         </div>
@@ -978,7 +979,7 @@ export default function ProductDetailModal({
 
                       {/* Stretch Width */}
                       <div className="space-y-1">
-                        <div className="flex justify-between font-mono text-[9px] text-neutral-500">
+                        <div className="flex justify-between font-mono text-[9px] text-neutral-500 dark:text-slate-400">
                           <span>GARMENT STRETCH (WIDTH)</span>
                           <span className="font-bold text-indigo-600">{tryOnStretch}%</span>
                         </div>
@@ -994,7 +995,7 @@ export default function ProductDetailModal({
 
                       {/* Height Offset (Y) */}
                       <div className="space-y-1">
-                        <div className="flex justify-between font-mono text-[9px] text-neutral-500">
+                        <div className="flex justify-between font-mono text-[9px] text-neutral-500 dark:text-slate-400">
                           <span>VERTICAL POSITION (HEIGHT)</span>
                           <span className="font-bold text-indigo-600">{tryOnY}px</span>
                         </div>
@@ -1010,7 +1011,7 @@ export default function ProductDetailModal({
 
                       {/* Width Offset (X) */}
                       <div className="space-y-1">
-                        <div className="flex justify-between font-mono text-[9px] text-neutral-500">
+                        <div className="flex justify-between font-mono text-[9px] text-neutral-500 dark:text-slate-400">
                           <span>HORIZONTAL CENTER</span>
                           <span className="font-bold text-indigo-600">{tryOnX}px</span>
                         </div>
@@ -1026,7 +1027,7 @@ export default function ProductDetailModal({
 
                       {/* Rotation */}
                       <div className="space-y-1">
-                        <div className="flex justify-between font-mono text-[9px] text-neutral-500">
+                        <div className="flex justify-between font-mono text-[9px] text-neutral-500 dark:text-slate-400">
                           <span>ROTATION ANGLE</span>
                           <span className="font-bold text-indigo-600">{tryOnRotate}°</span>
                         </div>
@@ -1042,7 +1043,7 @@ export default function ProductDetailModal({
 
                       {/* Opacity */}
                       <div className="space-y-1">
-                        <div className="flex justify-between font-mono text-[9px] text-neutral-500">
+                        <div className="flex justify-between font-mono text-[9px] text-neutral-500 dark:text-slate-400">
                           <span>OVERLAY INTENSITY (OPACITY)</span>
                           <span className="font-bold text-indigo-600">{tryOnOpacity}%</span>
                         </div>
@@ -1077,7 +1078,7 @@ export default function ProductDetailModal({
                       </span>
                     )}
                   </div>
-                  <h2 className="font-sans text-2xl md:text-3xl text-neutral-900 font-black tracking-tight leading-tight">
+                  <h2 className="font-sans text-2xl md:text-3xl text-neutral-900 dark:text-slate-100 font-black tracking-tight leading-tight">
                     {product.name}
                   </h2>
                 </div>
@@ -1091,28 +1092,28 @@ export default function ProductDetailModal({
                   </span>
                 </div>
 
-                <hr className="border-neutral-100" />
+                <hr className="border-neutral-100 dark:border-slate-800" />
 
                 <div className="space-y-1.5">
                   <span className="text-[10px] font-black uppercase text-neutral-400 tracking-wider font-mono">
                     Overview
                   </span>
-                  <p className="text-sm text-neutral-600 leading-relaxed font-sans">
+                  <p className="text-sm text-neutral-600 dark:text-slate-400 leading-relaxed font-sans">
                     {product.description}
                   </p>
                 </div>
 
-                <hr className="border-neutral-100" />
+                <hr className="border-neutral-100 dark:border-slate-800" />
 
                 {/* Additional Product Specs/Features */}
                 <div className="grid grid-cols-2 gap-4 text-xs">
-                  <div className="bg-neutral-50 p-3 rounded-xl border border-neutral-100">
+                  <div className="bg-neutral-50 dark:bg-slate-950 p-3 rounded-xl border border-neutral-100 dark:border-slate-800">
                     <span className="text-[9px] font-mono text-neutral-400 block uppercase font-bold mb-0.5">Availability</span>
-                    <span className="font-bold text-neutral-800">
+                    <span className="font-bold text-neutral-800 dark:text-slate-200">
                       {product.stock > 0 ? `In Stock (${product.stock} units)` : "Out of stock"}
                     </span>
                   </div>
-                  <div className="bg-neutral-50 p-3 rounded-xl border border-neutral-100">
+                  <div className="bg-neutral-50 dark:bg-slate-950 p-3 rounded-xl border border-neutral-100 dark:border-slate-800">
                     <span className="text-[9px] font-mono text-neutral-400 block uppercase font-bold mb-0.5">Bespoke Options</span>
                     <span className="font-bold text-amber-600 uppercase tracking-wider text-[10px] flex items-center gap-1.5">
                       <Ribbon className="w-3.5 h-3.5 animate-pulse text-amber-500" /> Try-On Supported
@@ -1129,25 +1130,37 @@ export default function ProductDetailModal({
                 </div>
               </div>
 
+              
               {/* CTA Purchase Button */}
               <div className="pt-4">
-                <button
-                  onClick={handleAddClick}
-                  disabled={product.stock === 0}
-                  className="w-full bg-indigo-600 hover:bg-indigo-500 disabled:bg-neutral-100 disabled:text-neutral-400 text-white py-4 rounded-2xl text-xs font-black uppercase tracking-widest transition-all duration-300 flex items-center justify-center gap-2 shadow-lg shadow-indigo-600/15 cursor-pointer disabled:opacity-50"
-                  id="product-detail-modal-add-to-cart-btn"
-                >
-                  <ShoppingBag className="w-4 h-4" />
-                  {product.stock === 0 ? "Out of Stock" : "Add to Shopping Bag"}
-                </button>
+                {product.stock === 0 ? (
+                  <button
+                    onClick={() => onNotifyMe?.(product)}
+                    className="w-full bg-neutral-800 hover:bg-neutral-700 text-white py-4 rounded-2xl text-xs font-black uppercase tracking-widest transition-all duration-300 flex items-center justify-center gap-2 shadow-lg cursor-pointer"
+                    id="product-detail-modal-notify-me-btn"
+                  >
+                    <Bell className="w-4 h-4" />
+                    Notify Me When Available
+                  </button>
+                ) : (
+                  <button
+                    onClick={handleAddClick}
+                    className="w-full bg-indigo-600 hover:bg-indigo-500 text-white py-4 rounded-2xl text-xs font-black uppercase tracking-widest transition-all duration-300 flex items-center justify-center gap-2 shadow-lg shadow-indigo-600/15 cursor-pointer"
+                    id="product-detail-modal-add-to-cart-btn"
+                  >
+                    <ShoppingBag className="w-4 h-4" />
+                    Add to Shopping Bag
+                  </button>
+                )}
               </div>
+
             </div>
 
           </div>
 
           {/* Bottom Half: Complete the Look & Recommended Accessories Section */}
           {recommendationData.items.length > 0 && (
-            <div className="pt-8 border-t border-neutral-100 space-y-5" id="suggested-products-section">
+            <div className="pt-8 border-t border-neutral-100 dark:border-slate-800 space-y-5" id="suggested-products-section">
               <div className="flex items-center justify-between flex-wrap gap-2">
                 <div className="flex items-center gap-2">
                   <div className="p-1.5 bg-indigo-50 text-indigo-600 rounded-lg border border-indigo-100 animate-pulse">
@@ -1181,43 +1194,43 @@ export default function ProductDetailModal({
                       stopCamera();
                       onViewProduct(item);
                     }}
-                    className="bg-neutral-50/50 hover:bg-white rounded-2xl p-3 border border-neutral-200/60 hover:border-indigo-400 shadow-sm hover:shadow-md transition-all duration-300 flex flex-col justify-between cursor-pointer group h-full relative"
+                    className="bg-neutral-50/50 hover:bg-white dark:bg-slate-900 rounded-2xl p-3 border border-neutral-200/60 hover:border-indigo-400 shadow-sm hover:shadow-md transition-all duration-300 flex flex-col justify-between cursor-pointer group h-full relative"
                   >
                     <div>
                       {/* Image Preview */}
-                      <div className="relative aspect-square rounded-xl overflow-hidden bg-white border border-neutral-150 mb-3">
+                      <div className="relative aspect-square rounded-xl overflow-hidden bg-white dark:bg-slate-900 border border-neutral-150 dark:border-slate-800 mb-3">
                         <img
                           src={item.image}
                           alt={item.name}
                           className="w-full h-full object-cover group-hover:scale-103 transition-transform duration-500"
                           referrerPolicy="no-referrer"
                         />
-                        <span className="absolute top-2 left-2 bg-white/90 text-neutral-600 text-[8px] px-2 py-0.5 rounded font-bold font-mono uppercase border border-neutral-200/50">
+                        <span className="absolute top-2 left-2 bg-white/90 text-neutral-600 dark:text-slate-400 text-[8px] px-2 py-0.5 rounded font-bold font-mono uppercase border border-neutral-200/50">
                           {item.category}
                         </span>
                       </div>
 
                       {/* Info details */}
                       <div className="space-y-1 px-1">
-                        <h4 className="text-[11px] font-black text-neutral-800 leading-snug tracking-tight group-hover:text-indigo-600 transition-colors line-clamp-1 uppercase">
+                        <h4 className="text-[11px] font-black text-neutral-800 dark:text-slate-200 leading-snug tracking-tight group-hover:text-indigo-600 transition-colors line-clamp-1 uppercase">
                           {item.name}
                         </h4>
-                        <p className="text-[10px] text-neutral-500 line-clamp-1 leading-normal">
+                        <p className="text-[10px] text-neutral-500 dark:text-slate-400 line-clamp-1 leading-normal">
                           {item.description}
                         </p>
                       </div>
                     </div>
 
                     {/* Footer price & action button */}
-                    <div className="pt-3 mt-3 border-t border-neutral-100 flex items-center justify-between px-1">
-                      <span className="text-xs font-mono font-black text-neutral-900">
+                    <div className="pt-3 mt-3 border-t border-neutral-100 dark:border-slate-800 flex items-center justify-between px-1">
+                      <span className="text-xs font-mono font-black text-neutral-900 dark:text-slate-100">
                         ₵{item.price.toFixed(0)}
                       </span>
                       <button
                         onClick={(e) => {
                           e.stopPropagation(); // prevent opening detailed view
                           if (!isLoggedIn) {
-                            onShowLogin();
+                            if (onShowLogin) onShowLogin();
                           } else {
                             onAddToCart(item);
                           }
@@ -1264,7 +1277,7 @@ export default function ProductDetailModal({
                   <img src={snapshotDataUrl} alt="Composite Preview" className="w-full h-full object-cover" />
                 ) : (
                   <div className="p-8 text-center space-y-4">
-                    <ImageIcon className="w-12 h-12 text-neutral-600 mx-auto animate-pulse" />
+                    <ImageIcon className="w-12 h-12 text-neutral-600 dark:text-slate-400 mx-auto animate-pulse" />
                     <div>
                       <span className="font-bold text-xs text-white block">Interactive Portrait Rendered</span>
                       <p className="text-[10px] text-neutral-400 max-w-xs mx-auto mt-1">Due to cross-origin resource protection, you can take a screenshot of the fitting page directly using your device's standard shortcuts or save the layout below!</p>

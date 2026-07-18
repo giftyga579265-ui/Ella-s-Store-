@@ -281,10 +281,10 @@ export default function CheckoutModal({
 
   return (
     <div className="fixed inset-0 bg-black/60 backdrop-blur-sm z-50 flex items-center justify-center p-4 overflow-y-auto animate-in fade-in duration-200">
-      <div className="bg-white rounded-3xl max-w-lg w-full overflow-hidden shadow-2xl border border-neutral-100 flex flex-col relative max-h-[90vh]">
+      <div className="bg-white dark:bg-slate-900 rounded-3xl max-w-lg w-full overflow-hidden shadow-2xl border border-neutral-100 dark:border-slate-800 flex flex-col relative max-h-[90vh]">
         
         {/* Header */}
-        <header className="p-6 border-b border-neutral-100 flex justify-between items-center bg-neutral-900 text-white">
+        <header className="p-6 border-b border-neutral-100 dark:border-slate-800 flex justify-between items-center bg-neutral-900 text-white">
           <div className="flex items-center gap-2.5">
             <ShoppingBag className="w-6 h-6 text-indigo-500 animate-pulse" />
             <div>
@@ -300,7 +300,7 @@ export default function CheckoutModal({
         </header>
 
         {/* Stepper Progress Bar */}
-        <div className="bg-amber-100/50 px-6 py-2 border-b border-amber-200/40 flex justify-between text-[11px] font-medium text-neutral-600">
+        <div className="bg-amber-100/50 px-6 py-2 border-b border-amber-200/40 flex justify-between text-[11px] font-medium text-neutral-600 dark:text-slate-400">
           <span className={step === 'summary' ? 'text-amber-600 font-semibold underline' : ''}>1. Summary</span>
           <span className={step === 'customer' ? 'text-amber-600 font-semibold underline' : ''}>2. Delivery Info</span>
           <span className={step === 'momo' ? 'text-amber-600 font-semibold underline' : ''}>3. Pay Securely</span>
@@ -314,8 +314,8 @@ export default function CheckoutModal({
               <div className="w-16 h-16 bg-red-50 text-red-500 rounded-full flex items-center justify-center mx-auto mb-2">
                 <AlertTriangle className="w-8 h-8" />
               </div>
-              <h4 className="font-serif text-lg font-bold text-neutral-900">MTN Mobile Money Offline</h4>
-              <p className="text-xs text-neutral-500 max-w-sm mx-auto leading-relaxed">
+              <h4 className="font-serif text-lg font-bold text-neutral-900 dark:text-slate-100">MTN Mobile Money Offline</h4>
+              <p className="text-xs text-neutral-500 dark:text-slate-400 max-w-sm mx-auto leading-relaxed">
                 The MTN Mobile Money payment system is temporarily disabled for routine network maintenance. 
                 Please contact our help desk or visit us directly to arrange alternative checkout.
               </p>
@@ -323,7 +323,7 @@ export default function CheckoutModal({
               <div className="pt-6">
                 <button
                   onClick={onClose}
-                  className="bg-neutral-900 hover:bg-amber-500 hover:text-neutral-900 text-white px-6 py-2.5 rounded-full text-xs font-bold transition-all"
+                  className="bg-neutral-900 hover:bg-amber-500 hover:text-neutral-900 dark:text-slate-100 text-white px-6 py-2.5 rounded-full text-xs font-bold transition-all"
                 >
                   Close & Return
                 </button>
@@ -334,14 +334,14 @@ export default function CheckoutModal({
               {/* STEP 1: Order Summary */}
               {step === 'summary' && (
                 <div className="space-y-6">
-                  <h4 className="font-serif text-neutral-950 text-base border-b border-neutral-100 pb-2 flex items-center gap-2">
+                  <h4 className="font-serif text-neutral-950 text-base border-b border-neutral-100 dark:border-slate-800 pb-2 flex items-center gap-2">
                     <ShoppingBag className="w-4 h-4 text-amber-500" />
                     Review Items in Bag
                   </h4>
                   
                   <div className="space-y-4">
-                    <div className="bg-neutral-50 p-4 rounded-2xl border border-neutral-200">
-                      <label className="text-xs font-bold text-neutral-700 flex items-center gap-1.5 mb-3">
+                    <div className="bg-neutral-50 dark:bg-slate-950 p-4 rounded-2xl border border-neutral-200 dark:border-slate-700">
+                      <label className="text-xs font-bold text-neutral-700 dark:text-slate-300 flex items-center gap-1.5 mb-3">
                         <MapPin className="w-3.5 h-3.5 text-indigo-600" />
                         Select Delivery Zone
                       </label>
@@ -359,20 +359,20 @@ export default function CheckoutModal({
                     </div>
                     <div className="space-y-2.5">
                       {cart.map(item => (
-                        <div key={item.id} className="flex justify-between items-center bg-neutral-50 p-3 rounded-xl border border-neutral-100">
+                        <div key={item.id} className="flex justify-between items-center bg-neutral-50 dark:bg-slate-950 p-3 rounded-xl border border-neutral-100 dark:border-slate-800">
                           <div>
                             <h5 className="text-sm font-semibold text-neutral-850">{item.name}</h5>
-                            <span className="text-xs text-neutral-500">₵{item.price} each &bull; Qty: {item.quantity}</span>
+                            <span className="text-xs text-neutral-500 dark:text-slate-400">₵{item.price} each &bull; Qty: {item.quantity}</span>
                           </div>
-                          <span className="text-sm font-bold text-neutral-900">₵{(item.price * item.quantity).toFixed(2)}</span>
+                          <span className="text-sm font-bold text-neutral-900 dark:text-slate-100">₵{(item.price * item.quantity).toFixed(2)}</span>
                         </div>
                       ))}
                     </div>
                   </div>
 
                   {/* Coupon System */}
-                  <div className="bg-neutral-50 p-4 rounded-2xl border border-neutral-200/60 space-y-3">
-                    <label className="text-xs font-bold text-neutral-700 flex items-center gap-1">
+                  <div className="bg-neutral-50 dark:bg-slate-950 p-4 rounded-2xl border border-neutral-200/60 space-y-3">
+                    <label className="text-xs font-bold text-neutral-700 dark:text-slate-300 flex items-center gap-1">
                       <Tag className="w-3.5 h-3.5 text-amber-500" />
                       Have an Elegant Promo Code?
                     </label>
@@ -382,11 +382,11 @@ export default function CheckoutModal({
                         value={couponCode}
                         onChange={e => setCouponCode(e.target.value)}
                         placeholder="Enter code (e.g. WELCOME10)"
-                        className="flex-1 px-4 py-2 text-sm border border-neutral-200 rounded-xl focus:outline-none focus:border-amber-500 focus:ring-2 focus:ring-amber-100 uppercase"
+                        className="flex-1 px-4 py-2 text-sm border border-neutral-200 dark:border-slate-700 rounded-xl focus:outline-none focus:border-amber-500 focus:ring-2 focus:ring-amber-100 uppercase"
                       />
                       <button
                         onClick={handleApplyCoupon}
-                        className="bg-amber-500 text-neutral-900 px-4 py-2 rounded-xl text-xs font-bold tracking-wide hover:bg-neutral-900 hover:text-white transition-colors duration-300 shadow"
+                        className="bg-amber-500 text-neutral-900 dark:text-slate-100 px-4 py-2 rounded-xl text-xs font-bold tracking-wide hover:bg-neutral-900 hover:text-white transition-colors duration-300 shadow"
                       >
                         Apply
                       </button>
@@ -404,7 +404,7 @@ export default function CheckoutModal({
                   {availablePoints > 0 && (
                     <div className="bg-amber-50/60 p-4 rounded-2xl border border-amber-200/50 space-y-3">
                       <div className="flex justify-between items-center">
-                        <label className="text-xs font-bold text-neutral-800 flex items-center gap-1.5">
+                        <label className="text-xs font-bold text-neutral-800 dark:text-slate-200 flex items-center gap-1.5">
                           <span>🪙</span>
                           <span>Bespoke Loyalty Points</span>
                         </label>
@@ -412,13 +412,13 @@ export default function CheckoutModal({
                           {availablePoints} Pts Available
                         </span>
                       </div>
-                      <p className="text-[11px] text-neutral-600 font-medium">
+                      <p className="text-[11px] text-neutral-600 dark:text-slate-400 font-medium">
                         Redeem points for discounts: <strong>10 points = 30% Off</strong>. 
                         You have {availablePoints} points.
                       </p>
                       
-                      <div className="flex items-center justify-between bg-white px-3 py-2 rounded-xl border border-neutral-150 shadow-sm">
-                        <span className="text-xs font-semibold text-neutral-700">Redeem points for discount?</span>
+                      <div className="flex items-center justify-between bg-white dark:bg-slate-900 px-3 py-2 rounded-xl border border-neutral-150 dark:border-slate-800 shadow-sm">
+                        <span className="text-xs font-semibold text-neutral-700 dark:text-slate-300">Redeem points for discount?</span>
                         <button
                           type="button"
                           onClick={() => {
@@ -434,8 +434,8 @@ export default function CheckoutModal({
                           }}
                           className={`px-3 py-1.5 rounded-lg text-[10px] font-black uppercase tracking-wider transition-all cursor-pointer ${
                             redeemPoints && availablePoints >= 10
-                              ? "bg-amber-500 text-neutral-900 shadow-sm" 
-                              : "bg-neutral-100 text-neutral-600 hover:bg-neutral-200"
+                              ? "bg-amber-500 text-neutral-900 dark:text-slate-100 shadow-sm" 
+                              : "bg-neutral-100 dark:bg-slate-800 text-neutral-600 dark:text-slate-400 hover:bg-neutral-200"
                           }`}
                         >
                           {redeemPoints ? "Redeemed ✓" : "Redeem Now"}
@@ -445,12 +445,12 @@ export default function CheckoutModal({
                   )}
 
                   {/* Total Summary */}
-                  <div className="border-t border-neutral-150 pt-4 space-y-2 text-sm">
-                    <div className="flex justify-between text-neutral-600">
+                  <div className="border-t border-neutral-150 dark:border-slate-800 pt-4 space-y-2 text-sm">
+                    <div className="flex justify-between text-neutral-600 dark:text-slate-400">
                       <span>Bag Subtotal</span>
                       <span>₵{subtotal.toFixed(2)}</span>
                     </div>
-                    <div className="flex justify-between text-neutral-600">
+                    <div className="flex justify-between text-neutral-600 dark:text-slate-400">
                       <span>Ashaiman Delivery Fee</span>
                       <span>₵{delivery.toFixed(2)}</span>
                     </div>
@@ -467,12 +467,12 @@ export default function CheckoutModal({
                       </div>
                     )}
                     {momoFee > 0 && (
-                      <div className="flex justify-between text-neutral-600">
+                      <div className="flex justify-between text-neutral-600 dark:text-slate-400">
                         <span>MTN MoMo Gateway Fee ({momoChargeRate}%)</span>
                         <span>₵{momoFee.toFixed(2)}</span>
                       </div>
                     )}
-                    <div className="flex justify-between font-serif text-lg text-neutral-900 border-t border-dashed border-neutral-250 pt-3">
+                    <div className="flex justify-between font-serif text-lg text-neutral-900 dark:text-slate-100 border-t border-dashed border-neutral-250 pt-3">
                       <span>Amount to Pay</span>
                       <span className="text-amber-500 font-bold text-xl">₵{total.toFixed(2)}</span>
                     </div>
@@ -480,7 +480,7 @@ export default function CheckoutModal({
 
                   <button
                     onClick={handleNextToCustomer}
-                    className="w-full bg-neutral-950 text-white hover:bg-amber-500 hover:text-neutral-900 py-4 rounded-xl text-sm font-bold tracking-wider flex items-center justify-center gap-2 transition-all duration-300 mt-6 shadow-md"
+                    className="w-full bg-neutral-950 text-white hover:bg-amber-500 hover:text-neutral-900 dark:text-slate-100 py-4 rounded-xl text-sm font-bold tracking-wider flex items-center justify-center gap-2 transition-all duration-300 mt-6 shadow-md"
                   >
                     Proceed to Checkout
                     <ArrowRight className="w-4 h-4" />
@@ -491,73 +491,73 @@ export default function CheckoutModal({
           {/* STEP 2: Customer Information */}
           {step === 'customer' && (
             <div className="space-y-5">
-              <h4 className="font-serif text-neutral-950 text-base border-b border-neutral-100 pb-2">
+              <h4 className="font-serif text-neutral-950 text-base border-b border-neutral-100 dark:border-slate-800 pb-2">
                 Delivery and Billing Details
               </h4>
 
               <div className="space-y-4">
                 <div>
-                  <label className="text-xs font-semibold text-neutral-600 mb-1.5 block">Full Name</label>
+                  <label className="text-xs font-semibold text-neutral-600 dark:text-slate-400 mb-1.5 block">Full Name</label>
                   <input
                     type="text"
                     value={name}
                     onChange={e => setName(e.target.value)}
                     placeholder="Enter your first and last name"
-                    className="w-full px-4 py-3 border border-neutral-200 rounded-xl focus:outline-none focus:border-amber-500"
+                    className="w-full px-4 py-3 border border-neutral-200 dark:border-slate-700 rounded-xl focus:outline-none focus:border-amber-500"
                     required
                   />
                 </div>
 
                 <div>
-                  <label className="text-xs font-semibold text-neutral-600 mb-1.5 block">MTN Ghana Mobile Money Number</label>
+                  <label className="text-xs font-semibold text-neutral-600 dark:text-slate-400 mb-1.5 block">MTN Ghana Mobile Money Number</label>
                   <input
                     type="tel"
                     value={phone}
                     onChange={e => setPhone(e.target.value)}
                     placeholder="e.g. 0244123456"
-                    className="w-full px-4 py-3 border border-neutral-200 rounded-xl focus:outline-none focus:border-amber-500 font-mono"
+                    className="w-full px-4 py-3 border border-neutral-200 dark:border-slate-700 rounded-xl focus:outline-none focus:border-amber-500 font-mono"
                     required
                   />
-                  <small className="text-[10px] text-neutral-500 mt-1 block">
+                  <small className="text-[10px] text-neutral-500 dark:text-slate-400 mt-1 block">
                     Must be registered on MTN Ghana Mobile Money networks.
                   </small>
                 </div>
 
                 <div>
-                  <label className="text-xs font-semibold text-neutral-600 mb-1.5 block">Email Address</label>
+                  <label className="text-xs font-semibold text-neutral-600 dark:text-slate-400 mb-1.5 block">Email Address</label>
                   <input
                     type="email"
                     value={email}
                     onChange={e => setEmail(e.target.value)}
                     placeholder="name@example.com"
-                    className="w-full px-4 py-3 border border-neutral-200 rounded-xl focus:outline-none focus:border-amber-500"
+                    className="w-full px-4 py-3 border border-neutral-200 dark:border-slate-700 rounded-xl focus:outline-none focus:border-amber-500"
                     required
                   />
                 </div>
 
                 <div>
-                  <label className="text-xs font-semibold text-neutral-600 mb-1.5 block">Delivery Address in Accra</label>
+                  <label className="text-xs font-semibold text-neutral-600 dark:text-slate-400 mb-1.5 block">Delivery Address in Accra</label>
                   <textarea
                     value={address}
                     onChange={e => setAddress(e.target.value)}
                     placeholder="Street name, landmark, house number, area (e.g. Near Ashaiman Market)"
                     rows={3}
-                    className="w-full px-4 py-3 border border-neutral-200 rounded-xl focus:outline-none focus:border-amber-500"
+                    className="w-full px-4 py-3 border border-neutral-200 dark:border-slate-700 rounded-xl focus:outline-none focus:border-amber-500"
                     required
                   />
                 </div>
               </div>
 
-              <div className="flex gap-3 mt-6 pt-4 border-t border-neutral-100">
+              <div className="flex gap-3 mt-6 pt-4 border-t border-neutral-100 dark:border-slate-800">
                 <button
                   onClick={() => setStep('summary')}
-                  className="flex-1 bg-neutral-100 hover:bg-neutral-200 text-neutral-700 py-3 rounded-xl text-xs font-bold flex items-center justify-center gap-1.5 transition-colors"
+                  className="flex-1 bg-neutral-100 dark:bg-slate-800 hover:bg-neutral-200 text-neutral-700 dark:text-slate-300 py-3 rounded-xl text-xs font-bold flex items-center justify-center gap-1.5 transition-colors"
                 >
                   <ArrowLeft className="w-3.5 h-3.5" /> Back
                 </button>
                 <button
                   onClick={handleNextToMomo}
-                  className="flex-1 bg-amber-500 hover:bg-amber-600 text-neutral-900 py-3 rounded-xl text-xs font-bold flex items-center justify-center gap-1.5 transition-colors shadow"
+                  className="flex-1 bg-amber-500 hover:bg-amber-600 text-neutral-900 dark:text-slate-100 py-3 rounded-xl text-xs font-bold flex items-center justify-center gap-1.5 transition-colors shadow"
                 >
                   Confirm Details <ArrowRight className="w-3.5 h-3.5" />
                 </button>
@@ -568,7 +568,7 @@ export default function CheckoutModal({
           {/* STEP 3: Multi-Method Payment Options (MTN MoMo & Google Pay) */}
           {step === 'momo' && (
             <div className="space-y-5">
-              <h4 className="font-serif text-neutral-950 text-base border-b border-neutral-100 pb-2 text-center text-neutral-800">
+              <h4 className="font-serif text-neutral-950 text-base border-b border-neutral-100 dark:border-slate-800 pb-2 text-center text-neutral-800 dark:text-slate-200">
                 Choose Secure Payment Option
               </h4>
 
@@ -580,7 +580,7 @@ export default function CheckoutModal({
                   className={`py-3 px-4 rounded-2xl text-xs font-bold transition-all duration-300 border flex flex-col items-center justify-center gap-1.5 cursor-pointer ${
                     paymentMethod === 'momo'
                       ? 'bg-amber-500/10 text-amber-700 border-amber-500 shadow-sm'
-                      : 'bg-white text-neutral-500 border-neutral-200 hover:border-neutral-300'
+                      : 'bg-white dark:bg-slate-900 text-neutral-500 dark:text-slate-400 border-neutral-200 dark:border-slate-700 hover:border-neutral-300'
                   }`}
                 >
                   <Smartphone className="w-4.5 h-4.5 text-amber-500 shrink-0 animate-pulse" />
@@ -592,7 +592,7 @@ export default function CheckoutModal({
                   className={`py-3 px-4 rounded-2xl text-xs font-bold transition-all duration-300 border flex flex-col items-center justify-center gap-1.5 cursor-pointer ${
                     paymentMethod === 'googlepay'
                       ? 'bg-indigo-50 text-indigo-700 border-indigo-500 shadow-sm'
-                      : 'bg-white text-neutral-500 border-neutral-200 hover:border-neutral-300'
+                      : 'bg-white dark:bg-slate-900 text-neutral-500 dark:text-slate-400 border-neutral-200 dark:border-slate-700 hover:border-neutral-300'
                   }`}
                 >
                   <CreditCard className="w-4.5 h-4.5 text-indigo-600 shrink-0" />
@@ -604,8 +604,8 @@ export default function CheckoutModal({
                 <div className="space-y-4">
                   {/* Instructions */}
                   <div className="bg-amber-50 border-l-4 border-amber-500 p-4 rounded-r-2xl space-y-2">
-                    <h5 className="font-bold text-neutral-900 text-xs">MTN MoMo Authorization Guide:</h5>
-                    <ol className="list-decimal pl-4 text-xs text-neutral-700 space-y-1">
+                    <h5 className="font-bold text-neutral-900 dark:text-slate-100 text-xs">MTN MoMo Authorization Guide:</h5>
+                    <ol className="list-decimal pl-4 text-xs text-neutral-700 dark:text-slate-300 space-y-1">
                       <li>Ensure your MTN wallet has at least ₵{total.toFixed(2)}.</li>
                       <li>Funds will be routed securely to <strong>{momoMerchantName}</strong> ({momoMerchantNumber}).</li>
                       <li>Confirm your MTN number and enter your 4-digit PIN to authorize.</li>
@@ -614,24 +614,24 @@ export default function CheckoutModal({
 
                   <div className="space-y-4 pt-2">
                     <div>
-                      <label className="text-xs font-semibold text-neutral-600 mb-1.5 block">Confirm MTN Wallet Number</label>
+                      <label className="text-xs font-semibold text-neutral-600 dark:text-slate-400 mb-1.5 block">Confirm MTN Wallet Number</label>
                       <input
                         type="text"
                         value={momoConfirmNumber}
                         onChange={e => setMomoConfirmNumber(e.target.value)}
-                        className="w-full px-4 py-3 border border-neutral-200 rounded-xl focus:outline-none focus:border-amber-500 text-center font-mono font-bold bg-neutral-50"
+                        className="w-full px-4 py-3 border border-neutral-200 dark:border-slate-700 rounded-xl focus:outline-none focus:border-amber-500 text-center font-mono font-bold bg-neutral-50 dark:bg-slate-950"
                       />
                     </div>
 
                     <div>
-                      <label className="text-xs font-semibold text-neutral-600 mb-1.5 block">MTN Mobile Money PIN (4 digits)</label>
+                      <label className="text-xs font-semibold text-neutral-600 dark:text-slate-400 mb-1.5 block">MTN Mobile Money PIN (4 digits)</label>
                       <input
                         type="password"
                         maxLength={4}
                         value={momoPin}
                         onChange={e => setMomoPin(e.target.value)}
                         placeholder="&bull; &bull; &bull; &bull;"
-                        className="w-full px-4 py-3 border border-neutral-200 rounded-xl focus:outline-none focus:border-amber-500 text-center font-mono text-2xl tracking-widest bg-neutral-50"
+                        className="w-full px-4 py-3 border border-neutral-200 dark:border-slate-700 rounded-xl focus:outline-none focus:border-amber-500 text-center font-mono text-2xl tracking-widest bg-neutral-50 dark:bg-slate-950"
                       />
                       <small className="text-[10px] text-neutral-400 text-center block mt-1">
                         Your PIN is encrypted and handled securely in the workspace.
@@ -645,8 +645,8 @@ export default function CheckoutModal({
                     <CreditCard className="w-6 h-6 text-indigo-600" />
                   </div>
                   <div className="space-y-1">
-                    <h5 className="text-xs font-bold text-neutral-800">Google Pay Instant Processing</h5>
-                    <p className="text-[11px] text-neutral-500 max-w-xs mx-auto leading-relaxed">
+                    <h5 className="text-xs font-bold text-neutral-800 dark:text-slate-200">Google Pay Instant Processing</h5>
+                    <p className="text-[11px] text-neutral-500 dark:text-slate-400 max-w-xs mx-auto leading-relaxed">
                       Complete your order instantly using cards saved to your Google Account. Safe, fast, and fully secure.
                     </p>
                   </div>
@@ -669,16 +669,16 @@ export default function CheckoutModal({
                 </div>
               )}
 
-              <div className="bg-neutral-50 p-4 rounded-xl border border-neutral-100 flex justify-between items-center">
-                <span className="text-sm font-semibold text-neutral-600">Grand Total to Pay:</span>
-                <span className="text-lg font-extrabold text-neutral-900 font-mono">₵{total.toFixed(2)}</span>
+              <div className="bg-neutral-50 dark:bg-slate-950 p-4 rounded-xl border border-neutral-100 dark:border-slate-800 flex justify-between items-center">
+                <span className="text-sm font-semibold text-neutral-600 dark:text-slate-400">Grand Total to Pay:</span>
+                <span className="text-lg font-extrabold text-neutral-900 dark:text-slate-100 font-mono">₵{total.toFixed(2)}</span>
               </div>
 
-              <div className="flex gap-3 mt-6 pt-4 border-t border-neutral-100">
+              <div className="flex gap-3 mt-6 pt-4 border-t border-neutral-100 dark:border-slate-800">
                 <button
                   disabled={isProcessing}
                   onClick={() => setStep('customer')}
-                  className="flex-1 bg-neutral-100 hover:bg-neutral-200 text-neutral-700 py-3 rounded-xl text-xs font-bold flex items-center justify-center gap-1.5 transition-colors disabled:opacity-50 cursor-pointer"
+                  className="flex-1 bg-neutral-100 dark:bg-slate-800 hover:bg-neutral-200 text-neutral-700 dark:text-slate-300 py-3 rounded-xl text-xs font-bold flex items-center justify-center gap-1.5 transition-colors disabled:opacity-50 cursor-pointer"
                 >
                   <ArrowLeft className="w-3.5 h-3.5" /> Back
                 </button>
@@ -687,11 +687,11 @@ export default function CheckoutModal({
                   <button
                     onClick={handleProcessPayment}
                     disabled={isProcessing}
-                    className="flex-1 bg-amber-500 hover:bg-amber-600 text-neutral-900 py-3 rounded-xl text-xs font-bold flex items-center justify-center gap-1.5 transition-colors shadow disabled:opacity-50 cursor-pointer"
+                    className="flex-1 bg-amber-500 hover:bg-amber-600 text-neutral-900 dark:text-slate-100 py-3 rounded-xl text-xs font-bold flex items-center justify-center gap-1.5 transition-colors shadow disabled:opacity-50 cursor-pointer"
                   >
                     {isProcessing ? (
                       <>
-                        <Loader2 className="w-4 h-4 animate-spin text-neutral-900" />
+                        <Loader2 className="w-4 h-4 animate-spin text-neutral-900 dark:text-slate-100" />
                         Authorizing...
                       </>
                     ) : (
@@ -709,10 +709,10 @@ export default function CheckoutModal({
           {/* SIMULATED GOOGLE PAY OVERLAY */}
           {showGPayOverlay && (
             <div className="absolute inset-0 bg-black/60 z-50 flex items-end justify-center animate-in fade-in duration-300 p-0">
-              <div className="bg-[#f8f9fa] w-full rounded-t-3xl p-6 border-t border-neutral-200 shadow-2xl animate-in slide-in-from-bottom duration-300 space-y-6 max-h-[90%] overflow-y-auto">
-                <div className="flex justify-between items-center border-b border-neutral-200 pb-3">
+              <div className="bg-[#f8f9fa] w-full rounded-t-3xl p-6 border-t border-neutral-200 dark:border-slate-700 shadow-2xl animate-in slide-in-from-bottom duration-300 space-y-6 max-h-[90%] overflow-y-auto">
+                <div className="flex justify-between items-center border-b border-neutral-200 dark:border-slate-700 pb-3">
                   <div className="flex items-center gap-1.5">
-                    <span className="font-sans font-black text-lg tracking-tight text-neutral-800 flex items-center gap-0.5">
+                    <span className="font-sans font-black text-lg tracking-tight text-neutral-800 dark:text-slate-200 flex items-center gap-0.5">
                       <span className="text-blue-600">G</span>
                       <span className="text-red-500">o</span>
                       <span className="text-yellow-500">o</span>
@@ -724,7 +724,7 @@ export default function CheckoutModal({
                   </div>
                   <button
                     onClick={() => setShowGPayOverlay(false)}
-                    className="w-7 h-7 rounded-full bg-neutral-200 hover:bg-neutral-300 flex items-center justify-center text-neutral-700 transition-all cursor-pointer"
+                    className="w-7 h-7 rounded-full bg-neutral-200 hover:bg-neutral-300 flex items-center justify-center text-neutral-700 dark:text-slate-300 transition-all cursor-pointer"
                   >
                     <X className="w-3.5 h-3.5" />
                   </button>
@@ -732,7 +732,7 @@ export default function CheckoutModal({
 
                 <div className="space-y-4">
                   {/* Account detail */}
-                  <div className="flex justify-between items-center bg-white p-4 rounded-2xl border border-neutral-100 shadow-sm">
+                  <div className="flex justify-between items-center bg-white dark:bg-slate-900 p-4 rounded-2xl border border-neutral-100 dark:border-slate-800 shadow-sm">
                     <div>
                       <h5 className="text-[10px] font-bold text-neutral-400 uppercase tracking-wider">Google Account</h5>
                       <p className="text-xs font-semibold text-neutral-850 mt-0.5">gifty.ga579265@gmail.com</p>
@@ -743,7 +743,7 @@ export default function CheckoutModal({
                   {/* Payment method selector */}
                   <div className="space-y-2">
                     <label className="text-[10px] font-bold text-neutral-400 uppercase tracking-wider block">Select Saved Card</label>
-                    <div className="bg-white rounded-2xl border border-neutral-150 divide-y divide-neutral-100 overflow-hidden shadow-sm">
+                    <div className="bg-white dark:bg-slate-900 rounded-2xl border border-neutral-150 dark:border-slate-800 divide-y divide-neutral-100 overflow-hidden shadow-sm">
                       {[
                         { id: 'visa', label: 'Visa ending in 4111', icon: '💳', desc: 'Preferred card' },
                         { id: 'master', label: 'MasterCard ending in 5555', icon: '💳', desc: 'Backup card' }
@@ -751,15 +751,15 @@ export default function CheckoutModal({
                         <div
                           key={card.id}
                           onClick={() => setGpaySelectedCard(`${card.label} [ gifty.ga579265@gmail.com ]`)}
-                          className={`p-4 flex justify-between items-center cursor-pointer hover:bg-neutral-50 transition-colors ${
+                          className={`p-4 flex justify-between items-center cursor-pointer hover:bg-neutral-50 dark:bg-slate-950 transition-colors ${
                             gpaySelectedCard.includes(card.label) ? 'bg-indigo-50/40' : ''
                           }`}
                         >
                           <div className="flex items-center gap-3">
                             <span className="text-lg">{card.icon}</span>
                             <div>
-                              <p className="text-xs font-bold text-neutral-800">{card.label}</p>
-                              <p className="text-[10px] text-neutral-500">{card.desc}</p>
+                              <p className="text-xs font-bold text-neutral-800 dark:text-slate-200">{card.label}</p>
+                              <p className="text-[10px] text-neutral-500 dark:text-slate-400">{card.desc}</p>
                             </div>
                           </div>
                           {gpaySelectedCard.includes(card.label) && (
@@ -771,23 +771,23 @@ export default function CheckoutModal({
                   </div>
 
                   {/* Shipping address info */}
-                  <div className="bg-white p-4 rounded-2xl border border-neutral-100 shadow-sm space-y-1">
+                  <div className="bg-white dark:bg-slate-900 p-4 rounded-2xl border border-neutral-100 dark:border-slate-800 shadow-sm space-y-1">
                     <h5 className="text-[10px] font-bold text-neutral-400 uppercase tracking-wider">Shipping Destination</h5>
-                    <p className="text-xs font-bold text-neutral-800">{name}</p>
-                    <p className="text-xs text-neutral-600 line-clamp-1">{address}</p>
+                    <p className="text-xs font-bold text-neutral-800 dark:text-slate-200">{name}</p>
+                    <p className="text-xs text-neutral-600 dark:text-slate-400 line-clamp-1">{address}</p>
                   </div>
 
                   {/* Totals */}
                   <div className="border-t border-dashed border-neutral-250 pt-3 space-y-1.5 text-xs">
-                    <div className="flex justify-between text-neutral-600">
+                    <div className="flex justify-between text-neutral-600 dark:text-slate-400">
                       <span>Store Checkout Total</span>
                       <span>₵{total.toFixed(2)}</span>
                     </div>
-                    <div className="flex justify-between text-neutral-600">
+                    <div className="flex justify-between text-neutral-600 dark:text-slate-400">
                       <span>GPay Processing Fee</span>
                       <span className="text-green-600 font-bold">FREE (₵0.00)</span>
                     </div>
-                    <div className="flex justify-between text-sm font-bold text-neutral-900 pt-2 border-t border-neutral-200">
+                    <div className="flex justify-between text-sm font-bold text-neutral-900 dark:text-slate-100 pt-2 border-t border-neutral-200 dark:border-slate-700">
                       <span>Total Charge</span>
                       <span>₵{total.toFixed(2)}</span>
                     </div>
@@ -824,16 +824,16 @@ export default function CheckoutModal({
 
               <div className="space-y-1">
                 <h4 className="font-serif text-2xl text-green-600 font-medium">Payment Successful!</h4>
-                <p className="text-xs text-neutral-500">Your fashion order has been completed successfully.</p>
+                <p className="text-xs text-neutral-500 dark:text-slate-400">Your fashion order has been completed successfully.</p>
               </div>
 
               {/* Invoice */}
-              <div className="bg-neutral-50 border border-neutral-200 p-5 rounded-2xl text-left text-xs space-y-3 font-mono">
+              <div className="bg-neutral-50 dark:bg-slate-950 border border-neutral-200 dark:border-slate-700 p-5 rounded-2xl text-left text-xs space-y-3 font-mono">
                 <div className="flex justify-between border-b border-dashed border-neutral-300 pb-2.5">
-                  <span className="font-bold text-neutral-600">INVOICE DETAILS</span>
+                  <span className="font-bold text-neutral-600 dark:text-slate-400">INVOICE DETAILS</span>
                   <span className="text-indigo-600 font-bold">{finalOrderDetails.orderId}</span>
                 </div>
-                <div className="space-y-1 text-neutral-700">
+                <div className="space-y-1 text-neutral-700 dark:text-slate-300">
                   <p><strong>Customer Name:</strong> {finalOrderDetails.name}</p>
                   <p><strong>Amount Paid:</strong> ₵{finalOrderDetails.total.toFixed(2)}</p>
                   <p><strong>Payment Mode:</strong> {finalOrderDetails.isGooglePay ? "Google Pay (Secure Card)" : "MTN Mobile Money"}</p>
@@ -850,7 +850,7 @@ export default function CheckoutModal({
 
               <button
                 onClick={onClose}
-                className="w-full bg-neutral-900 hover:bg-amber-500 hover:text-neutral-900 text-white py-3.5 rounded-xl text-sm font-bold tracking-wider transition-all duration-300 shadow"
+                className="w-full bg-neutral-900 hover:bg-amber-500 hover:text-neutral-900 dark:text-slate-100 text-white py-3.5 rounded-xl text-sm font-bold tracking-wider transition-all duration-300 shadow"
               >
                 Continue Shopping
               </button>

@@ -303,12 +303,12 @@ export default function CharityManager({
       </div>
 
       {/* 2. Sub-Tab Panel Selection */}
-      <div className="flex flex-wrap items-center justify-between border-b border-neutral-200 pb-2.5 gap-4">
-        <div className="flex gap-1 bg-neutral-100 p-1 rounded-xl">
+      <div className="flex flex-wrap items-center justify-between border-b border-neutral-200 dark:border-slate-700 pb-2.5 gap-4">
+        <div className="flex gap-1 bg-neutral-100 dark:bg-slate-800 p-1 rounded-xl">
           <button 
             onClick={() => { setActiveSubTab("projects"); setSearchQuery(""); }} 
             className={`px-4 py-2 text-xs font-bold rounded-lg transition-all flex items-center gap-2 cursor-pointer ${
-              activeSubTab === "projects" ? "bg-white text-indigo-600 shadow-sm" : "text-neutral-600 hover:text-neutral-950"
+              activeSubTab === "projects" ? "bg-white dark:bg-slate-900 text-indigo-600 shadow-sm" : "text-neutral-600 dark:text-slate-400 hover:text-neutral-950"
             }`}
           >
             <Tag className="w-3.5 h-3.5" />
@@ -317,7 +317,7 @@ export default function CharityManager({
           <button 
             onClick={() => { setActiveSubTab("donors"); setSearchQuery(""); }} 
             className={`px-4 py-2 text-xs font-bold rounded-lg transition-all flex items-center gap-2 cursor-pointer ${
-              activeSubTab === "donors" ? "bg-white text-indigo-600 shadow-sm" : "text-neutral-600 hover:text-neutral-950"
+              activeSubTab === "donors" ? "bg-white dark:bg-slate-900 text-indigo-600 shadow-sm" : "text-neutral-600 dark:text-slate-400 hover:text-neutral-950"
             }`}
           >
             <Users className="w-3.5 h-3.5" />
@@ -326,7 +326,7 @@ export default function CharityManager({
           <button 
             onClick={() => { setActiveSubTab("ledger"); setSearchQuery(""); }} 
             className={`px-4 py-2 text-xs font-bold rounded-lg transition-all flex items-center gap-2 cursor-pointer ${
-              activeSubTab === "ledger" ? "bg-white text-indigo-600 shadow-sm" : "text-neutral-600 hover:text-neutral-950"
+              activeSubTab === "ledger" ? "bg-white dark:bg-slate-900 text-indigo-600 shadow-sm" : "text-neutral-600 dark:text-slate-400 hover:text-neutral-950"
             }`}
           >
             <FileText className="w-3.5 h-3.5" />
@@ -346,7 +346,7 @@ export default function CharityManager({
                 placeholder={activeSubTab === "donors" ? "Search donors..." : "Search ledger entries..."}
                 value={searchQuery}
                 onChange={e => setSearchQuery(e.target.value)}
-                className="w-full pl-9 pr-3 py-1.5 text-xs border border-neutral-200 rounded-lg text-black bg-white focus:outline-none focus:border-indigo-500 font-sans"
+                className="w-full pl-9 pr-3 py-1.5 text-xs border border-neutral-200 dark:border-slate-700 rounded-lg text-black dark:text-white bg-white dark:bg-slate-900 focus:outline-none focus:border-indigo-500 font-sans"
               />
             </div>
           )}
@@ -373,55 +373,55 @@ export default function CharityManager({
       {activeSubTab === "projects" && (
         <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
           {/* Creation/Editing Form */}
-          <div className="bg-white p-6 rounded-2xl border border-neutral-200 shadow-sm space-y-4">
-            <h3 className="font-serif text-lg font-medium text-neutral-900 flex items-center gap-2">
+          <div className="bg-white dark:bg-slate-900 p-6 rounded-2xl border border-neutral-200 dark:border-slate-700 shadow-sm space-y-4">
+            <h3 className="font-serif text-lg font-medium text-neutral-900 dark:text-slate-100 flex items-center gap-2">
               <Heart className="w-4 h-4 text-indigo-600" />
               {editingId ? "Modify Philanthropic Project" : "Initiate New Cause"}
             </h3>
             
             <form onSubmit={handleSubmit} className="space-y-4 font-sans text-xs font-medium">
               <div className="space-y-1">
-                <label className="text-neutral-500">Project Name</label>
+                <label className="text-neutral-500 dark:text-slate-400">Project Name</label>
                 <input 
                   type="text" 
                   placeholder="e.g. Ashaiman Children Study Fund" 
                   value={name} 
                   onChange={e => setName(e.target.value)} 
-                  className="w-full p-2.5 border rounded-xl text-black bg-neutral-50" 
+                  className="w-full p-2.5 border rounded-xl text-black dark:text-white bg-neutral-50 dark:bg-slate-950" 
                   required
                 />
               </div>
 
               <div className="space-y-1">
-                <label className="text-neutral-500">Target Goal Amount (₵ / GH₵)</label>
+                <label className="text-neutral-500 dark:text-slate-400">Target Goal Amount (₵ / GH₵)</label>
                 <input 
                   type="number" 
                   placeholder="e.g. 15000" 
                   value={targetAmount} 
                   onChange={e => setTargetAmount(e.target.value)} 
-                  className="w-full p-2.5 border rounded-xl text-black bg-neutral-50" 
+                  className="w-full p-2.5 border rounded-xl text-black dark:text-white bg-neutral-50 dark:bg-slate-950" 
                   required
                 />
               </div>
 
               <div className="space-y-1">
-                <label className="text-neutral-500">Description & Mission statement</label>
+                <label className="text-neutral-500 dark:text-slate-400">Description & Mission statement</label>
                 <textarea 
                   placeholder="Provide precise descriptions about where this money is going..." 
                   value={description} 
                   onChange={e => setDescription(e.target.value)} 
-                  className="w-full p-2.5 border rounded-xl text-black bg-neutral-50 min-h-24" 
+                  className="w-full p-2.5 border rounded-xl text-black dark:text-white bg-neutral-50 dark:bg-slate-950 min-h-24" 
                   required
                 />
               </div>
 
               <div className="space-y-1">
-                <label className="text-neutral-500">Project Cover Banner Image</label>
+                <label className="text-neutral-500 dark:text-slate-400">Project Cover Banner Image</label>
                 <input 
                   type="file" 
                   accept="image/*" 
                   onChange={handleImageChange} 
-                  className="w-full p-2 border border-dashed rounded-xl text-neutral-500 cursor-pointer bg-neutral-50" 
+                  className="w-full p-2 border border-dashed rounded-xl text-neutral-500 dark:text-slate-400 cursor-pointer bg-neutral-50 dark:bg-slate-950" 
                 />
                 {imageUrl && (
                   <div className="relative mt-2 rounded-xl overflow-hidden border">
@@ -447,7 +447,7 @@ export default function CharityManager({
                       setTargetAmount("");
                       setImageUrl("");
                     }} 
-                    className="bg-neutral-100 hover:bg-neutral-200 text-neutral-600 font-bold px-4 py-2.5 rounded-xl cursor-pointer text-xs"
+                    className="bg-neutral-100 dark:bg-slate-800 hover:bg-neutral-200 text-neutral-600 dark:text-slate-400 font-bold px-4 py-2.5 rounded-xl cursor-pointer text-xs"
                   >
                     Cancel
                   </button>
@@ -458,10 +458,10 @@ export default function CharityManager({
 
           {/* Active Causes List */}
           <div className="lg:col-span-2 space-y-4">
-            <h3 className="font-serif text-lg font-medium text-neutral-900">Active Store Causes</h3>
+            <h3 className="font-serif text-lg font-medium text-neutral-900 dark:text-slate-100">Active Store Causes</h3>
             <div className="grid gap-4">
               {charityData.length === 0 ? (
-                <div className="bg-neutral-50 border border-neutral-200 rounded-2xl p-8 text-center text-neutral-500">
+                <div className="bg-neutral-50 dark:bg-slate-950 border border-neutral-200 dark:border-slate-700 rounded-2xl p-8 text-center text-neutral-500 dark:text-slate-400">
                   <p className="font-bold">No Philanthropic Causes Configured</p>
                   <p className="text-xs mt-1">Populate using the form or seed the database to test the flow.</p>
                 </div>
@@ -472,7 +472,7 @@ export default function CharityManager({
                   const projectTotal = projectDonations.reduce((acc, d) => acc + (parseFloat(d.amount) || 0), 0);
                   
                   return (
-                    <div key={charity.id} className="bg-white p-5 rounded-2xl border border-neutral-200 shadow-sm space-y-4 hover:shadow-md transition-shadow relative overflow-hidden">
+                    <div key={charity.id} className="bg-white dark:bg-slate-900 p-5 rounded-2xl border border-neutral-200 dark:border-slate-700 shadow-sm space-y-4 hover:shadow-md transition-shadow relative overflow-hidden">
                       <div className="flex flex-col sm:flex-row gap-4 items-start sm:items-center justify-between">
                         <div className="flex gap-4 items-center">
                           {charity.imageUrl && (
@@ -482,8 +482,8 @@ export default function CharityManager({
                             <span className="text-[9px] text-emerald-600 font-bold bg-emerald-50 border border-emerald-100 px-2 py-0.5 rounded-full uppercase tracking-wider">
                               Active Project
                             </span>
-                            <h4 className="font-bold text-neutral-900 font-serif text-base">{charity.name}</h4>
-                            <p className="text-xs text-neutral-500 line-clamp-2 max-w-md leading-relaxed">{charity.description}</p>
+                            <h4 className="font-bold text-neutral-900 dark:text-slate-100 font-serif text-base">{charity.name}</h4>
+                            <p className="text-xs text-neutral-500 dark:text-slate-400 line-clamp-2 max-w-md leading-relaxed">{charity.description}</p>
                           </div>
                         </div>
 
@@ -492,21 +492,21 @@ export default function CharityManager({
                           <button 
                             onClick={() => downloadDonationsCSV(projectDonations, `project_${charity.id}`)}
                             title="Export Project Spreadsheet Report"
-                            className="p-2 text-neutral-500 hover:text-indigo-600 hover:bg-indigo-50 rounded-xl transition-all cursor-pointer border border-neutral-100"
+                            className="p-2 text-neutral-500 dark:text-slate-400 hover:text-indigo-600 hover:bg-indigo-50 rounded-xl transition-all cursor-pointer border border-neutral-100 dark:border-slate-800"
                           >
                             <Download className="w-4 h-4" />
                           </button>
                           <button 
                             onClick={() => startEdit(charity)} 
                             title="Edit Project"
-                            className="p-2 text-neutral-500 hover:text-blue-600 hover:bg-blue-50 rounded-xl transition-all cursor-pointer border border-neutral-100"
+                            className="p-2 text-neutral-500 dark:text-slate-400 hover:text-blue-600 hover:bg-blue-50 rounded-xl transition-all cursor-pointer border border-neutral-100 dark:border-slate-800"
                           >
                             <Edit className="w-4 h-4" />
                           </button>
                           <button 
                             onClick={() => deleteCharity(charity.id, charity.name)} 
                             title="Remove Cause"
-                            className="p-2 text-neutral-500 hover:text-red-600 hover:bg-red-50 rounded-xl transition-all cursor-pointer border border-neutral-100"
+                            className="p-2 text-neutral-500 dark:text-slate-400 hover:text-red-600 hover:bg-red-50 rounded-xl transition-all cursor-pointer border border-neutral-100 dark:border-slate-800"
                           >
                             <Trash2 className="w-4 h-4" />
                           </button>
@@ -514,15 +514,15 @@ export default function CharityManager({
                       </div>
 
                       {/* Financial Tracker Bar */}
-                      <div className="bg-neutral-50 p-4.5 rounded-xl border space-y-2">
+                      <div className="bg-neutral-50 dark:bg-slate-950 p-4.5 rounded-xl border space-y-2">
                         <div className="flex justify-between text-xs font-semibold">
                           <div className="space-x-1.5">
-                            <span className="text-neutral-500 uppercase tracking-widest text-[9px] font-bold">Raised So Far:</span>
+                            <span className="text-neutral-500 dark:text-slate-400 uppercase tracking-widest text-[9px] font-bold">Raised So Far:</span>
                             <span className="text-indigo-600 font-extrabold">GH₵ {projectTotal.toLocaleString()}</span>
                           </div>
                           <div className="space-x-1.5">
-                            <span className="text-neutral-500 uppercase tracking-widest text-[9px] font-bold">Target Goal:</span>
-                            <span className="text-neutral-900 font-extrabold">GH₵ {charity.targetAmount.toLocaleString()}</span>
+                            <span className="text-neutral-500 dark:text-slate-400 uppercase tracking-widest text-[9px] font-bold">Target Goal:</span>
+                            <span className="text-neutral-900 dark:text-slate-100 font-extrabold">GH₵ {charity.targetAmount.toLocaleString()}</span>
                           </div>
                           <span className="text-emerald-600 font-black">{percent}%</span>
                         </div>
@@ -548,11 +548,11 @@ export default function CharityManager({
 
       {/* activeSubTab === "donors" -> Customer-centric donation summaries */}
       {activeSubTab === "donors" && (
-        <div className="bg-white rounded-2xl border border-neutral-200 shadow-sm overflow-hidden animate-in fade-in duration-300">
-          <div className="p-5 border-b border-neutral-200 bg-neutral-50 flex flex-col sm:flex-row sm:items-center justify-between gap-4">
+        <div className="bg-white dark:bg-slate-900 rounded-2xl border border-neutral-200 dark:border-slate-700 shadow-sm overflow-hidden animate-in fade-in duration-300">
+          <div className="p-5 border-b border-neutral-200 dark:border-slate-700 bg-neutral-50 dark:bg-slate-950 flex flex-col sm:flex-row sm:items-center justify-between gap-4">
             <div>
-              <h3 className="font-serif text-lg font-medium text-neutral-900">Total Money Raised From Every Donated Customer</h3>
-              <p className="text-xs text-neutral-500 font-sans mt-0.5">Aggregates and totals all philantropic contributions grouped by customer account.</p>
+              <h3 className="font-serif text-lg font-medium text-neutral-900 dark:text-slate-100">Total Money Raised From Every Donated Customer</h3>
+              <p className="text-xs text-neutral-500 dark:text-slate-400 font-sans mt-0.5">Aggregates and totals all philantropic contributions grouped by customer account.</p>
             </div>
             <button 
               onClick={() => {
@@ -588,7 +588,7 @@ export default function CharityManager({
           <div className="overflow-x-auto">
             <table className="w-full text-left border-collapse">
               <thead>
-                <tr className="bg-neutral-100 text-neutral-600 font-mono text-[9px] font-black uppercase tracking-wider border-b border-neutral-200">
+                <tr className="bg-neutral-100 dark:bg-slate-800 text-neutral-600 dark:text-slate-400 font-mono text-[9px] font-black uppercase tracking-wider border-b border-neutral-200 dark:border-slate-700">
                   <th className="py-3 px-5">Customer Donor</th>
                   <th className="py-3 px-5">Customer Email</th>
                   <th className="py-3 px-5">Total Donations</th>
@@ -600,28 +600,28 @@ export default function CharityManager({
               <tbody className="divide-y divide-neutral-150 font-sans text-xs">
                 {filteredDonors.length === 0 ? (
                   <tr>
-                    <td colSpan={6} className="py-8 text-center text-neutral-500 font-semibold">
+                    <td colSpan={6} className="py-8 text-center text-neutral-500 dark:text-slate-400 font-semibold">
                       No matching customer accounts or donations found.
                     </td>
                   </tr>
                 ) : (
                   filteredDonors.map((donor, idx) => (
                     <tr key={idx} className="hover:bg-neutral-50/50 transition-colors">
-                      <td className="py-3.5 px-5 font-bold text-neutral-900 flex items-center gap-2">
+                      <td className="py-3.5 px-5 font-bold text-neutral-900 dark:text-slate-100 flex items-center gap-2">
                         <div className="w-7 h-7 bg-indigo-50 border border-indigo-100 text-indigo-600 font-black rounded-full flex items-center justify-center text-[10px] uppercase shadow-inner">
                           {donor.name.charAt(0)}
                         </div>
                         <span>{donor.name}</span>
                       </td>
-                      <td className="py-3.5 px-5 text-neutral-600 font-mono text-[11px]">{donor.email}</td>
-                      <td className="py-3.5 px-5 font-bold text-neutral-700">{donor.donationCount} payments</td>
+                      <td className="py-3.5 px-5 text-neutral-600 dark:text-slate-400 font-mono text-[11px]">{donor.email}</td>
+                      <td className="py-3.5 px-5 font-bold text-neutral-700 dark:text-slate-300">{donor.donationCount} payments</td>
                       <td className="py-3.5 px-5 font-extrabold text-indigo-600 font-mono text-sm">
                         GH₵ {donor.totalDonated.toLocaleString()}
                       </td>
                       <td className="py-3.5 px-5 max-w-xs">
                         <div className="flex flex-wrap gap-1">
                           {Array.from(donor.supportedCharities).map((cName, cIdx) => (
-                            <span key={cIdx} className="bg-neutral-100 border text-neutral-600 text-[9px] px-2 py-0.5 rounded-full font-bold truncate max-w-[120px]" title={cName}>
+                            <span key={cIdx} className="bg-neutral-100 dark:bg-slate-800 border text-neutral-600 dark:text-slate-400 text-[9px] px-2 py-0.5 rounded-full font-bold truncate max-w-[120px]" title={cName}>
                               {cName}
                             </span>
                           ))}
@@ -639,18 +639,18 @@ export default function CharityManager({
 
       {/* activeSubTab === "ledger" -> Direct payments listing */}
       {activeSubTab === "ledger" && (
-        <div className="bg-white rounded-2xl border border-neutral-200 shadow-sm overflow-hidden animate-in fade-in duration-300">
-          <div className="p-5 border-b border-neutral-200 bg-neutral-50 flex items-center justify-between">
+        <div className="bg-white dark:bg-slate-900 rounded-2xl border border-neutral-200 dark:border-slate-700 shadow-sm overflow-hidden animate-in fade-in duration-300">
+          <div className="p-5 border-b border-neutral-200 dark:border-slate-700 bg-neutral-50 dark:bg-slate-950 flex items-center justify-between">
             <div>
-              <h3 className="font-serif text-lg font-medium text-neutral-900">Global Philanthropic Donations Ledger</h3>
-              <p className="text-xs text-neutral-500 font-sans mt-0.5">Line-by-line detailed listing of all completed donor transactions.</p>
+              <h3 className="font-serif text-lg font-medium text-neutral-900 dark:text-slate-100">Global Philanthropic Donations Ledger</h3>
+              <p className="text-xs text-neutral-500 dark:text-slate-400 font-sans mt-0.5">Line-by-line detailed listing of all completed donor transactions.</p>
             </div>
           </div>
 
           <div className="overflow-x-auto">
             <table className="w-full text-left border-collapse">
               <thead>
-                <tr className="bg-neutral-100 text-neutral-600 font-mono text-[9px] font-black uppercase tracking-wider border-b border-neutral-200">
+                <tr className="bg-neutral-100 dark:bg-slate-800 text-neutral-600 dark:text-slate-400 font-mono text-[9px] font-black uppercase tracking-wider border-b border-neutral-200 dark:border-slate-700">
                   <th className="py-3 px-5">Donation ID</th>
                   <th className="py-3 px-5">Donor</th>
                   <th className="py-3 px-5">Sponsored Cause</th>
@@ -663,7 +663,7 @@ export default function CharityManager({
               <tbody className="divide-y divide-neutral-150 font-sans text-xs">
                 {filteredLedger.length === 0 ? (
                   <tr>
-                    <td colSpan={7} className="py-8 text-center text-neutral-500 font-semibold">
+                    <td colSpan={7} className="py-8 text-center text-neutral-500 dark:text-slate-400 font-semibold">
                       No matching records found in the global payments ledger.
                     </td>
                   </tr>
@@ -672,13 +672,13 @@ export default function CharityManager({
                     <tr key={idx} className="hover:bg-neutral-50/50 transition-colors">
                       <td className="py-3.5 px-5 font-mono text-[10px] text-neutral-400 font-bold">#{d.id}</td>
                       <td className="py-3.5 px-5">
-                        <p className="font-bold text-neutral-900">{d.customerName || "Anonymous Donor"}</p>
-                        <p className="text-[10px] text-neutral-500 font-mono">{d.customerEmail || "anonymous@example.com"}</p>
+                        <p className="font-bold text-neutral-900 dark:text-slate-100">{d.customerName || "Anonymous Donor"}</p>
+                        <p className="text-[10px] text-neutral-500 dark:text-slate-400 font-mono">{d.customerEmail || "anonymous@example.com"}</p>
                       </td>
-                      <td className="py-3.5 px-5 font-medium text-neutral-800">{d.charityName || "N/A"}</td>
-                      <td className="py-3.5 px-5 text-neutral-500 font-mono text-[11px]">{d.date}</td>
+                      <td className="py-3.5 px-5 font-medium text-neutral-800 dark:text-slate-200">{d.charityName || "N/A"}</td>
+                      <td className="py-3.5 px-5 text-neutral-500 dark:text-slate-400 font-mono text-[11px]">{d.date}</td>
                       <td className="py-3.5 px-5">
-                        <span className="bg-neutral-100 text-neutral-600 border px-2 py-0.5 rounded-md font-mono text-[9px] font-black uppercase">
+                        <span className="bg-neutral-100 dark:bg-slate-800 text-neutral-600 dark:text-slate-400 border px-2 py-0.5 rounded-md font-mono text-[9px] font-black uppercase">
                           {d.method || "momo"}
                         </span>
                       </td>

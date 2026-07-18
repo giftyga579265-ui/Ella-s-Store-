@@ -5,11 +5,7 @@ import {
   CustomerInquiry, ActivityLog, DiscountCode, Charity, MediaFile, HomepageSettings, ChatMessage, NotificationItem, StoreEvent, CustomerReview, DeliveryItem,
   DeliveryRate, DeliveryPersonnel
 } from "./types";
-import { 
-  ShoppingBag, Phone, MapPin, Mail, Clock, HelpCircle, 
-  Settings, User, Check, Ribbon, Star, ChevronDown, Lock, Bell, Trash2, X, Menu, Heart, Search,
-  Mic, Video, Film, Upload, Camera, Image as ImageIcon
-} from "lucide-react";
+import { ShoppingBag, Phone, MapPin, Mail, Clock, HelpCircle, Settings, User, Check, Ribbon, Star, ChevronDown, Lock, Bell, Trash2, X, Menu, Heart, Search, Mic, Video, Film, Upload, Camera, Image as ImageIcon, Sun, Moon } from 'lucide-react';
 
 import SmsWidget from "./components/SmsWidget";
 import MediaGallery from "./components/MediaGallery";
@@ -454,6 +450,21 @@ export default function App() {
   const [adminMessages, setAdminMessages] = useState<any[]>([]);
   const [notifications, setNotifications] = useState<NotificationItem[]>([]);
   const [showNotifications, setShowNotifications] = useState(false);
+  
+  const [isDarkMode, setIsDarkMode] = useState(() => {
+    return localStorage.getItem('ella_theme') === 'dark';
+  });
+
+  useEffect(() => {
+    if (isDarkMode) {
+      document.documentElement.classList.add('dark');
+      localStorage.setItem('ella_theme', 'dark');
+    } else {
+      document.documentElement.classList.remove('dark');
+      localStorage.setItem('ella_theme', 'light');
+    }
+  }, [isDarkMode]);
+
   const [siteLoading, setSiteLoading] = useState(false);
   const [loadingMessage, setLoadingMessage] = useState("");
   const [isSlowLoading, setIsSlowLoading] = useState(false);
@@ -1614,6 +1625,36 @@ export default function App() {
   };
 
   // Shopping cart handlers
+  
+  const handleNotifyMe = async (product: Product) => {
+    if (!isLoggedIn) {
+      showToast("Login Required", "Please log in to receive stock alerts.", "info");
+      setShowLogin(true);
+      return;
+    }
+    setSiteLoading(true);
+    setLoadingMessage("Setting up stock alert...");
+    try {
+      const alertRef = doc(collection(db, "stock_alerts"));
+      await setDoc(alertRef, {
+        id: alertRef.id,
+        productId: product.id,
+        productName: product.name,
+        customerEmail: currentUserEmail,
+        customerName: currentUser,
+        status: "pending",
+        timestamp: new Date().toISOString()
+      });
+      showToast("Alert Set", `We will notify you when ${product.name} is back in stock!`, "success");
+      logActivity(`Requested stock alert for ${product.name}`, "user_action");
+    } catch (error) {
+      console.error("Error setting stock alert:", error);
+      showToast("Error", "Failed to set up alert. Please try again.", "error");
+    } finally {
+      setSiteLoading(false);
+    }
+  };
+
   const addToCart = (product: Product) => {
     setCart(prev => {
       const existing = prev.find(item => item.id === product.id);
@@ -1790,18 +1831,18 @@ export default function App() {
 
   const ProfessionalLogo = () => (
     <div className="flex items-center gap-2.5 group">
-      <div className="relative w-10 h-10 rounded-full flex items-center justify-center overflow-hidden shadow-md border border-neutral-200 transition-transform duration-300 group-hover:scale-105">
-        <img src="/src/assets/images/ellas_store_logo_1782860468627.jpg" alt="Ella's Store Logo" className="w-full h-full object-cover" />
+      <div className="relative w-10 h-10 rounded-full flex items-center justify-center overflow-hidden shadow-md border border-neutral-200 dark:border-slate-700 transition-transform duration-300 group-hover:scale-105">
+        <img src={Logo} alt="Ella's Store Logo" className="w-full h-full object-cover" />
       </div>
       <div className="text-left">
-        <span className="block font-sans text-sm font-black tracking-widest text-black uppercase group-hover:text-indigo-600 transition-colors">ELLA'S STORE</span>
-        <span className="block text-[8px] font-mono tracking-wider text-neutral-500 uppercase">COUTURE & ALTERATIONS</span>
+        <span className="block font-sans text-sm font-black tracking-widest text-black dark:text-white uppercase group-hover:text-indigo-600 transition-colors">ELLA'S STORE</span>
+        <span className="block text-[8px] font-mono tracking-wider text-neutral-500 dark:text-slate-400 uppercase">COUTURE & ALTERATIONS</span>
       </div>
     </div>
   );
 
   return (
-    <div className="min-h-screen bg-neutral-50 text-black select-none antialiased flex flex-col font-sans">
+    <div className="min-h-screen bg-neutral-50 dark:bg-slate-950 text-black dark:text-white select-none antialiased flex flex-col font-sans">
       
       {/* Toast Notification Container */}
       <div className="fixed top-6 right-6 z-50 flex flex-col gap-3 max-w-sm w-full">
@@ -1809,18 +1850,18 @@ export default function App() {
           <div
             key={t.id}
             className={`p-4 rounded-3xl shadow-xl flex justify-between items-start border animate-in slide-in-from-right duration-250 ${
-              t.type === 'success' ? 'bg-white border-emerald-200 text-emerald-800' :
-              t.type === 'error' ? 'bg-white border-rose-200 text-rose-800' :
-              'bg-white border-indigo-200 text-indigo-800'
+              t.type === 'success' ? 'bg-white dark:bg-slate-900 border-emerald-200 text-emerald-800' :
+              t.type === 'error' ? 'bg-white dark:bg-slate-900 border-rose-200 text-rose-800' :
+              'bg-white dark:bg-slate-900 border-indigo-200 text-indigo-800'
             }`}
           >
             <div className="space-y-1">
               <h5 className="font-bold text-xs tracking-wide uppercase">{t.title}</h5>
-              <p className="text-xs leading-relaxed text-neutral-700">{t.message}</p>
+              <p className="text-xs leading-relaxed text-neutral-700 dark:text-slate-300">{t.message}</p>
             </div>
             <button 
               onClick={() => setToasts(prev => prev.filter(item => item.id !== t.id))}
-              className="text-neutral-400 hover:text-black transition-colors ml-3.5 shrink-0 cursor-pointer"
+              className="text-neutral-400 hover:text-black dark:text-white transition-colors ml-3.5 shrink-0 cursor-pointer"
             >
               <X className="w-4 h-4" />
             </button>
@@ -1833,8 +1874,8 @@ export default function App() {
         <div className="fixed inset-0 bg-slate-950/85 backdrop-blur-md z-50 flex items-center justify-center p-4">
           <form onSubmit={handleClientLogin} className="bg-slate-900 rounded-3xl p-8 max-w-md w-full shadow-2xl border border-slate-800 space-y-6 text-center animate-in zoom-in-95 duration-300">
             <div className="space-y-1">
-              <div className="w-14 h-14 rounded-2xl bg-amber-500 text-neutral-900 flex items-center justify-center font-sans font-black text-2xl mx-auto shadow-md">
-                E
+              <div className="w-14 h-14 rounded-2xl overflow-hidden flex items-center justify-center mx-auto shadow-md border border-amber-500/30">
+                <img src={Logo} alt="Logo" className="w-full h-full object-cover" />
               </div>
               <h2 className="font-sans text-2xl text-slate-100 font-bold pt-3 tracking-tight">Welcome to Ella's</h2>
               <p className="text-xs text-slate-400">Ashaiman's premium fashion, dressmaking & styling showroom</p>
@@ -1956,7 +1997,7 @@ export default function App() {
 
             <button
               type="submit"
-              className="w-full bg-amber-500 hover:bg-amber-400 text-neutral-900 py-3.5 rounded-xl text-xs font-black tracking-wider transition-all shadow-lg uppercase cursor-pointer"
+              className="w-full bg-amber-500 hover:bg-amber-400 text-neutral-900 dark:text-slate-100 py-3.5 rounded-xl text-xs font-black tracking-wider transition-all shadow-lg uppercase cursor-pointer"
             >
               Sign In
             </button>
@@ -1970,7 +2011,7 @@ export default function App() {
             <button
               type="button"
               onClick={handleGoogleLogin}
-              className="w-full bg-white hover:bg-neutral-100 text-neutral-900 py-3.5 rounded-xl text-xs font-bold tracking-wider transition-all shadow-md flex items-center justify-center gap-2 cursor-pointer border border-neutral-200"
+              className="w-full bg-white dark:bg-slate-900 hover:bg-neutral-100 dark:bg-slate-800 text-neutral-900 dark:text-slate-100 py-3.5 rounded-xl text-xs font-bold tracking-wider transition-all shadow-md flex items-center justify-center gap-2 cursor-pointer border border-neutral-200 dark:border-slate-700"
             >
               <svg className="w-4 h-4" viewBox="0 0 24 24">
                 <path
@@ -2035,7 +2076,7 @@ export default function App() {
             <button
               type="button"
               onClick={handleGoogleAdminAuth}
-              className="w-full bg-white hover:bg-neutral-100 text-neutral-900 py-2.5 rounded-xl text-xs font-bold transition-all shadow-md flex items-center justify-center gap-2 cursor-pointer border border-neutral-200"
+              className="w-full bg-white dark:bg-slate-900 hover:bg-neutral-100 dark:bg-slate-800 text-neutral-900 dark:text-slate-100 py-2.5 rounded-xl text-xs font-bold transition-all shadow-md flex items-center justify-center gap-2 cursor-pointer border border-neutral-200 dark:border-slate-700"
             >
               <svg className="w-3.5 h-3.5" viewBox="0 0 24 24">
                 <path
@@ -2079,9 +2120,12 @@ export default function App() {
     </AnimatePresence>
 
     {/* HEADER NAV */}
-      <nav className="sticky top-0 bg-white/90 backdrop-blur-md border-b border-neutral-100 z-30 transition-all duration-300 shadow-sm px-6 py-4">
+      <nav className="sticky top-0 bg-white/90 backdrop-blur-md border-b border-neutral-100 dark:border-slate-800 z-30 transition-all duration-300 shadow-sm px-6 py-4">
         <div className="max-w-7xl mx-auto flex flex-col gap-4">
           <div className="flex items-center justify-between gap-4 w-full">
+            <div className="hidden md:block">
+              <ProfessionalLogo />
+            </div>
             <div className="flex-1 max-w-lg flex items-center gap-2">
               <div className="relative flex-1">
                 <input 
@@ -2095,13 +2139,13 @@ export default function App() {
                       logActivity(`Searched for "${searchQuery}" in search dialog`, "user_action");
                     }
                   }}
-                  className="w-full pl-4 pr-10 py-2 rounded-full border border-neutral-200 text-xs focus:outline-none focus:ring-2 focus:ring-indigo-500 bg-white"
+                  className="w-full pl-4 pr-10 py-2 rounded-full border border-neutral-200 dark:border-slate-700 text-xs focus:outline-none focus:ring-2 focus:ring-indigo-500 bg-white dark:bg-slate-900"
                 />
                 <Search className="absolute right-3.5 top-2.5 w-3.5 h-3.5 text-neutral-400 pointer-events-none" />
 
                 {/* Live Suggestions Dropdown */}
                 {searchQuery.trim() && (
-                  <div className="absolute top-full left-0 right-0 mt-2 bg-white/95 backdrop-blur-md rounded-2xl shadow-2xl border border-neutral-150 z-50 max-h-80 overflow-y-auto divide-y divide-neutral-100 animate-in fade-in slide-in-from-top-2 duration-200">
+                  <div className="absolute top-full left-0 right-0 mt-2 bg-white/95 backdrop-blur-md rounded-2xl shadow-2xl border border-neutral-150 dark:border-slate-800 z-50 max-h-80 overflow-y-auto divide-y divide-neutral-100 animate-in fade-in slide-in-from-top-2 duration-200">
                     {/* Products suggestions */}
                     {filteredProducts.length > 0 && (
                       <div className="p-3 text-left">
@@ -2117,15 +2161,15 @@ export default function App() {
                                 setSearchQuery(""); // Close dropdown cleanly on select
                                 logActivity(`Clicked matching suggestion "${prod.name}" in dropdown`, "user_action");
                               }}
-                              className="flex items-center gap-2.5 p-2 rounded-xl hover:bg-neutral-50 transition-colors cursor-pointer"
+                              className="flex items-center gap-2.5 p-2 rounded-xl hover:bg-neutral-50 dark:bg-slate-950 transition-colors cursor-pointer"
                             >
                               <img
                                 src={prod.image}
                                 alt={prod.name}
-                                className="w-8 h-8 rounded-lg object-cover bg-neutral-100"
+                                className="w-8 h-8 rounded-lg object-cover bg-neutral-100 dark:bg-slate-800"
                               />
                               <div className="flex-1 min-w-0">
-                                <h4 className="text-[11px] font-bold text-neutral-800 truncate leading-tight uppercase">
+                                <h4 className="text-[11px] font-bold text-neutral-800 dark:text-slate-200 truncate leading-tight uppercase">
                                   {prod.name}
                                 </h4>
                                 <span className="text-[9px] font-mono text-neutral-400">
@@ -2157,10 +2201,10 @@ export default function App() {
                             >
                               <span className="text-sm shrink-0">{feat.icon}</span>
                               <div className="flex-1 min-w-0">
-                                <h4 className="text-[11px] font-bold text-neutral-800 truncate leading-none uppercase">
+                                <h4 className="text-[11px] font-bold text-neutral-800 dark:text-slate-200 truncate leading-none uppercase">
                                   {feat.name}
                                 </h4>
-                                <p className="text-[9px] text-neutral-500 truncate mt-0.5 font-medium leading-none">
+                                <p className="text-[9px] text-neutral-500 dark:text-slate-400 truncate mt-0.5 font-medium leading-none">
                                   {feat.description}
                                 </p>
                               </div>
@@ -2195,7 +2239,7 @@ export default function App() {
                   setShowOrderHistory(true);
                   logActivity("Opened customer order history panel via profile chip", "user_action");
                 }}
-                className="flex items-center gap-2 text-xs text-neutral-700 font-medium bg-neutral-100 pl-1.5 pr-3.5 py-1.5 rounded-full border border-neutral-200 shrink-0 cursor-pointer hover:bg-neutral-200/80 transition-colors"
+                className="flex items-center gap-2 text-xs text-neutral-700 dark:text-slate-300 font-medium bg-neutral-100 dark:bg-slate-800 pl-1.5 pr-3.5 py-1.5 rounded-full border border-neutral-200 dark:border-slate-700 shrink-0 cursor-pointer hover:bg-neutral-200/80 transition-colors"
                 title="View Style Profile & Dashboard"
               >
                 {currentUserAvatar ? (
@@ -2210,12 +2254,12 @@ export default function App() {
 
           <div className="flex justify-between items-center w-full">
             <div className="flex items-center gap-4">
-              <a href="#" className="font-sans text-xl tracking-tight text-neutral-900 transition-colors font-bold">
+              <a href="#" className="font-sans text-xl tracking-tight text-neutral-900 dark:text-slate-100 transition-colors font-bold">
                 <span className="text-indigo-600">Ella's</span> Store
               </a>
             </div>
 
-          <div className="hidden lg:flex items-center gap-6 text-xs font-medium tracking-wide uppercase text-neutral-600">
+          <div className="hidden lg:flex items-center gap-6 text-xs font-medium tracking-wide uppercase text-neutral-600 dark:text-slate-400">
             <a href="#collections" className="hover:text-indigo-600 transition-colors">Collections</a>
             <a href="#about" className="hover:text-indigo-600 transition-colors">About</a>
             <a href="#process" className="hover:text-indigo-600 transition-colors">Services</a>
@@ -2238,7 +2282,7 @@ export default function App() {
             </button>
             <button 
               onClick={() => setShowMedia(true)}
-              className="text-neutral-900 hover:text-indigo-600 transition-colors uppercase tracking-wide text-xs font-medium cursor-pointer"
+              className="text-neutral-900 dark:text-slate-100 hover:text-indigo-600 transition-colors uppercase tracking-wide text-xs font-medium cursor-pointer"
             >
               Gallery
             </button>
@@ -2261,18 +2305,24 @@ export default function App() {
             {isLoggedIn && (
                 <button
                   onClick={handleLogout}
-                  className="text-neutral-500 hover:text-rose-600 text-[10px] font-bold tracking-widest uppercase cursor-pointer"
+                  className="text-neutral-500 dark:text-slate-400 hover:text-rose-600 text-[10px] font-bold tracking-widest uppercase cursor-pointer"
                 >
                   Logout
                 </button>
             )}
             
+                        <button
+              onClick={() => setIsDarkMode(!isDarkMode)}
+              className="w-9 h-9 rounded-full border border-neutral-200 dark:border-slate-700 flex items-center justify-center text-neutral-600 dark:text-slate-400 hover:border-indigo-500 hover:text-indigo-600 bg-white dark:bg-slate-900 transition-colors cursor-pointer"
+            >
+              {isDarkMode ? <Sun className="w-4 h-4" /> : <Moon className="w-4 h-4" />}
+            </button>
             <button
               onClick={() => {
                 setShowNotifications(true);
                 logActivity("Opened customer notifications panel", "user_action");
               }}
-              className="w-9 h-9 rounded-full border border-neutral-200 flex items-center justify-center text-neutral-600 hover:border-indigo-500 hover:text-indigo-600 bg-white transition-colors cursor-pointer"
+              className="w-9 h-9 rounded-full border border-neutral-200 dark:border-slate-700 flex items-center justify-center text-neutral-600 dark:text-slate-400 hover:border-indigo-500 hover:text-indigo-600 bg-white dark:bg-slate-900 transition-colors cursor-pointer"
             >
               <Bell className="w-4 h-4" />
             </button>
@@ -2285,7 +2335,7 @@ export default function App() {
                 }
                 setShowCheckout(true);
               }}
-              className="relative w-9 h-9 rounded-full border border-neutral-200 flex items-center justify-center text-neutral-600 hover:border-indigo-500 hover:text-indigo-600 bg-white transition-colors cursor-pointer"
+              className="relative w-9 h-9 rounded-full border border-neutral-200 dark:border-slate-700 flex items-center justify-center text-neutral-600 dark:text-slate-400 hover:border-indigo-500 hover:text-indigo-600 bg-white dark:bg-slate-900 transition-colors cursor-pointer"
             >
               <ShoppingBag className="w-4 h-4" />
               {cart.length > 0 && (
@@ -2299,7 +2349,7 @@ export default function App() {
                 setShowMobileMenu(!showMobileMenu);
                 logActivity("Opened customer navigation menu", "user_action");
               }}
-              className="lg:hidden w-9 h-9 rounded-full border border-neutral-200 flex items-center justify-center text-neutral-600 hover:border-indigo-500 hover:text-indigo-600 bg-white transition-colors cursor-pointer"
+              className="lg:hidden w-9 h-9 rounded-full border border-neutral-200 dark:border-slate-700 flex items-center justify-center text-neutral-600 dark:text-slate-400 hover:border-indigo-500 hover:text-indigo-600 bg-white dark:bg-slate-900 transition-colors cursor-pointer"
             >
               <Menu className="w-4 h-4" />
             </button>
@@ -2313,7 +2363,7 @@ export default function App() {
         <div className="fixed inset-0 bg-white/95 backdrop-blur-md z-45 flex flex-col justify-center items-center p-6 lg:hidden animate-in fade-in duration-300">
           <button 
             onClick={() => setShowMobileMenu(false)}
-            className="absolute top-6 right-6 w-12 h-12 rounded-full bg-neutral-100 border border-neutral-200 flex items-center justify-center text-neutral-800 hover:text-black cursor-pointer"
+            className="absolute top-6 right-6 w-12 h-12 rounded-full bg-neutral-100 dark:bg-slate-800 border border-neutral-200 dark:border-slate-700 flex items-center justify-center text-neutral-800 dark:text-slate-200 hover:text-black dark:text-white cursor-pointer"
             title="Close Menu"
           >
             <X className="w-5 h-5" />
@@ -2325,13 +2375,13 @@ export default function App() {
             }}
             initial="hidden"
             animate="visible"
-            className="flex flex-col gap-4 text-center text-xl font-bold tracking-wider uppercase text-neutral-800 w-full max-w-sm"
+            className="flex flex-col gap-4 text-center text-xl font-bold tracking-wider uppercase text-neutral-800 dark:text-slate-200 w-full max-w-sm"
           >
             <motion.a 
               variants={{ hidden: { opacity: 0, y: 10 }, visible: { opacity: 1, y: 0 } }}
               href="#collections" 
               onClick={() => setShowMobileMenu(false)}
-              className="group flex items-center justify-between py-4 px-6 rounded-2xl hover:bg-neutral-50 transition-all text-neutral-900"
+              className="group flex items-center justify-between py-4 px-6 rounded-2xl hover:bg-neutral-50 dark:bg-slate-950 transition-all text-neutral-900 dark:text-slate-100"
             >
               <span className="text-lg font-medium tracking-tight">Collections</span>
               <span className="text-neutral-300 group-hover:text-indigo-600 transition-colors">→</span>
@@ -2340,7 +2390,7 @@ export default function App() {
               variants={{ hidden: { opacity: 0, y: 10 }, visible: { opacity: 1, y: 0 } }}
               href="#about" 
               onClick={() => setShowMobileMenu(false)}
-              className="group flex items-center justify-between py-4 px-6 rounded-2xl hover:bg-neutral-50 transition-all text-neutral-900"
+              className="group flex items-center justify-between py-4 px-6 rounded-2xl hover:bg-neutral-50 dark:bg-slate-950 transition-all text-neutral-900 dark:text-slate-100"
             >
               <span className="text-lg font-medium tracking-tight">About</span>
               <span className="text-neutral-300 group-hover:text-indigo-600 transition-colors">→</span>
@@ -2349,7 +2399,7 @@ export default function App() {
               variants={{ hidden: { opacity: 0, y: 10 }, visible: { opacity: 1, y: 0 } }}
               href="#process" 
               onClick={() => setShowMobileMenu(false)}
-              className="group flex items-center justify-between py-4 px-6 rounded-2xl hover:bg-neutral-50 transition-all text-neutral-900"
+              className="group flex items-center justify-between py-4 px-6 rounded-2xl hover:bg-neutral-50 dark:bg-slate-950 transition-all text-neutral-900 dark:text-slate-100"
             >
               <span className="text-lg font-medium tracking-tight">Services</span>
               <span className="text-neutral-300 group-hover:text-indigo-600 transition-colors">→</span>
@@ -2358,7 +2408,7 @@ export default function App() {
               variants={{ hidden: { opacity: 0, y: 10 }, visible: { opacity: 1, y: 0 } }}
               href="#events" 
               onClick={() => setShowMobileMenu(false)}
-              className="group flex items-center justify-between py-4 px-6 rounded-2xl hover:bg-neutral-50 transition-all text-neutral-900"
+              className="group flex items-center justify-between py-4 px-6 rounded-2xl hover:bg-neutral-50 dark:bg-slate-950 transition-all text-neutral-900 dark:text-slate-100"
             >
               <span className="text-lg font-medium tracking-tight">Events</span>
               <span className="text-neutral-300 group-hover:text-indigo-600 transition-colors">→</span>
@@ -2367,7 +2417,7 @@ export default function App() {
               variants={{ hidden: { opacity: 0, y: 10 }, visible: { opacity: 1, y: 0 } }}
               href="#shop" 
               onClick={() => setShowMobileMenu(false)}
-              className="group flex items-center justify-between py-4 px-6 rounded-2xl hover:bg-neutral-50 transition-all text-neutral-900"
+              className="group flex items-center justify-between py-4 px-6 rounded-2xl hover:bg-neutral-50 dark:bg-slate-950 transition-all text-neutral-900 dark:text-slate-100"
             >
               <span className="text-lg font-medium tracking-tight">Shop</span>
               <span className="text-neutral-300 group-hover:text-indigo-600 transition-colors">→</span>
@@ -2383,7 +2433,7 @@ export default function App() {
                   showToast("Sign In Required", "Please sign in to view your personalized chart history & payments.", "info");
                 }
               }}
-              className="group flex items-center justify-between py-4 px-6 rounded-2xl hover:bg-neutral-50 transition-all text-neutral-900 w-full"
+              className="group flex items-center justify-between py-4 px-6 rounded-2xl hover:bg-neutral-50 dark:bg-slate-950 transition-all text-neutral-900 dark:text-slate-100 w-full"
               id="mobile-chart-history-btn"
             >
               <div className="flex items-center gap-3">
@@ -2423,10 +2473,10 @@ export default function App() {
                 setShowMobileMenu(false);
                 document.getElementById('contact')?.scrollIntoView({ behavior: 'smooth' });
               }}
-              className="group flex items-center justify-between py-4 px-6 rounded-2xl hover:bg-neutral-50 transition-all text-neutral-900 w-full"
+              className="group flex items-center justify-between py-4 px-6 rounded-2xl hover:bg-neutral-50 dark:bg-slate-950 transition-all text-neutral-900 dark:text-slate-100 w-full"
             >
               <div className="flex items-center gap-3">
-                <Mail className="w-5 h-5 text-neutral-500" />
+                <Mail className="w-5 h-5 text-neutral-500 dark:text-slate-400" />
                 <span className="text-lg font-medium tracking-tight">Contact</span>
               </div>
               <span className="text-neutral-300 group-hover:text-indigo-600 transition-colors">→</span>
@@ -2437,7 +2487,7 @@ export default function App() {
                 setShowReviewModal(true);
                 logActivity("Opened showroom review modal", "user_action");
               }}
-              className="group flex items-center justify-between py-4 px-6 rounded-2xl hover:bg-neutral-50 transition-all text-neutral-900 w-full"
+              className="group flex items-center justify-between py-4 px-6 rounded-2xl hover:bg-neutral-50 dark:bg-slate-950 transition-all text-neutral-900 dark:text-slate-100 w-full"
               id="mobile-reviews-btn"
             >
               <div className="flex items-center gap-3">
@@ -2460,7 +2510,7 @@ export default function App() {
       )}
 
       {/* HERO CANVAS WITH ANIMATED BACKGROUND AND PROFESSIONAL LOGO */}
-      <section className="h-[85vh] flex items-center justify-center relative overflow-hidden text-black bg-neutral-50 border-b border-neutral-100">
+      <section className="h-[85vh] flex items-center justify-center relative overflow-hidden text-black dark:text-white bg-neutral-50 dark:bg-slate-950 border-b border-neutral-100 dark:border-slate-800">
         
         {/* Underlay: Animated Zoom/Scale Hero Background Image */}
         <motion.div 
@@ -2622,7 +2672,7 @@ export default function App() {
             
             {/* Logo Circular Frame with Gold Ring */}
             <div className="relative w-28 h-28 md:w-32 md:h-32 rounded-full flex items-center justify-center p-1 bg-gradient-to-tr from-amber-400 via-pink-400 to-indigo-500 shadow-xl">
-              <div className="absolute inset-0.5 rounded-full bg-white flex items-center justify-center overflow-hidden">
+              <div className="absolute inset-0.5 rounded-full bg-white dark:bg-slate-900 flex items-center justify-center overflow-hidden">
                 <img 
                   src={Logo} 
                   alt="Ella's Store Logo" 
@@ -2641,7 +2691,7 @@ export default function App() {
             <div className="text-center space-y-1">
               <div className="flex items-center justify-center gap-1.5">
                 <Ribbon className="w-3.5 h-3.5 text-amber-500 animate-bounce" />
-                <h2 className="font-sans text-lg font-black tracking-[0.2em] text-neutral-900 uppercase flex items-center gap-1">
+                <h2 className="font-sans text-lg font-black tracking-[0.2em] text-neutral-900 dark:text-slate-100 uppercase flex items-center gap-1">
                   ELLA'S <span>🎗</span> STORE
                 </h2>
                 <Ribbon className="w-3.5 h-3.5 text-amber-500 animate-bounce" />
@@ -2649,7 +2699,7 @@ export default function App() {
               <p className="text-[9px] font-mono tracking-widest text-indigo-600 font-bold uppercase">COUTURE & LUXURY ALTERATIONS</p>
               <div className="flex items-center justify-center gap-1.5 pt-1">
                 <span className="w-1.5 h-1.5 rounded-full bg-emerald-500 animate-ping" />
-                <span className="text-[8px] font-sans font-bold text-neutral-500 uppercase tracking-wider">Premium Ashaiman Showroom</span>
+                <span className="text-[8px] font-sans font-bold text-neutral-500 dark:text-slate-400 uppercase tracking-wider">Premium Ashaiman Showroom</span>
               </div>
             </div>
           </motion.div>
@@ -2659,10 +2709,10 @@ export default function App() {
             <span className="bg-indigo-50 text-indigo-600 text-[10px] px-4 py-2 rounded-full font-black tracking-widest font-mono uppercase shadow-sm border border-indigo-100">
               Operational Showroom Live
             </span>
-            <h1 className="font-sans text-4xl md:text-5xl lg:text-6xl tracking-tight uppercase font-black text-black leading-none drop-shadow-sm">
+            <h1 className="font-sans text-4xl md:text-5xl lg:text-6xl tracking-tight uppercase font-black text-black dark:text-white leading-none drop-shadow-sm">
               {homepageSettings.heroTitle}
             </h1>
-            <p className="text-xs md:text-sm font-sans tracking-wide text-neutral-800 max-w-lg mx-auto leading-relaxed">
+            <p className="text-xs md:text-sm font-sans tracking-wide text-neutral-800 dark:text-slate-200 max-w-lg mx-auto leading-relaxed">
               {homepageSettings.heroDescription}
             </p>
           </div>
@@ -2682,7 +2732,7 @@ export default function App() {
       {/* COLLECTIONS GRID */}
       <section id="collections" className="py-20 px-6 max-w-7xl mx-auto w-full space-y-12">
         <div className="text-center space-y-2">
-          <h2 className="font-sans text-3xl md:text-4xl text-black font-bold tracking-tight">Our Premium Collections</h2>
+          <h2 className="font-sans text-3xl md:text-4xl text-black dark:text-white font-bold tracking-tight">Our Premium Collections</h2>
           <p className="text-xs text-indigo-600 font-mono tracking-widest uppercase font-bold">Systemized Elegance & Trends</p>
         </div>
 
@@ -2692,11 +2742,11 @@ export default function App() {
             { title: "Day Dress Comfort", desc: "Light Ankara wax prints and tailored daily skater wears", img: "https://images.unsplash.com/photo-1595777457583-95e059d581b8?w=600", gridClass: "md:col-span-1" },
             { title: "Occasion Ceremony", desc: "Bespoke kente dress fittings for special wedding guests", img: "https://images.unsplash.com/photo-1515372039744-b8f02a3ae446?w=600", gridClass: "md:col-span-1" },
           ].map((col, idx) => (
-            <div key={idx} className={`${col.gridClass} group relative rounded-3xl overflow-hidden aspect-[4/5] shadow-sm border border-neutral-200 bg-white cursor-pointer`}>
+            <div key={idx} className={`${col.gridClass} group relative rounded-3xl overflow-hidden aspect-[4/5] shadow-sm border border-neutral-200 dark:border-slate-700 bg-white dark:bg-slate-900 cursor-pointer`}>
               <img src={col.img} alt={col.title} className="w-full h-full object-cover transition-transform duration-700 group-hover:scale-105 opacity-90 group-hover:opacity-100" />
               <div className="absolute inset-0 bg-gradient-to-t from-white via-white/50 to-transparent flex flex-col justify-end p-6 space-y-1.5 transition-opacity">
-                <h3 className="font-sans text-xl text-black font-bold">{col.title}</h3>
-                <p className="text-neutral-800 text-xs leading-relaxed font-semibold">{col.desc}</p>
+                <h3 className="font-sans text-xl text-black dark:text-white font-bold">{col.title}</h3>
+                <p className="text-neutral-800 dark:text-slate-200 text-xs leading-relaxed font-semibold">{col.desc}</p>
                 <a href="#shop" className="text-xs text-indigo-600 font-bold uppercase tracking-widest pt-2 flex items-center gap-1 group-hover:text-indigo-500">
                   Shop styles &rarr;
                 </a>
@@ -2707,14 +2757,14 @@ export default function App() {
       </section>
 
       {/* ABOUT TIMELINE */}
-      <section id="about" className="py-20 px-6 bg-neutral-100/65 border-t border-b border-neutral-200">
+      <section id="about" className="py-20 px-6 bg-neutral-100/65 border-t border-b border-neutral-200 dark:border-slate-700">
         <div className="max-w-7xl mx-auto grid grid-cols-1 lg:grid-cols-2 gap-12 items-center">
           <div className="space-y-6">
-            <h2 className="font-sans text-3xl md:text-4xl text-black font-bold tracking-tight">Bespoke Heritage Since 2021</h2>
-            <p className="text-neutral-700 text-sm leading-relaxed">
+            <h2 className="font-sans text-3xl md:text-4xl text-black dark:text-white font-bold tracking-tight">Bespoke Heritage Since 2021</h2>
+            <p className="text-neutral-700 dark:text-slate-300 text-sm leading-relaxed">
               Located in the heart of Ashaiman, Accra, Ella's Store has emerged as a beloved showroom for traditional Ghanaian dressmaking and retail styles. Over five years of tailoring expertise, we deliver stunning couture collections blending vibrant Ankara prints and delicate laces.
             </p>
-            <blockquote className="border-l-4 border-indigo-600 bg-white p-6 rounded-r-3xl italic font-sans text-neutral-800 text-base leading-relaxed border border-neutral-200 shadow-sm">
+            <blockquote className="border-l-4 border-indigo-600 bg-white dark:bg-slate-900 p-6 rounded-r-3xl italic font-sans text-neutral-800 dark:text-slate-200 text-base leading-relaxed border border-neutral-200 dark:border-slate-700 shadow-sm">
               "We believe fashion is a profound language of self-expression. Every design at Ella's is engineered to highlight your heritage, silhouette, and unique confidence."
             </blockquote>
             <p className="font-mono text-xs font-bold text-indigo-600 uppercase tracking-widest">- Ella, Showroom Tailoring Director</p>
@@ -2728,7 +2778,7 @@ export default function App() {
       {/* SERVICE DESK */}
       <section id="process" className="py-20 px-6 max-w-7xl mx-auto w-full space-y-12">
         <div className="text-center space-y-2">
-          <h2 className="font-sans text-3xl md:text-4xl text-black font-bold tracking-tight">Professional Showroom Services</h2>
+          <h2 className="font-sans text-3xl md:text-4xl text-black dark:text-white font-bold tracking-tight">Professional Showroom Services</h2>
           <p className="text-xs text-indigo-600 font-mono tracking-widest uppercase font-bold">Bento Tailoring Desk</p>
         </div>
 
@@ -2739,11 +2789,11 @@ export default function App() {
             { step: "03", title: "Alterations & Hemming", desc: "Premium suit/dress alterations, tapers, and tapering with professional finishes." },
             { step: "04", title: "Accra Logistics Delivery", desc: "Express delivery routed straight to your doorstep throughout greater Accra." },
           ].map((srv, idx) => (
-            <div key={idx} className="bg-white p-6 rounded-3xl border border-neutral-200 flex flex-col justify-between hover:border-indigo-500/40 transition-colors shadow-sm">
+            <div key={idx} className="bg-white dark:bg-slate-900 p-6 rounded-3xl border border-neutral-200 dark:border-slate-700 flex flex-col justify-between hover:border-indigo-500/40 transition-colors shadow-sm">
               <span className="font-mono text-3xl font-extrabold text-indigo-600 mb-4">{srv.step}</span>
               <div className="space-y-1.5">
-                <h4 className="font-sans text-base text-black font-bold">{srv.title}</h4>
-                <p className="text-neutral-600 text-xs leading-relaxed font-medium">{srv.desc}</p>
+                <h4 className="font-sans text-base text-black dark:text-white font-bold">{srv.title}</h4>
+                <p className="text-neutral-600 dark:text-slate-400 text-xs leading-relaxed font-medium">{srv.desc}</p>
               </div>
             </div>
           ))}
@@ -2753,15 +2803,15 @@ export default function App() {
       {/* EVENTS SECTION */}
       <section id="events" className="py-20 px-6 max-w-7xl mx-auto w-full space-y-12">
         <div className="text-center space-y-2">
-          <h2 className="font-sans text-3xl md:text-4xl text-black font-bold tracking-tight">Showroom Events & Launches</h2>
+          <h2 className="font-sans text-3xl md:text-4xl text-black dark:text-white font-bold tracking-tight">Showroom Events & Launches</h2>
           <p className="text-xs text-indigo-600 font-mono tracking-widest uppercase font-bold">Vibrant runway presentations, design exhibitions & Accra pop-ups</p>
         </div>
 
         {events.length === 0 ? (
-          <div className="bg-neutral-50 border border-neutral-200/60 rounded-3xl p-12 text-center max-w-xl mx-auto">
+          <div className="bg-neutral-50 dark:bg-slate-950 border border-neutral-200/60 rounded-3xl p-12 text-center max-w-xl mx-auto">
             <span className="text-4xl">🗓️</span>
-            <h3 className="font-sans text-lg font-bold text-black mt-4">No Active Schedules</h3>
-            <p className="text-neutral-500 text-xs mt-1.5 leading-relaxed">
+            <h3 className="font-sans text-lg font-bold text-black dark:text-white mt-4">No Active Schedules</h3>
+            <p className="text-neutral-500 dark:text-slate-400 text-xs mt-1.5 leading-relaxed">
               We are currently designing our next seasonal collection lines in the Ashaiman showroom. Please join our SMS updates for future events!
             </p>
           </div>
@@ -2772,10 +2822,10 @@ export default function App() {
                 key={evt.id}
                 whileHover={{ y: -6 }}
                 transition={{ duration: 0.3 }}
-                className="bg-white border border-neutral-250/60 rounded-3xl overflow-hidden shadow-sm flex flex-col justify-between"
+                className="bg-white dark:bg-slate-900 border border-neutral-250/60 rounded-3xl overflow-hidden shadow-sm flex flex-col justify-between"
               >
                 <div>
-                  <div className="relative h-56 bg-neutral-100 overflow-hidden">
+                  <div className="relative h-56 bg-neutral-100 dark:bg-slate-800 overflow-hidden">
                     <img
                       src={evt.imageUrl || "https://images.unsplash.com/photo-1511578314322-379afb476865?w=800"}
                       alt={evt.title}
@@ -2786,7 +2836,7 @@ export default function App() {
                       <span className={`px-3 py-1.5 rounded-full text-[10px] font-black tracking-wider uppercase border shadow ${
                         evt.status === 'upcoming' ? 'bg-emerald-100 text-emerald-800 border-emerald-200/50' :
                         evt.status === 'ongoing' ? 'bg-indigo-600 text-white border-indigo-500/30 animate-pulse' :
-                        'bg-neutral-200 text-neutral-600 border-neutral-300'
+                        'bg-neutral-200 text-neutral-600 dark:text-slate-400 border-neutral-300'
                       }`}>
                         {evt.status === 'upcoming' ? 'Upcoming' : evt.status === 'ongoing' ? 'Ongoing' : 'Past'}
                       </span>
@@ -2794,10 +2844,10 @@ export default function App() {
                   </div>
 
                   <div className="p-6 space-y-3">
-                    <h3 className="font-sans text-lg text-black font-extrabold tracking-tight leading-snug">{evt.title}</h3>
-                    <p className="text-neutral-600 text-xs leading-relaxed font-medium line-clamp-3">{evt.description}</p>
+                    <h3 className="font-sans text-lg text-black dark:text-white font-extrabold tracking-tight leading-snug">{evt.title}</h3>
+                    <p className="text-neutral-600 dark:text-slate-400 text-xs leading-relaxed font-medium line-clamp-3">{evt.description}</p>
                     
-                    <div className="space-y-2 pt-3 text-xs text-neutral-500 font-bold border-t border-neutral-100">
+                    <div className="space-y-2 pt-3 text-xs text-neutral-500 dark:text-slate-400 font-bold border-t border-neutral-100 dark:border-slate-800">
                       <div className="flex items-center gap-2">
                         <span className="text-indigo-600">📅</span>
                         <span>{evt.date} {evt.time ? `at ${evt.time}` : ""}</span>
@@ -2810,7 +2860,7 @@ export default function App() {
                   </div>
                 </div>
 
-                <div className="p-6 bg-neutral-50/50 border-t border-neutral-100">
+                <div className="p-6 bg-neutral-50/50 border-t border-neutral-100 dark:border-slate-800">
                   {evt.status === 'past' ? (
                     <button
                       disabled
@@ -2846,15 +2896,15 @@ export default function App() {
       </section>
 
       {/* SHOP SECTION */}
-      <section id="shop" className="py-20 px-6 bg-neutral-100/40 border-t border-b border-neutral-200">
+      <section id="shop" className="py-20 px-6 bg-neutral-100/40 border-t border-b border-neutral-200 dark:border-slate-700">
         <div className="max-w-7xl mx-auto w-full space-y-12">
           <div className="text-center space-y-2">
-            <h2 className="font-sans text-3xl md:text-4xl text-black font-bold tracking-tight">Boutique Catalog Shelf</h2>
+            <h2 className="font-sans text-3xl md:text-4xl text-black dark:text-white font-bold tracking-tight">Boutique Catalog Shelf</h2>
             <p className="text-xs text-indigo-600 font-mono tracking-widest uppercase font-bold">Select & Checkout securely with MoMo or Google Pay</p>
           </div>
 
           {/* Category Navigation Tabs */}
-          <div className="flex flex-wrap justify-center items-center gap-2.5 max-w-4xl mx-auto border-b border-neutral-200 pb-8">
+          <div className="flex flex-wrap justify-center items-center gap-2.5 max-w-4xl mx-auto border-b border-neutral-200 dark:border-slate-700 pb-8">
             {[
               { id: 'all', label: 'All Listings' },
               { id: 'dresses', label: 'Evening Couture' },
@@ -2869,7 +2919,7 @@ export default function App() {
                 className={`px-5 py-2.5 rounded-full text-[10px] font-black tracking-widest uppercase transition-all duration-300 border cursor-pointer ${
                   activeCategory === cat.id
                     ? 'bg-indigo-600 text-white border-indigo-600 shadow-md scale-105'
-                    : 'bg-white text-neutral-600 border-neutral-200 hover:border-neutral-300 hover:text-neutral-900'
+                    : 'bg-white dark:bg-slate-900 text-neutral-600 dark:text-slate-400 border-neutral-200 dark:border-slate-700 hover:border-neutral-300 hover:text-neutral-900 dark:text-slate-100'
                 }`}
               >
                 {cat.label}
@@ -2882,10 +2932,10 @@ export default function App() {
             (activeCategory === 'all' || p.category === activeCategory) &&
             ((p.name || '').toLowerCase().includes((searchQuery || '').toLowerCase()) || (p.category || '').toLowerCase().includes((searchQuery || '').toLowerCase()))
           ).length === 0 ? (
-            <div className="text-center py-16 bg-white rounded-3xl border border-neutral-200 shadow-sm max-w-md mx-auto space-y-3 animate-in fade-in">
+            <div className="text-center py-16 bg-white dark:bg-slate-900 rounded-3xl border border-neutral-200 dark:border-slate-700 shadow-sm max-w-md mx-auto space-y-3 animate-in fade-in">
               <span className="text-4xl">🍽️</span>
-              <h4 className="font-sans text-base font-bold text-neutral-800">No Products Found</h4>
-              <p className="text-xs text-neutral-500 max-w-xs mx-auto leading-relaxed">
+              <h4 className="font-sans text-base font-bold text-neutral-800 dark:text-slate-200">No Products Found</h4>
+              <p className="text-xs text-neutral-500 dark:text-slate-400 max-w-xs mx-auto leading-relaxed">
                 Try a different search term or category.
               </p>
             </div>
@@ -2929,6 +2979,7 @@ export default function App() {
                     className="h-full"
                   >
                     <ProductCard
+                      onNotifyMe={handleNotifyMe}
                       product={prod}
                       allProducts={products}
                       onAddToCart={addToCart}
@@ -2969,53 +3020,53 @@ export default function App() {
       <section id="contact" className="py-20 px-6 max-w-7xl mx-auto w-full grid grid-cols-1 lg:grid-cols-2 gap-12">
         <div className="space-y-8">
           <div>
-            <h2 className="font-sans text-3xl md:text-4xl text-black font-bold tracking-tight">Consult Ella Directly</h2>
+            <h2 className="font-sans text-3xl md:text-4xl text-black dark:text-white font-bold tracking-tight">Consult Ella Directly</h2>
             <p className="text-xs text-indigo-600 font-mono tracking-widest uppercase mt-1 font-bold">Showroom phone and scheduling</p>
           </div>
 
           <div className="space-y-4">
-            <div className="bg-white p-5 rounded-3xl border border-neutral-200 flex items-center gap-4 shadow-sm">
+            <div className="bg-white dark:bg-slate-900 p-5 rounded-3xl border border-neutral-200 dark:border-slate-700 flex items-center gap-4 shadow-sm">
               <div className="w-10 h-10 bg-indigo-50 text-indigo-600 rounded-xl flex items-center justify-center border border-indigo-100">
                 <MapPin className="w-5 h-5" />
               </div>
               <div className="text-xs space-y-0.5">
-                <strong className="block text-black">Showroom Address</strong>
-                <span className="text-neutral-600 font-medium">Ashaiman Showroom, Accra, Ghana (Near Market)</span>
+                <strong className="block text-black dark:text-white">Showroom Address</strong>
+                <span className="text-neutral-600 dark:text-slate-400 font-medium">Ashaiman Showroom, Accra, Ghana (Near Market)</span>
               </div>
             </div>
 
-            <div className="bg-white p-5 rounded-3xl border border-neutral-200 flex items-center gap-4 shadow-sm">
+            <div className="bg-white dark:bg-slate-900 p-5 rounded-3xl border border-neutral-200 dark:border-slate-700 flex items-center gap-4 shadow-sm">
               <div className="w-10 h-10 bg-indigo-50 text-indigo-600 rounded-xl flex items-center justify-center border border-indigo-100">
                 <Phone className="w-5 h-5" />
               </div>
               <div className="text-xs space-y-0.5">
-                <strong className="block text-black">Direct Line</strong>
-                <span className="text-neutral-600 font-mono font-medium">0276747037 / +233 27 674 7037</span>
+                <strong className="block text-black dark:text-white">Direct Line</strong>
+                <span className="text-neutral-600 dark:text-slate-400 font-mono font-medium">0276747037 / +233 27 674 7037</span>
               </div>
             </div>
 
-            <div className="bg-white p-5 rounded-3xl border border-neutral-200 flex items-center gap-4 shadow-sm">
+            <div className="bg-white dark:bg-slate-900 p-5 rounded-3xl border border-neutral-200 dark:border-slate-700 flex items-center gap-4 shadow-sm">
               <div className="w-10 h-10 bg-indigo-50 text-indigo-600 rounded-xl flex items-center justify-center border border-indigo-100">
                 <Clock className="w-5 h-5" />
               </div>
               <div className="text-xs space-y-0.5">
-                <strong className="block text-black">Showroom Hours</strong>
-                <span className="text-neutral-600 font-medium">Mon - Sat: 8:00 AM - 8:00 PM &bull; Sun: Closed</span>
+                <strong className="block text-black dark:text-white">Showroom Hours</strong>
+                <span className="text-neutral-600 dark:text-slate-400 font-medium">Mon - Sat: 8:00 AM - 8:00 PM &bull; Sun: Closed</span>
               </div>
             </div>
           </div>
         </div>
 
         {/* Form Submission */}
-        <form onSubmit={handleInquirySubmit} className="bg-white p-6 rounded-3xl border border-neutral-200 shadow-sm space-y-4">
-          <h3 className="font-sans text-lg font-bold text-black">Forward Consultation Form</h3>
+        <form onSubmit={handleInquirySubmit} className="bg-white dark:bg-slate-900 p-6 rounded-3xl border border-neutral-200 dark:border-slate-700 shadow-sm space-y-4">
+          <h3 className="font-sans text-lg font-bold text-black dark:text-white">Forward Consultation Form</h3>
           
           <div className="space-y-1.5">
             <input
               type="text"
               name="name"
               placeholder="Your Full Name"
-              className="w-full px-4 py-3 border border-neutral-200 rounded-xl text-xs focus:outline-none focus:border-indigo-500 bg-neutral-50 text-black placeholder-neutral-400"
+              className="w-full px-4 py-3 border border-neutral-200 dark:border-slate-700 rounded-xl text-xs focus:outline-none focus:border-indigo-500 bg-neutral-50 dark:bg-slate-950 text-black dark:text-white placeholder-neutral-400"
               required
             />
           </div>
@@ -3025,7 +3076,7 @@ export default function App() {
               type="email"
               name="email"
               placeholder="Your Email Address"
-              className="w-full px-4 py-3 border border-neutral-200 rounded-xl text-xs focus:outline-none focus:border-indigo-500 bg-neutral-50 text-black placeholder-neutral-400"
+              className="w-full px-4 py-3 border border-neutral-200 dark:border-slate-700 rounded-xl text-xs focus:outline-none focus:border-indigo-500 bg-neutral-50 dark:bg-slate-950 text-black dark:text-white placeholder-neutral-400"
               required
             />
           </div>
@@ -3035,14 +3086,14 @@ export default function App() {
               type="tel"
               name="phone"
               placeholder="MTN / Mobile Contact Number"
-              className="w-full px-4 py-3 border border-neutral-200 rounded-xl text-xs focus:outline-none focus:border-indigo-500 bg-neutral-50 text-black font-mono placeholder-neutral-400"
+              className="w-full px-4 py-3 border border-neutral-200 dark:border-slate-700 rounded-xl text-xs focus:outline-none focus:border-indigo-500 bg-neutral-50 dark:bg-slate-950 text-black dark:text-white font-mono placeholder-neutral-400"
             />
           </div>
 
           <div className="space-y-1.5">
             <select
               name="service"
-              className="w-full px-4 py-3 border border-neutral-200 rounded-xl text-xs focus:outline-none focus:border-indigo-500 bg-neutral-50 text-black"
+              className="w-full px-4 py-3 border border-neutral-200 dark:border-slate-700 rounded-xl text-xs focus:outline-none focus:border-indigo-500 bg-neutral-50 dark:bg-slate-950 text-black dark:text-white"
               required
             >
               <option value="fashion">Traditional styling & fittings</option>
@@ -3059,7 +3110,7 @@ export default function App() {
               onChange={(e) => setInquiryMessage(e.target.value)}
               placeholder="Draft your sizing details, customization requirements, or dress codes..."
               rows={4}
-              className="w-full pl-4 pr-12 py-3 border border-neutral-200 rounded-xl text-xs focus:outline-none focus:border-indigo-500 bg-neutral-50 text-black placeholder-neutral-400"
+              className="w-full pl-4 pr-12 py-3 border border-neutral-200 dark:border-slate-700 rounded-xl text-xs focus:outline-none focus:border-indigo-500 bg-neutral-50 dark:bg-slate-950 text-black dark:text-white placeholder-neutral-400"
               required
             />
             <button
@@ -3069,7 +3120,7 @@ export default function App() {
               className={`absolute right-3.5 bottom-3.5 p-2 rounded-xl border transition-all flex items-center justify-center cursor-pointer shadow-sm ${
                 isListening 
                   ? "bg-rose-500 border-rose-500 text-white animate-pulse shadow-md shadow-rose-500/20" 
-                  : "bg-white border-neutral-200 text-neutral-400 hover:text-indigo-650 hover:border-indigo-200 hover:shadow-md"
+                  : "bg-white dark:bg-slate-900 border-neutral-200 dark:border-slate-700 text-neutral-400 hover:text-indigo-650 hover:border-indigo-200 hover:shadow-md"
               }`}
             >
               <Mic className="w-3.5 h-3.5" />
@@ -3086,14 +3137,14 @@ export default function App() {
       </section>
 
       {/* IN-PAGE CUSTOMER NOTIFICATIONS BLOCK */}
-      <section className="max-w-7xl mx-auto px-6 py-12 border-t border-neutral-100" id="in-page-notifications-hub">
+      <section className="max-w-7xl mx-auto px-6 py-12 border-t border-neutral-100 dark:border-slate-800" id="in-page-notifications-hub">
         <div className="flex justify-between items-center mb-6">
           <div className="flex items-center gap-2">
             <div className="p-1.5 bg-amber-500/10 text-amber-600 rounded-lg">
               <Bell className="w-4 h-4 animate-bounce" />
             </div>
             <div>
-              <h3 className="font-sans text-sm font-black uppercase tracking-wider text-black">
+              <h3 className="font-sans text-sm font-black uppercase tracking-wider text-black dark:text-white">
                 Personalized Notifications Hub
               </h3>
               <p className="text-[10px] text-slate-500 font-mono">
@@ -3108,7 +3159,7 @@ export default function App() {
           )}
         </div>
 
-        <div className="bg-white border border-neutral-200/80 rounded-2xl p-5 shadow-sm">
+        <div className="bg-white dark:bg-slate-900 border border-neutral-200/80 rounded-2xl p-5 shadow-sm">
           {notifications.filter(n => {
             if (!n.customerEmail || n.customerEmail === "all") return true;
             if (isLoggedIn && currentUserEmail && (n.customerEmail || '').toLowerCase() === (currentUserEmail || '').toLowerCase()) return true;
@@ -3116,7 +3167,7 @@ export default function App() {
           }).length === 0 ? (
             <div className="text-center py-6 text-neutral-400 text-xs">
               <Bell className="w-8 h-8 mx-auto mb-2 opacity-50" />
-              <p className="font-semibold text-neutral-500">Your notification log is currently empty.</p>
+              <p className="font-semibold text-neutral-500 dark:text-slate-400">Your notification log is currently empty.</p>
               <p className="text-[10px] text-neutral-400 mt-1">Updates on orders or promotions will appear directly in this hub.</p>
             </div>
           ) : (
@@ -3141,7 +3192,7 @@ export default function App() {
                     </span>
                     <div className="space-y-0.5">
                       <h4 className="text-xs font-black text-slate-900 uppercase tracking-tight">{n.title}</h4>
-                      <p className="text-xs text-neutral-600 font-sans leading-relaxed font-medium">{n.message}</p>
+                      <p className="text-xs text-neutral-600 dark:text-slate-400 font-sans leading-relaxed font-medium">{n.message}</p>
                       <span className="text-[8px] text-neutral-400 font-mono font-medium block">
                         {new Date(n.timestamp).toLocaleString('en-GB')}
                       </span>
@@ -3162,20 +3213,20 @@ export default function App() {
       </section>
 
       {/* FOOTER */}
-      <footer className="bg-neutral-100 text-neutral-800 pt-16 pb-8 px-6 border-t border-neutral-200">
+      <footer className="bg-neutral-100 dark:bg-slate-800 text-neutral-800 dark:text-slate-200 pt-16 pb-8 px-6 border-t border-neutral-200 dark:border-slate-700">
         <div className="max-w-7xl mx-auto grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-8 mb-12">
           <div className="space-y-3">
             <div className="scale-95 origin-left">
               <ProfessionalLogo />
             </div>
-            <p className="text-neutral-600 text-xs leading-relaxed font-medium">
+            <p className="text-neutral-600 dark:text-slate-400 text-xs leading-relaxed font-medium">
               Your favorite bespoke fashion design, Ankara wax prints boutique and alterations clinic based in Ashaiman, Accra.
             </p>
           </div>
           
           <div className="space-y-3">
-            <h4 className="font-sans text-sm text-black font-extrabold uppercase tracking-wider">Social Directory</h4>
-            <ul className="space-y-1.5 text-xs text-neutral-600 font-medium">
+            <h4 className="font-sans text-sm text-black dark:text-white font-extrabold uppercase tracking-wider">Social Directory</h4>
+            <ul className="space-y-1.5 text-xs text-neutral-600 dark:text-slate-400 font-medium">
               <li><a href="#" className="hover:text-indigo-600 transition-colors">Instagram</a></li>
               <li><a href="#" className="hover:text-indigo-600 transition-colors">Facebook</a></li>
               <li><a href="https://wa.me/233276747037" className="hover:text-indigo-600 transition-colors">WhatsApp Direct</a></li>
@@ -3183,21 +3234,21 @@ export default function App() {
           </div>
 
           <div className="space-y-3">
-            <h4 className="font-sans text-sm text-black font-extrabold uppercase tracking-wider">Showroom Contacts</h4>
-            <div className="text-xs text-neutral-600 space-y-1 font-medium">
+            <h4 className="font-sans text-sm text-black dark:text-white font-extrabold uppercase tracking-wider">Showroom Contacts</h4>
+            <div className="text-xs text-neutral-600 dark:text-slate-400 space-y-1 font-medium">
               <p>Ashaiman Market Area, Accra</p>
-              <p className="font-mono text-neutral-600 font-medium">0276747037</p>
+              <p className="font-mono text-neutral-600 dark:text-slate-400 font-medium">0276747037</p>
               <p>info@ellastore.com</p>
             </div>
           </div>
 
           <div className="space-y-3">
-            <h4 className="font-sans text-sm text-black font-extrabold uppercase tracking-wider">Store Newsletter</h4>
+            <h4 className="font-sans text-sm text-black dark:text-white font-extrabold uppercase tracking-wider">Store Newsletter</h4>
             <form onSubmit={e => { e.preventDefault(); showToast("Subscribed", "Newsletter active.", "success"); e.currentTarget.reset(); }} className="flex gap-2">
               <input
                 type="email"
                 placeholder="Your email"
-                className="flex-1 bg-white border border-neutral-200 px-3.5 py-2 text-xs rounded-xl focus:outline-none focus:border-indigo-500 text-black"
+                className="flex-1 bg-white dark:bg-slate-900 border border-neutral-200 dark:border-slate-700 px-3.5 py-2 text-xs rounded-xl focus:outline-none focus:border-indigo-500 text-black dark:text-white"
                 required
               />
               <button
@@ -3210,7 +3261,7 @@ export default function App() {
           </div>
         </div>
 
-        <div className="max-w-7xl mx-auto border-t border-neutral-200 pt-6 text-center text-[10px] text-slate-500 font-mono">
+        <div className="max-w-7xl mx-auto border-t border-neutral-200 dark:border-slate-700 pt-6 text-center text-[10px] text-slate-500 font-mono">
           <p>&copy; 2026 Ella's Store Accra. Systemized with excellence. All Rights Reserved.</p>
         </div>
       </footer>
@@ -3232,8 +3283,8 @@ export default function App() {
       />
       
       {showCharity && (
-        <div className="fixed inset-0 bg-white z-50 overflow-y-auto">
-          <button onClick={() => setShowCharity(false)} className="absolute top-6 right-6 p-2 rounded-full bg-neutral-100"><X /></button>
+        <div className="fixed inset-0 bg-white dark:bg-slate-900 z-50 overflow-y-auto">
+          <button onClick={() => setShowCharity(false)} className="absolute top-6 right-6 p-2 rounded-full bg-neutral-100 dark:bg-slate-800"><X /></button>
           <CharityDonations 
             charityData={charityData} 
             onLogActivity={logActivity} 
@@ -3419,20 +3470,20 @@ export default function App() {
               exit={{ opacity: 0, scale: 0.95, y: 20 }}
               transition={{ duration: 0.3, cubicBezier: [0.16, 1, 0.3, 1] }}
               onClick={(e) => e.stopPropagation()}
-              className="bg-white rounded-[2.5rem] shadow-2xl max-w-3xl w-full max-h-[85vh] flex flex-col overflow-hidden border border-neutral-100"
+              className="bg-white dark:bg-slate-900 rounded-[2.5rem] shadow-2xl max-w-3xl w-full max-h-[85vh] flex flex-col overflow-hidden border border-neutral-100 dark:border-slate-800"
             >
               {/* Modal Header */}
-              <div className="p-6 border-b border-neutral-100 flex items-center justify-between gap-4 bg-neutral-50">
+              <div className="p-6 border-b border-neutral-100 dark:border-slate-800 flex items-center justify-between gap-4 bg-neutral-50 dark:bg-slate-950">
                 <div className="flex items-center gap-2.5">
                   <span className="p-2.5 bg-indigo-50 rounded-full text-indigo-600 text-xs font-black">🔍</span>
                   <div>
                     <h3 className="text-sm font-black text-slate-900 uppercase tracking-wider">Boutique Search & Intelligence</h3>
-                    <p className="text-[10px] text-neutral-500 font-mono">Real-time matching of premium products & custom services</p>
+                    <p className="text-[10px] text-neutral-500 dark:text-slate-400 font-mono">Real-time matching of premium products & custom services</p>
                   </div>
                 </div>
                 <button
                   onClick={() => setShowSearchDialog(false)}
-                  className="p-2 text-neutral-400 hover:text-rose-600 hover:bg-neutral-100 rounded-full transition-all cursor-pointer"
+                  className="p-2 text-neutral-400 hover:text-rose-600 hover:bg-neutral-100 dark:bg-slate-800 rounded-full transition-all cursor-pointer"
                   title="Close Search Dialog"
                 >
                   <X className="w-4 h-4" />
@@ -3440,14 +3491,14 @@ export default function App() {
               </div>
 
               {/* Live Filter Bar inside Modal */}
-              <div className="p-5 border-b border-neutral-100 bg-white">
+              <div className="p-5 border-b border-neutral-100 dark:border-slate-800 bg-white dark:bg-slate-900">
                 <div className="relative">
                   <input
                     type="text"
                     value={searchQuery}
                     onChange={(e) => setSearchQuery(e.target.value)}
                     placeholder="Type to filter products, custom measurements, charity initiatives, or chatbot styling support..."
-                    className="w-full pl-10 pr-10 py-3 rounded-2xl border border-neutral-200 text-xs focus:outline-none focus:ring-2 focus:ring-indigo-500 bg-neutral-50/50"
+                    className="w-full pl-10 pr-10 py-3 rounded-2xl border border-neutral-200 dark:border-slate-700 text-xs focus:outline-none focus:ring-2 focus:ring-indigo-500 bg-neutral-50/50"
                     autoFocus
                   />
                   <Search className="absolute left-3.5 top-3.5 w-4 h-4 text-neutral-400" />
@@ -3475,7 +3526,7 @@ export default function App() {
                   </div>
 
                   {filteredFeatures.length === 0 ? (
-                    <div className="p-4 bg-white rounded-2xl border border-dashed border-neutral-200 text-center text-xs text-neutral-500 font-medium">
+                    <div className="p-4 bg-white dark:bg-slate-900 rounded-2xl border border-dashed border-neutral-200 dark:border-slate-700 text-center text-xs text-neutral-500 dark:text-slate-400 font-medium">
                       No matching services found. Try typing "charity", "sizing", or "reviews".
                     </div>
                   ) : (
@@ -3483,17 +3534,17 @@ export default function App() {
                       {filteredFeatures.map((feat) => (
                         <div
                           key={feat.name}
-                          className="bg-white p-4.5 rounded-2xl border border-neutral-100 shadow-sm hover:shadow-md hover:border-indigo-100 transition-all duration-300 flex flex-col justify-between group"
+                          className="bg-white dark:bg-slate-900 p-4.5 rounded-2xl border border-neutral-100 dark:border-slate-800 shadow-sm hover:shadow-md hover:border-indigo-100 transition-all duration-300 flex flex-col justify-between group"
                         >
                           <div className="space-y-2">
                             <div className="flex items-center gap-2">
                               <span className="text-xl">{feat.icon}</span>
                               <div>
                                 <span className="text-[9px] font-mono font-bold uppercase tracking-wider text-neutral-400 block leading-none">{feat.category}</span>
-                                <h4 className="text-xs font-black text-neutral-900 group-hover:text-indigo-600 transition-colors uppercase tracking-tight">{feat.name}</h4>
+                                <h4 className="text-xs font-black text-neutral-900 dark:text-slate-100 group-hover:text-indigo-600 transition-colors uppercase tracking-tight">{feat.name}</h4>
                               </div>
                             </div>
-                            <p className="text-[11px] text-neutral-600 leading-relaxed font-medium font-sans">{feat.description}</p>
+                            <p className="text-[11px] text-neutral-600 dark:text-slate-400 leading-relaxed font-medium font-sans">{feat.description}</p>
                           </div>
                           <div className="pt-3 border-t border-neutral-50 mt-3 flex justify-end">
                             <button
@@ -3520,10 +3571,10 @@ export default function App() {
                   </div>
 
                   {filteredProducts.length === 0 ? (
-                    <div className="p-8 bg-white rounded-2xl border border-dashed border-neutral-200 text-center space-y-2 max-w-sm mx-auto">
+                    <div className="p-8 bg-white dark:bg-slate-900 rounded-2xl border border-dashed border-neutral-200 dark:border-slate-700 text-center space-y-2 max-w-sm mx-auto">
                       <span className="text-2xl block">🧥</span>
                       <h4 className="text-xs font-black text-slate-800 uppercase">No Product Matches</h4>
-                      <p className="text-[10px] text-neutral-500 font-medium">Try filtering by other categories like "food", "dresses", "accessories", or "shoes".</p>
+                      <p className="text-[10px] text-neutral-500 dark:text-slate-400 font-medium">Try filtering by other categories like "food", "dresses", "accessories", or "shoes".</p>
                     </div>
                   ) : (
                     <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
@@ -3534,9 +3585,9 @@ export default function App() {
                             setShowSearchDialog(false);
                             handleViewDetail(prod);
                           }}
-                          className="bg-white p-3.5 rounded-2xl border border-neutral-100 hover:border-pink-100 shadow-sm hover:shadow-md transition-all duration-300 flex items-center gap-4 group cursor-pointer"
+                          className="bg-white dark:bg-slate-900 p-3.5 rounded-2xl border border-neutral-100 dark:border-slate-800 hover:border-pink-100 shadow-sm hover:shadow-md transition-all duration-300 flex items-center gap-4 group cursor-pointer"
                         >
-                          <div className="w-16 h-16 rounded-xl overflow-hidden bg-neutral-100 shrink-0 border border-neutral-200">
+                          <div className="w-16 h-16 rounded-xl overflow-hidden bg-neutral-100 dark:bg-slate-800 shrink-0 border border-neutral-200 dark:border-slate-700">
                             <img
                               src={prod.image}
                               alt={prod.name}
@@ -3547,12 +3598,12 @@ export default function App() {
                           
                           <div className="flex-1 min-w-0 space-y-1">
                             <div className="flex items-center gap-1.5">
-                              <span className="px-2 py-0.5 bg-neutral-100 text-neutral-600 rounded-full font-mono font-bold text-[8px] uppercase tracking-wider">{prod.category}</span>
+                              <span className="px-2 py-0.5 bg-neutral-100 dark:bg-slate-800 text-neutral-600 dark:text-slate-400 rounded-full font-mono font-bold text-[8px] uppercase tracking-wider">{prod.category}</span>
                               {prod.stock <= 5 && (
                                 <span className="px-1.5 py-0.5 bg-rose-50 text-rose-600 rounded-full font-sans font-bold text-[8px] uppercase tracking-wider">Low Stock</span>
                               )}
                             </div>
-                            <h4 className="text-xs font-black text-neutral-900 uppercase tracking-tight truncate">{prod.name}</h4>
+                            <h4 className="text-xs font-black text-neutral-900 dark:text-slate-100 uppercase tracking-tight truncate">{prod.name}</h4>
                             <div className="text-xs font-black text-indigo-600 font-mono">₵{prod.price}</div>
                           </div>
 
@@ -3576,9 +3627,9 @@ export default function App() {
               </div>
 
               {/* Modal Footer */}
-              <div className="p-4 border-t border-neutral-100 bg-neutral-50 text-center">
+              <div className="p-4 border-t border-neutral-100 dark:border-slate-800 bg-neutral-50 dark:bg-slate-950 text-center">
                 <p className="text-[9px] text-neutral-400 font-mono">
-                  Press <kbd className="bg-white border px-1 rounded shadow-sm">Esc</kbd> or click backdrop to dismiss. Matches update instantly as you type.
+                  Press <kbd className="bg-white dark:bg-slate-900 border px-1 rounded shadow-sm">Esc</kbd> or click backdrop to dismiss. Matches update instantly as you type.
                 </p>
               </div>
             </motion.div>
@@ -3590,6 +3641,7 @@ export default function App() {
       <AnimatePresence>
         {selectedDetailProduct && (
           <ProductDetailModal
+            onNotifyMe={handleNotifyMe}
             product={selectedDetailProduct}
             allProducts={products}
             onClose={() => handleViewDetail(null)}
@@ -3619,9 +3671,9 @@ export default function App() {
             >
               {/* Spinning / pulsing luxury ring loader */}
               <div className="relative w-40 h-40 flex items-center justify-center">
-                <div className="absolute inset-0 rounded-full border-2 border-neutral-100 border-t-neutral-800 animate-spin" style={{ animationDuration: '1.5s' }} />
+                <div className="absolute inset-0 rounded-full border-2 border-neutral-100 dark:border-slate-800 border-t-neutral-800 animate-spin" style={{ animationDuration: '1.5s' }} />
                 <div className="absolute inset-2 rounded-full border border-dashed border-neutral-300 animate-spin" style={{ animationDuration: '4s', animationDirection: 'reverse' }} />
-                <div className="absolute inset-4 rounded-full bg-white shadow-xl overflow-hidden p-2 flex items-center justify-center">
+                <div className="absolute inset-4 rounded-full bg-white dark:bg-slate-900 shadow-xl overflow-hidden p-2 flex items-center justify-center">
                   <img 
                     src={Logo} 
                     alt="Ella's Store Logo" 
@@ -3633,17 +3685,17 @@ export default function App() {
 
               {/* Typography */}
               <div className="space-y-2">
-                <h2 className="font-sans text-lg font-black tracking-widest text-neutral-900 uppercase">
+                <h2 className="font-sans text-lg font-black tracking-widest text-neutral-900 dark:text-slate-100 uppercase">
                   ELLA'S STORE
                 </h2>
                 <div className="h-[2px] w-12 bg-neutral-900 mx-auto rounded-full" />
-                <p className="text-[10px] text-neutral-500 font-mono tracking-wider uppercase">
+                <p className="text-[10px] text-neutral-500 dark:text-slate-400 font-mono tracking-wider uppercase">
                   {loadingMessage || "Synchronizing Showroom..."}
                 </p>
               </div>
 
               {/* Progress Indicator */}
-              <div className="w-full bg-neutral-100 h-1 rounded-full overflow-hidden max-w-[200px]">
+              <div className="w-full bg-neutral-100 dark:bg-slate-800 h-1 rounded-full overflow-hidden max-w-[200px]">
                 <div className="bg-neutral-900 h-full rounded-full animate-pulse" style={{ width: '60%' }} />
               </div>
 
@@ -3654,9 +3706,9 @@ export default function App() {
                     initial={{ opacity: 0, y: 10 }}
                     animate={{ opacity: 1, y: 0 }}
                     exit={{ opacity: 0, y: -10 }}
-                    className="p-3 bg-neutral-50 rounded-2xl border border-neutral-100 space-y-1.5"
+                    className="p-3 bg-neutral-50 dark:bg-slate-950 rounded-2xl border border-neutral-100 dark:border-slate-800 space-y-1.5"
                   >
-                    <p className="text-[11px] text-neutral-600 font-medium leading-relaxed">
+                    <p className="text-[11px] text-neutral-600 dark:text-slate-400 font-medium leading-relaxed">
                       Ella's network is taking a moment to process.
                     </p>
                     <p className="text-[9px] text-neutral-400 font-mono leading-normal">

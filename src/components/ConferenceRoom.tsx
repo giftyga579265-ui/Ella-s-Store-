@@ -640,10 +640,10 @@ export default function ConferenceRoom({
                       <h3 className="font-bold text-sm uppercase tracking-wider text-neutral-200">Active Public Rooms ({rooms.length})</h3>
                     </div>
                     {rooms.length === 0 ? (
-                      <div className="py-8 text-center text-neutral-500 space-y-2 border border-dashed border-neutral-800 rounded-2xl">
-                        <AlertCircle className="w-6 h-6 mx-auto text-neutral-600" />
+                      <div className="py-8 text-center text-neutral-500 dark:text-slate-400 space-y-2 border border-dashed border-neutral-800 rounded-2xl">
+                        <AlertCircle className="w-6 h-6 mx-auto text-neutral-600 dark:text-slate-400" />
                         <p className="text-xs">No ongoing rooms at this time.</p>
-                        <p className="text-[10px] text-neutral-600">Be the first to host a fitting session!</p>
+                        <p className="text-[10px] text-neutral-600 dark:text-slate-400">Be the first to host a fitting session!</p>
                       </div>
                     ) : (
                       <div className="space-y-2 max-h-48 overflow-y-auto pr-1">
@@ -654,7 +654,7 @@ export default function ConferenceRoom({
                           >
                             <div>
                               <p className="text-xs font-bold text-neutral-200 truncate max-w-[180px]">{rm.name}</p>
-                              <p className="text-[9px] text-neutral-500 font-mono">By: {rm.hostName}</p>
+                              <p className="text-[9px] text-neutral-500 dark:text-slate-400 font-mono">By: {rm.hostName}</p>
                             </div>
                             <button
                               onClick={() => joinRoom(rm)}
@@ -671,7 +671,7 @@ export default function ConferenceRoom({
               </div>
 
               {/* Secure note */}
-              <div className="flex items-center justify-center gap-2 text-neutral-500 text-[10px] font-mono">
+              <div className="flex items-center justify-center gap-2 text-neutral-500 dark:text-slate-400 text-[10px] font-mono">
                 <Shield className="w-3.5 h-3.5 text-indigo-500/70" />
                 <span>All room text chats, durations, and logs are secured and recorded for the boutique's admin records.</span>
               </div>
@@ -826,11 +826,11 @@ export default function ConferenceRoom({
                   <div className="relative w-full h-full min-h-[220px] max-h-[380px] bg-neutral-900 border border-neutral-800 rounded-3xl overflow-hidden shadow-2xl flex items-center justify-center group">
                     {isVideoOff ? (
                       <div className="text-center space-y-2 z-10">
-                        <div className="w-12 h-12 rounded-full bg-neutral-800 flex items-center justify-center text-neutral-500 mx-auto border border-neutral-700">
+                        <div className="w-12 h-12 rounded-full bg-neutral-800 flex items-center justify-center text-neutral-500 dark:text-slate-400 mx-auto border border-neutral-700">
                           <VideoOff className="w-6 h-6" />
                         </div>
                         <p className="text-xs text-neutral-400 font-bold">Your Video is Paused</p>
-                        <p className="text-[10px] text-neutral-500">Camera shutter closed</p>
+                        <p className="text-[10px] text-neutral-500 dark:text-slate-400">Camera shutter closed</p>
                       </div>
                     ) : (
                       <video
@@ -854,11 +854,11 @@ export default function ConferenceRoom({
                       <div key={p.id} className="relative w-full h-full min-h-[220px] max-h-[380px] bg-neutral-900 border border-neutral-800 rounded-3xl overflow-hidden shadow-2xl flex items-center justify-center group animate-in fade-in zoom-in-95 duration-350">
                         {!p.isVideoOn ? (
                           <div className="text-center space-y-2 z-10">
-                            <div className="w-12 h-12 rounded-full bg-neutral-800 flex items-center justify-center text-neutral-500 mx-auto border border-neutral-700">
+                            <div className="w-12 h-12 rounded-full bg-neutral-800 flex items-center justify-center text-neutral-500 dark:text-slate-400 mx-auto border border-neutral-700">
                               <VideoOff className="w-6 h-6" />
                             </div>
                             <p className="text-xs text-neutral-400 font-bold">{p.name || "Customer"}'s Video is Off</p>
-                            <p className="text-[10px] text-neutral-500">Camera paused</p>
+                            <p className="text-[10px] text-neutral-500 dark:text-slate-400">Camera paused</p>
                           </div>
                         ) : (
                           <video
@@ -901,7 +901,7 @@ export default function ConferenceRoom({
                             Awaiting additional customers or design tailors to join via your room invitation link.
                           </p>
                         </div>
-                        <div className="bg-neutral-950 px-4 py-2 rounded-2xl border border-neutral-800 text-[9px] font-mono text-neutral-500">
+                        <div className="bg-neutral-950 px-4 py-2 rounded-2xl border border-neutral-800 text-[9px] font-mono text-neutral-500 dark:text-slate-400">
                           P2P Signal listening on room endpoint...
                         </div>
                       </div>
@@ -1003,8 +1003,8 @@ export default function ConferenceRoom({
                 {/* Messages Shelf */}
                 <div className="flex-1 p-4 overflow-y-auto space-y-3.5 flex flex-col">
                   {chats.length === 0 ? (
-                    <div className="my-auto text-center space-y-2 py-8 text-neutral-500">
-                      <AlertCircle className="w-5 h-5 mx-auto text-neutral-600" />
+                    <div className="my-auto text-center space-y-2 py-8 text-neutral-500 dark:text-slate-400">
+                      <AlertCircle className="w-5 h-5 mx-auto text-neutral-600 dark:text-slate-400" />
                       <p className="text-[10px] leading-relaxed">No messages in this chat yet. Start the conversation!</p>
                     </div>
                   ) : (
@@ -1046,7 +1046,7 @@ export default function ConferenceRoom({
                                     <FileText className="w-5 h-5 text-indigo-400 shrink-0" />
                                     <div className="flex-1 min-w-0">
                                       <p className="text-[9px] font-bold text-neutral-200 truncate">{msg.file.name}</p>
-                                      <p className="text-[8px] text-neutral-500 font-mono">{(msg.file.size ? (msg.file.size / 1024).toFixed(1) + " KB" : "Unknown size")}</p>
+                                      <p className="text-[8px] text-neutral-500 dark:text-slate-400 font-mono">{(msg.file.size ? (msg.file.size / 1024).toFixed(1) + " KB" : "Unknown size")}</p>
                                     </div>
                                     <a href={msg.file.url} download={msg.file.name} className="p-1 text-neutral-400 hover:text-white bg-neutral-950 hover:bg-neutral-800 rounded-lg transition-all" title="Download file">
                                       <Download className="w-3.5 h-3.5" />
@@ -1056,7 +1056,7 @@ export default function ConferenceRoom({
                               </div>
                             )}
                           </div>
-                          <span className="text-[7px] text-neutral-500 font-mono">{msg.timestamp}</span>
+                          <span className="text-[7px] text-neutral-500 dark:text-slate-400 font-mono">{msg.timestamp}</span>
                         </div>
                       );
                     })

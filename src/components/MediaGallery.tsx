@@ -55,7 +55,7 @@ export default function MediaGallery({ mediaFiles, isOpen, onClose, onLogActivit
         </h2>
         <button 
           onClick={onClose} 
-          className="w-10 h-10 bg-neutral-800 hover:bg-amber-500 hover:text-neutral-900 rounded-full flex items-center justify-center text-white transition-all duration-300"
+          className="w-10 h-10 bg-neutral-800 hover:bg-amber-500 hover:text-neutral-900 dark:text-slate-100 rounded-full flex items-center justify-center text-white transition-all duration-300"
           id="close-gallery-btn"
         >
           <X className="w-5 h-5" />
@@ -71,7 +71,7 @@ export default function MediaGallery({ mediaFiles, isOpen, onClose, onLogActivit
               onClick={() => setFilter(type)}
               className={`px-5 py-2.5 rounded-full text-sm font-medium transition-all duration-300 tracking-wider capitalize ${
                 filter === type
-                  ? "bg-amber-500 text-neutral-900 font-semibold shadow-md shadow-amber-500/20"
+                  ? "bg-amber-500 text-neutral-900 dark:text-slate-100 font-semibold shadow-md shadow-amber-500/20"
                   : "bg-neutral-800 text-neutral-300 hover:bg-neutral-700 hover:text-white border border-neutral-700"
               }`}
             >
@@ -83,9 +83,9 @@ export default function MediaGallery({ mediaFiles, isOpen, onClose, onLogActivit
         {/* Media Grid */}
         {filteredMedia.length === 0 ? (
           <div className="text-center py-20 text-neutral-400">
-            <ImageIcon className="w-16 h-16 mx-auto text-neutral-600 mb-4" />
+            <ImageIcon className="w-16 h-16 mx-auto text-neutral-600 dark:text-slate-400 mb-4" />
             <h3 className="text-lg font-serif text-neutral-300 mb-1">No Media Files Found</h3>
-            <p className="text-sm text-neutral-500">Check back later for updates and catalogs!</p>
+            <p className="text-sm text-neutral-500 dark:text-slate-400">Check back later for updates and catalogs!</p>
           </div>
         ) : (
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
@@ -154,7 +154,7 @@ export default function MediaGallery({ mediaFiles, isOpen, onClose, onLogActivit
           <div className="absolute top-4 right-4 flex gap-2">
             <button 
               onClick={() => setLightboxIndex(null)}
-              className="w-12 h-12 bg-neutral-900/80 hover:bg-amber-500 hover:text-neutral-900 text-white rounded-full flex items-center justify-center transition-all duration-300"
+              className="w-12 h-12 bg-neutral-900/80 hover:bg-amber-500 hover:text-neutral-900 dark:text-slate-100 text-white rounded-full flex items-center justify-center transition-all duration-300"
             >
               <X className="w-6 h-6" />
             </button>
@@ -164,7 +164,7 @@ export default function MediaGallery({ mediaFiles, isOpen, onClose, onLogActivit
           {lightboxIndex > 0 && (
             <button
               onClick={handlePrev}
-              className="absolute left-4 w-12 h-12 bg-neutral-900/60 hover:bg-amber-500 hover:text-neutral-900 text-white rounded-full flex items-center justify-center transition-all duration-300"
+              className="absolute left-4 w-12 h-12 bg-neutral-900/60 hover:bg-amber-500 hover:text-neutral-900 dark:text-slate-100 text-white rounded-full flex items-center justify-center transition-all duration-300"
             >
               <ChevronLeft className="w-6 h-6" />
             </button>
@@ -174,7 +174,7 @@ export default function MediaGallery({ mediaFiles, isOpen, onClose, onLogActivit
           {lightboxIndex < filteredMedia.length - 1 && (
             <button
               onClick={handleNext}
-              className="absolute right-4 w-12 h-12 bg-neutral-900/60 hover:bg-amber-500 hover:text-neutral-900 text-white rounded-full flex items-center justify-center transition-all duration-300"
+              className="absolute right-4 w-12 h-12 bg-neutral-900/60 hover:bg-amber-500 hover:text-neutral-900 dark:text-slate-100 text-white rounded-full flex items-center justify-center transition-all duration-300"
             >
               <ChevronRight className="w-6 h-6" />
             </button>
@@ -216,7 +216,7 @@ export default function MediaGallery({ mediaFiles, isOpen, onClose, onLogActivit
           <div className="absolute bottom-6 left-1/2 -translate-x-1/2 text-center text-white p-4 max-w-xl w-full" onClick={e => e.stopPropagation()}>
             <h3 className="font-serif text-xl text-amber-500 mb-1">{filteredMedia[lightboxIndex].title}</h3>
             <p className="text-neutral-400 text-xs leading-relaxed">{filteredMedia[lightboxIndex].description}</p>
-            <div className="text-[10px] text-neutral-500 mt-2 tracking-wider uppercase font-mono">
+            <div className="text-[10px] text-neutral-500 dark:text-slate-400 mt-2 tracking-wider uppercase font-mono">
               Item {lightboxIndex + 1} of {filteredMedia.length}
             </div>
           </div>

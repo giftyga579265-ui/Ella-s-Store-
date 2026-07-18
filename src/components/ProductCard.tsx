@@ -1,6 +1,6 @@
 import React from "react";
 import { Product } from "../types";
-import { ShoppingBag, Star, Plus, Sparkles } from "lucide-react";
+import { ShoppingBag, Star, Plus, Sparkles, Bell } from "lucide-react";
 
 interface ProductCardProps {
   key?: any;
@@ -8,17 +8,19 @@ interface ProductCardProps {
   allProducts?: Product[];
   onAddToCart: (product: Product) => void;
   isLoggedIn: boolean;
-  onShowLogin: () => void;
+  onShowLogin?: () => void;
+  onNotifyMe?: (product: Product) => void;
   layout: 'grid' | 'list' | 'carousel' | 'masonry';
   onViewDetail?: (product: Product, initialTab?: 'classic' | 'spin360' | 'video' | 'tryon') => void;
 }
 
-export default function ProductCard({ product, allProducts = [], onAddToCart, isLoggedIn, onShowLogin, layout, onViewDetail }: ProductCardProps) {
+export default function ProductCard({ product, allProducts = [], onAddToCart, isLoggedIn, onShowLogin, onNotifyMe, layout, onViewDetail }: ProductCardProps) {
   const isFood = product.category === "food" || product.category === "kitchen";
   
-  const handleAddClick = () => {
+  const handleAddClick = (e: React.MouseEvent) => {
+    e.stopPropagation();
     if (!isLoggedIn) {
-      onShowLogin();
+      if (onShowLogin) onShowLogin();
     } else {
       onAddToCart(product);
     }
@@ -49,10 +51,10 @@ export default function ProductCard({ product, allProducts = [], onAddToCart, is
 
   if (layout === "list") {
     return (
-      <div className="bg-white p-5 rounded-3xl border border-neutral-200 shadow-sm flex flex-col sm:flex-row items-start sm:items-center justify-between gap-5 hover:border-indigo-500/50 transition-all duration-300 hover:shadow-lg animate-in fade-in">
+      <div className="bg-white dark:bg-slate-900 p-5 rounded-3xl border border-neutral-200 dark:border-slate-700 shadow-sm flex flex-col sm:flex-row items-start sm:items-center justify-between gap-5 hover:border-indigo-500/50 transition-all duration-300 hover:shadow-lg animate-in fade-in">
         <div className="flex flex-col md:flex-row md:items-center gap-4.5 flex-1">
           <div className="flex items-center gap-4.5 cursor-pointer hover:opacity-95 transition-opacity" onClick={() => onViewDetail?.(product)}>
-            <img src={product.image} alt={product.name} className="w-20 h-20 rounded-2xl object-cover border border-neutral-150 shadow-inner shrink-0" />
+            <img src={product.image} alt={product.name} className="w-20 h-20 rounded-2xl object-cover border border-neutral-150 dark:border-slate-800 shadow-inner shrink-0" />
             <div className="space-y-1">
               <div className="flex items-center gap-2">
                 <span className="text-[10px] font-bold text-indigo-600 uppercase tracking-widest bg-indigo-50 border border-indigo-200 px-2 py-0.5 rounded-md font-mono">{product.category}</span>
@@ -60,83 +62,67 @@ export default function ProductCard({ product, allProducts = [], onAddToCart, is
                   <span className="text-[9px] bg-rose-50 border border-rose-200 text-rose-600 px-2 py-0.5 rounded font-black font-mono">ONLY {product.stock} LEFT</span>
                 )}
               </div>
-              <h4 className="font-sans text-base text-neutral-900 font-semibold tracking-tight hover:text-indigo-600 transition-colors">{product.name}</h4>
-              <p className="text-xs text-neutral-500 line-clamp-1 leading-relaxed max-w-md">{product.description}</p>
+              <h4 className="font-sans text-base text-neutral-900 dark:text-slate-100 font-semibold tracking-tight hover:text-indigo-600 transition-colors">{product.name}</h4>
+              <p className="text-xs text-neutral-500 dark:text-slate-400 line-clamp-1 leading-relaxed max-w-md">{product.description}</p>
             </div>
           </div>
-
           {/* Suggestions block inside list layout */}
           {compProducts.length > 0 && (
-            <div className="md:ml-6 pt-3 md:pt-0 md:pl-6 md:border-l border-neutral-100 flex flex-col gap-1.5 shrink-0 max-w-xs">
+            <div className="md:ml-6 pt-3 md:pt-0 md:pl-6 md:border-l border-neutral-100 dark:border-slate-800 flex flex-col gap-1.5 shrink-0 max-w-xs">
               <div className="flex items-center gap-1 text-[9px] font-black uppercase text-indigo-600 tracking-wider font-mono">
                 <span className="text-xs animate-pulse filter drop-shadow-[0_0_2px_rgba(245,158,11,0.5)]">🎗️</span>
                 <span>Complete the Look</span>
               </div>
               <div className="flex gap-2">
                 {compProducts.map(comp => (
-                  <div key={comp.id} className="flex items-center gap-1.5 p-1 rounded-xl bg-neutral-50 hover:bg-neutral-100 transition-colors border border-neutral-100/50 text-left">
-                    <img src={comp.image} alt={comp.name} className="w-7 h-7 rounded-lg object-cover shrink-0 border border-neutral-200" />
+                  <div key={comp.id} className="flex items-center gap-1.5 p-1 rounded-xl bg-neutral-50 dark:bg-slate-950 hover:bg-neutral-100 dark:bg-slate-800 transition-colors border border-neutral-100/50 text-left">
+                    <img src={comp.image} alt={comp.name} className="w-7 h-7 rounded-lg object-cover shrink-0 border border-neutral-200 dark:border-slate-700" />
                     <div className="max-w-[70px] overflow-hidden">
-                      <p className="text-[9px] font-bold text-neutral-800 truncate leading-none">{comp.name}</p>
+                      <p className="text-[9px] font-bold text-neutral-800 dark:text-slate-200 truncate leading-none">{comp.name}</p>
                       <p className="text-[8px] font-mono font-bold text-indigo-600">₵{comp.price.toFixed(0)}</p>
                     </div>
-                    <button
-                      onClick={(e) => {
-                        e.stopPropagation();
-                        if (!isLoggedIn) {
-                          onShowLogin();
-                        } else {
-                          onAddToCart(comp);
-                        }
-                      }}
-                      className="p-0.5 bg-white hover:bg-indigo-600 hover:text-white text-indigo-600 rounded border border-neutral-200 hover:border-indigo-600 transition-all cursor-pointer shadow-sm shrink-0"
-                      title={`Add ${comp.name}`}
-                    >
-                      <Plus className="w-2.5 h-2.5" />
-                    </button>
                   </div>
                 ))}
               </div>
             </div>
           )}
         </div>
-
-        <div className="text-left sm:text-right space-y-2.5 shrink-0 w-full sm:w-auto flex sm:flex-col justify-between sm:justify-start items-center sm:items-end border-t sm:border-0 pt-3 sm:pt-0">
-          <div className="text-xl font-mono font-black text-black">₵{product.price.toFixed(2)}</div>
-          
-          {!isFood && (
+        <div className="flex items-center gap-6 shrink-0 w-full sm:w-auto">
+          <div className="flex flex-col items-end">
+            <span className="text-lg font-mono font-black tracking-tight text-neutral-900 dark:text-slate-100">₵{product.price.toFixed(2)}</span>
+            {isFood && <span className="text-[10px] text-neutral-400 font-medium tracking-wide">Hot & Ready</span>}
+          </div>
+          {product.stock === 0 ? (
             <button
-              onClick={() => onViewDetail?.(product, 'tryon')}
-              className="bg-slate-900 hover:bg-indigo-600 text-indigo-400 hover:text-white border border-indigo-500/35 hover:border-indigo-600 px-4 py-2.5 rounded-xl text-[10px] font-black tracking-wider transition-all duration-300 flex items-center gap-1.5 shadow-sm hover:shadow-md cursor-pointer uppercase"
+              onClick={(e) => { e.stopPropagation(); onNotifyMe?.(product); }}
+              className="bg-neutral-800 hover:bg-neutral-700 text-white px-5 py-2.5 rounded-xl text-xs font-bold tracking-wider transition-all duration-300 flex items-center gap-1.5 shadow-md cursor-pointer"
             >
-              <span className="text-xs animate-pulse filter drop-shadow-[0_0_2px_rgba(245,158,11,0.5)]">🎗️</span>
-              <span>AR Try-On & 3D</span>
+              <Bell className="w-3.5 h-3.5" />
+              Notify Me
+            </button>
+          ) : (
+            <button
+              onClick={handleAddClick}
+              className="bg-indigo-600 hover:bg-indigo-500 text-white px-5 py-2.5 rounded-xl text-xs font-bold tracking-wider transition-all duration-300 flex items-center gap-1.5 shadow-md shadow-indigo-600/10 cursor-pointer"
+            >
+              <ShoppingBag className="w-3.5 h-3.5" />
+              Add to Bag
             </button>
           )}
-
-          <button
-            onClick={handleAddClick}
-            disabled={product.stock === 0}
-            className="bg-indigo-600 hover:bg-indigo-500 disabled:bg-neutral-100 disabled:text-neutral-400 text-white px-5 py-2.5 rounded-xl text-xs font-bold tracking-wider transition-all duration-300 flex items-center gap-1.5 shadow-md shadow-indigo-600/10 cursor-pointer"
-          >
-            <ShoppingBag className="w-3.5 h-3.5" />
-            {product.stock === 0 ? "Out of Stock" : "Add to Bag"}
-          </button>
         </div>
       </div>
     );
   }
 
+  // Grid / Masonry / Carousel layout
   return (
-    <div className="bg-white rounded-3xl overflow-hidden shadow-sm border border-neutral-200 hover:border-indigo-500/50 hover:shadow-lg transition-all duration-500 hover:-translate-y-1.5 flex flex-col justify-between animate-in fade-in group h-full">
-      {/* Image Wrap */}
-      <div className="relative aspect-[4/5] bg-neutral-100 overflow-hidden w-full cursor-pointer hover:opacity-95 transition-opacity" onClick={() => onViewDetail?.(product)}>
-        <img 
-          src={product.image} 
-          alt={product.name} 
-          className="w-full h-full object-cover transition-transform duration-700 group-hover:scale-105 opacity-90 group-hover:opacity-100"
-          loading="lazy"
-        />
+    <div 
+      className={`group bg-white dark:bg-slate-900 rounded-3xl overflow-hidden border border-neutral-150 dark:border-slate-800 transition-all duration-500 hover:shadow-2xl hover:shadow-indigo-500/10 hover:-translate-y-1.5 flex flex-col h-full relative ${layout === 'masonry' ? 'break-inside-avoid mb-6' : ''}`}
+      onClick={() => onViewDetail?.(product)}
+    >
+      <div className="relative aspect-[4/5] overflow-hidden bg-neutral-100 dark:bg-slate-800 cursor-pointer">
+        <img src={product.image} alt={product.name} className="w-full h-full object-cover transition-transform duration-700 group-hover:scale-105" loading="lazy" />
+        <div className="absolute inset-0 bg-gradient-to-t from-black/60 via-black/0 to-black/10 opacity-0 group-hover:opacity-100 transition-opacity duration-300 pointer-events-none" />
         
         {/* Badges */}
         <div className="absolute top-4.5 left-4.5 flex flex-col gap-1.5 z-10">
@@ -155,73 +141,39 @@ export default function ProductCard({ product, allProducts = [], onAddToCart, is
         </div>
       </div>
 
-      {/* Info Block */}
-      <div className="p-5 flex-1 flex flex-col justify-between space-y-4">
-        <div className="space-y-1.5 cursor-pointer" onClick={() => onViewDetail?.(product)}>
-          <h4 className="font-sans text-neutral-900 text-lg group-hover:text-indigo-600 transition-colors duration-300 font-semibold tracking-tight line-clamp-1">
-            {product.name}
-          </h4>
-          <p className="text-neutral-500 text-xs leading-relaxed line-clamp-2">{product.description}</p>
+      <div className="p-5 flex flex-col flex-1 relative bg-white dark:bg-slate-900">
+        <div className="flex-1 space-y-1 mb-4">
+          <div className="flex items-center justify-between">
+            <h3 className="font-sans text-base font-bold text-neutral-900 dark:text-slate-100 line-clamp-1 group-hover:text-indigo-600 transition-colors">{product.name}</h3>
+            {(product as any).rating && (
+              <div className="flex items-center gap-1 bg-amber-50 px-1.5 py-0.5 rounded text-[10px] font-bold text-amber-600 shrink-0">
+                <Star className="w-3 h-3 fill-amber-500 stroke-amber-500" />
+                {(product as any).rating}
+              </div>
+            )}
+          </div>
+          <p className="text-xs text-neutral-500 dark:text-slate-400 line-clamp-2 leading-relaxed">{product.description}</p>
         </div>
 
-        {/* Complete the look recommendations for Grid/Carousel layouts */}
-        {compProducts.length > 0 && (
-          <div className="mt-2 pt-3 border-t border-neutral-100 space-y-2">
-            <div className="flex items-center gap-1 text-[10px] font-black uppercase text-indigo-600 tracking-wider font-mono">
-              <span className="text-xs animate-pulse filter drop-shadow-[0_0_2px_rgba(245,158,11,0.5)]">🎗️</span>
-              <span>Complete the Look</span>
-            </div>
-            <div className="grid grid-cols-2 gap-2">
-              {compProducts.map(comp => (
-                <div key={comp.id} className="flex items-center gap-1.5 p-1 rounded-xl bg-neutral-50 hover:bg-neutral-100 transition-all border border-neutral-150/40 text-left">
-                  <img src={comp.image} alt={comp.name} className="w-7 h-7 rounded-lg object-cover shrink-0 border border-neutral-200" />
-                  <div className="overflow-hidden flex-1 min-w-0">
-                    <p className="text-[9px] font-bold text-neutral-800 truncate leading-none mb-0.5">{comp.name}</p>
-                    <p className="text-[8px] font-mono font-bold text-indigo-600">₵{comp.price.toFixed(0)}</p>
-                  </div>
-                  <button
-                    onClick={(e) => {
-                      e.stopPropagation();
-                      if (!isLoggedIn) {
-                        onShowLogin();
-                      } else {
-                        onAddToCart(comp);
-                      }
-                    }}
-                    className="p-1 bg-white hover:bg-indigo-600 hover:text-white text-indigo-600 rounded-lg border border-neutral-200 hover:border-indigo-600 transition-all cursor-pointer shadow-sm shrink-0"
-                    title={`Add matching ${comp.name}`}
-                  >
-                    <Plus className="w-3 h-3" />
-                  </button>
-                </div>
-              ))}
-            </div>
-          </div>
-        )}
-
-        {/* Interactive AR/360 Try-On Quick Link */}
-        {!isFood && (
-          <div className="pt-2">
+        <div className="pt-3.5 border-t border-neutral-100 dark:border-slate-800 flex items-center justify-between">
+          <span className="text-xl font-mono font-black text-black dark:text-white">₵{product.price.toFixed(2)}</span>
+          {product.stock === 0 ? (
             <button
-              onClick={() => onViewDetail?.(product, 'tryon')}
-              className="w-full bg-slate-900 hover:bg-indigo-600 text-indigo-400 hover:text-white border border-indigo-500/35 hover:border-indigo-600 py-2.5 rounded-2xl text-[10px] font-black tracking-widest uppercase transition-all duration-300 flex items-center justify-center gap-2 shadow-inner cursor-pointer"
+              onClick={(e) => { e.stopPropagation(); onNotifyMe?.(product); }}
+              className="bg-neutral-800 hover:bg-neutral-700 text-white px-5 py-2.5 rounded-xl text-xs font-bold tracking-wider transition-all duration-300 flex items-center gap-1.5 shadow-md cursor-pointer"
             >
-              <span className="text-xs animate-pulse filter drop-shadow-[0_0_2px_rgba(245,158,11,0.5)]">🎗️</span>
-              <span>AR Try-On & Interactive 3D</span>
+              <Bell className="w-3.5 h-3.5" />
+              Notify Me
             </button>
-          </div>
-        )}
-
-        <div className="pt-3.5 border-t border-neutral-100 flex items-center justify-between">
-          <span className="text-xl font-mono font-black text-black">₵{product.price.toFixed(2)}</span>
-          <button
-            onClick={handleAddClick}
-            disabled={product.stock === 0}
-            className="bg-indigo-600 hover:bg-indigo-500 disabled:bg-neutral-100 disabled:text-neutral-400 text-white px-5 py-2.5 rounded-xl text-xs font-bold tracking-wider transition-all duration-300 flex items-center gap-1.5 shadow-md shadow-indigo-600/10 disabled:shadow-none disabled:opacity-40 cursor-pointer"
-          >
-            <ShoppingBag className="w-3.5 h-3.5" />
-            {product.stock === 0 ? "Sold Out" : "Add to Bag"}
-          </button>
+          ) : (
+            <button
+              onClick={handleAddClick}
+              className="bg-indigo-600 hover:bg-indigo-500 text-white px-5 py-2.5 rounded-xl text-xs font-bold tracking-wider transition-all duration-300 flex items-center gap-1.5 shadow-md shadow-indigo-600/10 cursor-pointer"
+            >
+              <ShoppingBag className="w-3.5 h-3.5" />
+              Add to Bag
+            </button>
+          )}
         </div>
       </div>
     </div>

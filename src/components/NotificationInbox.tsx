@@ -79,11 +79,11 @@ export default function NotificationInbox({
             animate={{ y: 0, opacity: 1 }}
             exit={{ y: "100%", opacity: 0 }}
             transition={{ type: "spring", damping: 25, stiffness: 200 }}
-            className="fixed bottom-0 left-0 right-0 max-h-[85vh] bg-white rounded-t-3xl shadow-2xl z-50 border-t border-neutral-200 overflow-hidden flex flex-col md:max-w-2xl md:mx-auto"
+            className="fixed bottom-0 left-0 right-0 max-h-[85vh] bg-white dark:bg-slate-900 rounded-t-3xl shadow-2xl z-50 border-t border-neutral-200 dark:border-slate-700 overflow-hidden flex flex-col md:max-w-2xl md:mx-auto"
             id="notification-drawer"
           >
             {/* Header */}
-            <div className="flex justify-between items-center px-6 py-5 border-b border-neutral-150 bg-slate-50">
+            <div className="flex justify-between items-center px-6 py-5 border-b border-neutral-150 dark:border-slate-800 bg-slate-50">
               <div className="flex items-center gap-2">
                 <div className="p-2 bg-indigo-50 rounded-xl">
                   <Bell className="w-5 h-5 text-indigo-600 animate-swing" />
@@ -131,7 +131,7 @@ export default function NotificationInbox({
                       )}`}
                     >
                       <div className="flex gap-3 items-start">
-                        <div className="mt-0.5 p-1.5 bg-white rounded-lg shadow-sm border border-neutral-100">
+                        <div className="mt-0.5 p-1.5 bg-white dark:bg-slate-900 rounded-lg shadow-sm border border-neutral-100 dark:border-slate-800">
                           {getIcon(n.type)}
                         </div>
                         <div className="space-y-1">

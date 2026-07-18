@@ -555,24 +555,24 @@ export default function OrderHistory({
   return (
     <div className="fixed inset-0 bg-slate-950/80 backdrop-blur-sm z-50 flex justify-end animate-in fade-in duration-300" id="order-history-panel">
       {/* Sidebar Container */}
-      <div className="w-full max-w-lg bg-white h-full flex flex-col shadow-2xl border-l border-neutral-100">
+      <div className="w-full max-w-lg bg-white dark:bg-slate-900 h-full flex flex-col shadow-2xl border-l border-neutral-100 dark:border-slate-800">
         
         {/* Header */}
-        <header className="p-6 border-b border-neutral-100 flex items-center justify-between bg-neutral-50/50">
+        <header className="p-6 border-b border-neutral-100 dark:border-slate-800 flex items-center justify-between bg-neutral-50/50">
             <div className="flex items-center gap-2.5">
             <div className="w-10 h-10 rounded-full bg-indigo-50 border border-indigo-100 flex items-center justify-center text-indigo-600">
               <ShoppingBag className="w-5 h-5" />
             </div>
             <div>
-              <h2 className="font-sans text-lg font-extrabold text-black tracking-tight">Chart History</h2>
-              <p className="text-[11px] text-neutral-500 font-medium">View all your previous shopping & payment records</p>
+              <h2 className="font-sans text-lg font-extrabold text-black dark:text-white tracking-tight">Chart History</h2>
+              <p className="text-[11px] text-neutral-500 dark:text-slate-400 font-medium">View all your previous shopping & payment records</p>
             </div>
           </div>
           <div className="flex items-center gap-2">
             {selectedOrders.length > 0 && (
               <button 
                 onClick={handleBulkPrint}
-                className="flex items-center gap-1.5 text-[10px] bg-amber-500 hover:bg-amber-600 text-neutral-900 font-black px-3 py-2 rounded-lg transition-all cursor-pointer shadow-sm active:scale-95"
+                className="flex items-center gap-1.5 text-[10px] bg-amber-500 hover:bg-amber-600 text-neutral-900 dark:text-slate-100 font-black px-3 py-2 rounded-lg transition-all cursor-pointer shadow-sm active:scale-95"
               >
                 <Printer className="w-3.5 h-3.5" />
                 Bulk Print ({selectedOrders.length})
@@ -580,7 +580,7 @@ export default function OrderHistory({
             )}
             <button 
               onClick={onClose}
-              className="w-9 h-9 rounded-full hover:bg-neutral-100 flex items-center justify-center text-neutral-500 hover:text-black transition-colors border border-neutral-200/60 cursor-pointer"
+              className="w-9 h-9 rounded-full hover:bg-neutral-100 dark:bg-slate-800 flex items-center justify-center text-neutral-500 dark:text-slate-400 hover:text-black dark:text-white transition-colors border border-neutral-200/60 cursor-pointer"
               title="Close Panel"
               id="close-order-history-btn"
             >
@@ -590,13 +590,13 @@ export default function OrderHistory({
         </header>
 
         {/* Tab Switcher */}
-        <div className="px-6 pt-4 pb-2 border-b border-neutral-100 flex gap-2">
+        <div className="px-6 pt-4 pb-2 border-b border-neutral-100 dark:border-slate-800 flex gap-2">
           <button
             onClick={() => setActiveTab("orders")}
             className={`flex-1 py-2 rounded-xl text-xs font-black uppercase tracking-wider transition-all cursor-pointer flex items-center justify-center gap-2 border ${
               activeTab === "orders" 
                 ? "bg-indigo-600 text-white border-indigo-600 shadow-md" 
-                : "bg-neutral-50 text-neutral-600 border-neutral-200 hover:bg-neutral-100"
+                : "bg-neutral-50 dark:bg-slate-950 text-neutral-600 dark:text-slate-400 border-neutral-200 dark:border-slate-700 hover:bg-neutral-100 dark:bg-slate-800"
             }`}
             id="tab-history-orders"
           >
@@ -608,7 +608,7 @@ export default function OrderHistory({
             className={`flex-1 py-2 rounded-xl text-xs font-black uppercase tracking-wider transition-all cursor-pointer flex items-center justify-center gap-2 border ${
               activeTab === "payments" 
                 ? "bg-indigo-600 text-white border-indigo-600 shadow-md" 
-                : "bg-neutral-50 text-neutral-600 border-neutral-200 hover:bg-neutral-100"
+                : "bg-neutral-50 dark:bg-slate-950 text-neutral-600 dark:text-slate-400 border-neutral-200 dark:border-slate-700 hover:bg-neutral-100 dark:bg-slate-800"
             }`}
             id="tab-history-payments"
           >
@@ -620,9 +620,9 @@ export default function OrderHistory({
         {/* Content Body */}
         <div className="flex-1 overflow-y-auto p-6 space-y-6">
           {/* CUSTOMER PROFILE CARD WITH ACTIVE AVATAR AND IMAGE UPDATE */}
-          <div className="bg-neutral-50 rounded-2xl p-4 border border-neutral-200/60 flex items-center gap-3.5 relative overflow-hidden shadow-sm">
+          <div className="bg-neutral-50 dark:bg-slate-950 rounded-2xl p-4 border border-neutral-200/60 flex items-center gap-3.5 relative overflow-hidden shadow-sm">
             <div className="relative group shrink-0">
-              <div className="w-12 h-12 rounded-full overflow-hidden border-2 border-indigo-150 bg-neutral-100 flex items-center justify-center shadow-md">
+              <div className="w-12 h-12 rounded-full overflow-hidden border-2 border-indigo-150 bg-neutral-100 dark:bg-slate-800 flex items-center justify-center shadow-md">
                 {currentUserAvatar ? (
                   <img src={currentUserAvatar} alt={currentUser} className="w-full h-full object-cover" />
                 ) : (
@@ -669,14 +669,14 @@ export default function OrderHistory({
               <span className="text-[8px] font-black text-indigo-600 bg-indigo-50 border border-indigo-100/60 px-2 py-0.5 rounded-full uppercase tracking-wider font-mono">
                 Bespoke Customer
               </span>
-              <h3 className="font-sans text-xs font-black text-neutral-800 uppercase tracking-wide">{currentUser}</h3>
-              <p className="text-[10px] text-neutral-500 font-semibold truncate max-w-[200px]">{currentUserEmail}</p>
+              <h3 className="font-sans text-xs font-black text-neutral-800 dark:text-slate-200 uppercase tracking-wide">{currentUser}</h3>
+              <p className="text-[10px] text-neutral-500 dark:text-slate-400 font-semibold truncate max-w-[200px]">{currentUserEmail}</p>
               
               {/* Loyalty Points display in the Profile Sidebar Card */}
-              <div className="mt-2 pt-1.5 border-t border-dashed border-neutral-200 flex items-center justify-between">
+              <div className="mt-2 pt-1.5 border-t border-dashed border-neutral-200 dark:border-slate-700 flex items-center justify-between">
                 <div className="flex items-center gap-1">
                   <span className="text-xs">🪙</span>
-                  <span className="text-[10px] font-bold text-neutral-500 uppercase tracking-wide">Loyalty Balance:</span>
+                  <span className="text-[10px] font-bold text-neutral-500 dark:text-slate-400 uppercase tracking-wide">Loyalty Balance:</span>
                 </div>
                 <span className="text-xs font-extrabold text-amber-600 font-mono bg-amber-50 px-2 py-0.5 rounded-full border border-amber-100">
                   {matchedCustomer?.loyaltyPoints ?? 0} Points
@@ -685,7 +685,7 @@ export default function OrderHistory({
               {matchedCustomer && matchedCustomer.loyaltyPoints >= 10 && (
                 <button
                   onClick={() => onRedeemPoints(matchedCustomer.id)}
-                  className="mt-2 w-full bg-amber-500 hover:bg-amber-600 text-neutral-900 font-black text-[10px] uppercase py-1.5 rounded-lg shadow-sm transition-all"
+                  className="mt-2 w-full bg-amber-500 hover:bg-amber-600 text-neutral-900 dark:text-slate-100 font-black text-[10px] uppercase py-1.5 rounded-lg shadow-sm transition-all"
                 >
                   Redeem 30% Off
                 </button>
@@ -704,12 +704,12 @@ export default function OrderHistory({
               >
                 {filteredOrders.length === 0 ? (
                   <div className="text-center py-20 text-neutral-400 space-y-3">
-                    <div className="w-16 h-16 bg-neutral-100 rounded-full flex items-center justify-center mx-auto text-neutral-300">
+                    <div className="w-16 h-16 bg-neutral-100 dark:bg-slate-800 rounded-full flex items-center justify-center mx-auto text-neutral-300">
                       <ShoppingBag className="w-8 h-8" />
                     </div>
                     <div>
-                      <p className="text-sm font-bold text-neutral-700">No Orders Placed Yet</p>
-                      <p className="text-xs text-neutral-500 max-w-xs mx-auto mt-1">
+                      <p className="text-sm font-bold text-neutral-700 dark:text-slate-300">No Orders Placed Yet</p>
+                      <p className="text-xs text-neutral-500 dark:text-slate-400 max-w-xs mx-auto mt-1">
                         When you select designs from the catalog and checkout, your orders will appear here.
                       </p>
                     </div>
@@ -721,7 +721,7 @@ export default function OrderHistory({
                     return (
                       <div 
                         key={order.id} 
-                        className="bg-white border border-neutral-200/80 rounded-2xl p-5 shadow-sm space-y-4 hover:shadow-md transition-shadow relative overflow-hidden"
+                        className="bg-white dark:bg-slate-900 border border-neutral-200/80 rounded-2xl p-5 shadow-sm space-y-4 hover:shadow-md transition-shadow relative overflow-hidden"
                       >
                         <div className="absolute top-4 left-4 z-10">
                           <input 
@@ -732,12 +732,12 @@ export default function OrderHistory({
                           />
                         </div>
                         {/* Card Header */}
-                        <div className="flex justify-between items-start border-b border-neutral-100 pb-3 pl-6">
+                        <div className="flex justify-between items-start border-b border-neutral-100 dark:border-slate-800 pb-3 pl-6">
                           <div className="space-y-0.5">
                             <span className="text-[10px] font-mono font-bold text-indigo-600 uppercase">
                               Order ID: #{order.id.slice(-6).toUpperCase()}
                             </span>
-                            <div className="flex items-center gap-1.5 text-xs text-neutral-500 font-medium">
+                            <div className="flex items-center gap-1.5 text-xs text-neutral-500 dark:text-slate-400 font-medium">
                               <Calendar className="w-3.5 h-3.5" />
                               <span>{order.date}</span>
                             </div>
@@ -745,7 +745,7 @@ export default function OrderHistory({
                           
                           <div className="text-right flex flex-col items-end gap-2">
                             <div>
-                              <span className="text-sm font-black text-black">
+                              <span className="text-sm font-black text-black dark:text-white">
                                 GH₵ {order.total.toLocaleString()}
                               </span>
                               <p className="text-[9px] text-neutral-400 uppercase tracking-widest font-black">Total Paid</p>
@@ -753,7 +753,7 @@ export default function OrderHistory({
                             {isCustomerOnly && (
                               <button 
                                 onClick={() => printOrderInvoice(order)}
-                                className="flex items-center gap-1 text-[10px] bg-neutral-900 hover:bg-amber-500 hover:text-neutral-900 text-white font-bold px-2.5 py-1.5 rounded-md transition-colors cursor-pointer shadow-sm active:scale-95"
+                                className="flex items-center gap-1 text-[10px] bg-neutral-900 hover:bg-amber-500 hover:text-neutral-900 dark:text-slate-100 text-white font-bold px-2.5 py-1.5 rounded-md transition-colors cursor-pointer shadow-sm active:scale-95"
                               >
                                 <Printer className="w-3 h-3" />
                                 Print Invoice
@@ -767,7 +767,7 @@ export default function OrderHistory({
                           <p className="text-[10px] font-bold text-neutral-400 uppercase tracking-wider">Purchased Styles</p>
                           <ul className="space-y-1">
                             {order.items.map((item, idx) => (
-                              <li key={idx} className="text-xs font-semibold text-neutral-800 flex items-center gap-1.5">
+                              <li key={idx} className="text-xs font-semibold text-neutral-800 dark:text-slate-200 flex items-center gap-1.5">
                                 <span className="text-indigo-500">✦</span>
                                 <span>{item}</span>
                               </li>
@@ -792,7 +792,7 @@ export default function OrderHistory({
                         )}
 
                         {/* Visual Progress Status Indicator */}
-                        <div className="pt-3 border-t border-neutral-100 space-y-3">
+                        <div className="pt-3 border-t border-neutral-100 dark:border-slate-800 space-y-3">
                           <p className="text-[10px] font-bold text-neutral-400 uppercase tracking-wider">Order Tracking Status</p>
                           
                           {order.status === "cancelled" ? (
@@ -803,7 +803,7 @@ export default function OrderHistory({
                           ) : (
                             <div className="relative pt-1">
                               {/* Connector Lines */}
-                              <div className="absolute top-[14px] left-[10%] right-[10%] h-[2px] bg-neutral-100 -z-10" />
+                              <div className="absolute top-[14px] left-[10%] right-[10%] h-[2px] bg-neutral-100 dark:bg-slate-800 -z-10" />
                               <div 
                                 className="absolute top-[14px] left-[10%] h-[2px] bg-emerald-500 -z-10 transition-all duration-500"
                                 style={{ 
@@ -818,7 +818,7 @@ export default function OrderHistory({
                                   <div className={`w-7 h-7 rounded-full flex items-center justify-center border text-xs font-bold transition-all duration-300 ${
                                     step >= 1 
                                       ? "bg-emerald-500 border-emerald-500 text-white shadow-sm shadow-emerald-500/20" 
-                                      : "bg-white border-neutral-200 text-neutral-400"
+                                      : "bg-white dark:bg-slate-900 border-neutral-200 dark:border-slate-700 text-neutral-400"
                                   }`}>
                                     <Clock className="w-3.5 h-3.5" />
                                   </div>
@@ -832,7 +832,7 @@ export default function OrderHistory({
                                   <div className={`w-7 h-7 rounded-full flex items-center justify-center border text-xs font-bold transition-all duration-300 ${
                                     step >= 2 
                                       ? "bg-emerald-500 border-emerald-500 text-white shadow-sm shadow-emerald-500/20" 
-                                      : "bg-white border-neutral-200 text-neutral-400"
+                                      : "bg-white dark:bg-slate-900 border-neutral-200 dark:border-slate-700 text-neutral-400"
                                   }`}>
                                     <Truck className="w-3.5 h-3.5" />
                                   </div>
@@ -846,7 +846,7 @@ export default function OrderHistory({
                                   <div className={`w-7 h-7 rounded-full flex items-center justify-center border text-xs font-bold transition-all duration-300 ${
                                     step >= 3 
                                       ? "bg-emerald-500 border-emerald-500 text-white shadow-sm shadow-emerald-500/20" 
-                                      : "bg-white border-neutral-200 text-neutral-400"
+                                      : "bg-white dark:bg-slate-900 border-neutral-200 dark:border-slate-700 text-neutral-400"
                                   }`}>
                                     <PackageCheck className="w-3.5 h-3.5" />
                                   </div>
@@ -873,12 +873,12 @@ export default function OrderHistory({
               >
                 {filteredPayments.length === 0 ? (
                   <div className="text-center py-20 text-neutral-400 space-y-3">
-                    <div className="w-16 h-16 bg-neutral-100 rounded-full flex items-center justify-center mx-auto text-neutral-300">
+                    <div className="w-16 h-16 bg-neutral-100 dark:bg-slate-800 rounded-full flex items-center justify-center mx-auto text-neutral-300">
                       <CreditCard className="w-8 h-8" />
                     </div>
                     <div>
-                      <p className="text-sm font-bold text-neutral-700">No Payments Made Yet</p>
-                      <p className="text-xs text-neutral-500 max-w-xs mx-auto mt-1">
+                      <p className="text-sm font-bold text-neutral-700 dark:text-slate-300">No Payments Made Yet</p>
+                      <p className="text-xs text-neutral-500 dark:text-slate-400 max-w-xs mx-auto mt-1">
                         Your successful checkout transactions and MoMo / Cash payments will be cataloged here.
                       </p>
                     </div>
@@ -887,7 +887,7 @@ export default function OrderHistory({
                   filteredPayments.map(payment => (
                     <div 
                       key={payment.id} 
-                      className="bg-neutral-50/50 border border-neutral-200 rounded-2xl p-4.5 flex items-center justify-between gap-4"
+                      className="bg-neutral-50/50 border border-neutral-200 dark:border-slate-700 rounded-2xl p-4.5 flex items-center justify-between gap-4"
                     >
                       <div className="flex items-center gap-3">
                         <div className={`w-10 h-10 rounded-full border flex items-center justify-center ${
@@ -898,10 +898,10 @@ export default function OrderHistory({
                           <CreditCard className="w-4 h-4" />
                         </div>
                         <div className="space-y-0.5">
-                          <p className="text-xs font-black text-neutral-800 uppercase tracking-tight">
+                          <p className="text-xs font-black text-neutral-800 dark:text-slate-200 uppercase tracking-tight">
                             {(payment.method || '').toUpperCase()} Payment
                           </p>
-                          <div className="flex items-center gap-1.5 text-[10px] text-neutral-500 font-medium">
+                          <div className="flex items-center gap-1.5 text-[10px] text-neutral-500 dark:text-slate-400 font-medium">
                             <span className="font-mono">ID: #{payment.id.slice(-6).toUpperCase()}</span>
                             <span>•</span>
                             <span>{payment.date}</span>
@@ -910,7 +910,7 @@ export default function OrderHistory({
                       </div>
 
                       <div className="text-right space-y-1">
-                        <span className="text-xs font-black text-neutral-900 block">
+                        <span className="text-xs font-black text-neutral-900 dark:text-slate-100 block">
                           GH₵ {payment.amount.toLocaleString()}
                         </span>
                         <span className={`px-2 py-0.5 rounded-full text-[9px] font-black tracking-wider uppercase border inline-block ${
@@ -923,9 +923,9 @@ export default function OrderHistory({
                         {isCustomerOnly && (
                           <button 
                             onClick={() => printPaymentReceipt(payment)}
-                            className="mt-2 flex items-center gap-1 text-[9px] bg-neutral-900 hover:bg-emerald-500 hover:text-neutral-900 text-white font-bold border border-neutral-800 px-2.5 py-1.5 rounded-md transition-all cursor-pointer ml-auto justify-end shadow-sm active:scale-95 animate-pulse"
+                            className="mt-2 flex items-center gap-1 text-[9px] bg-neutral-900 hover:bg-emerald-500 hover:text-neutral-900 dark:text-slate-100 text-white font-bold border border-neutral-800 px-2.5 py-1.5 rounded-md transition-all cursor-pointer ml-auto justify-end shadow-sm active:scale-95 animate-pulse"
                           >
-                            <Printer className="w-2.5 h-2.5 text-white hover:text-neutral-900" />
+                            <Printer className="w-2.5 h-2.5 text-white hover:text-neutral-900 dark:text-slate-100" />
                             <span>Print Receipt</span>
                           </button>
                         )}
@@ -939,7 +939,7 @@ export default function OrderHistory({
         </div>
 
         {/* Footer info banner */}
-        <footer className="p-5 border-t border-neutral-100 bg-neutral-50/50 text-center text-[10px] text-neutral-400 font-bold tracking-tight">
+        <footer className="p-5 border-t border-neutral-100 dark:border-slate-800 bg-neutral-50/50 text-center text-[10px] text-neutral-400 font-bold tracking-tight">
           Payments are secure via MTN MoMo / Orange Money Integration.
         </footer>
       </div>

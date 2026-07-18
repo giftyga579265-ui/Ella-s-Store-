@@ -1,9 +1,10 @@
+const fs = require('fs');
 
+const css = `
 @import url('https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,300;0,400;0,500;0,600;0,700;1,400&family=Inter:wght@300;400;500;600;700&family=JetBrains+Mono:wght@400;500&display=swap');
 @import "tailwindcss";
 
 @theme {
-
   --font-sans: "Inter", ui-sans-serif, system-ui, sans-serif;
   --font-serif: "Playfair Display", Georgia, serif;
   --font-mono: "JetBrains Mono", monospace;
@@ -24,7 +25,6 @@
 
 @layer base {
   :root {
-
     --my-white: #ffffff;
     --my-neutral-50: #fafafa;
     --my-neutral-100: #f5f5f5;
@@ -39,7 +39,6 @@
     --my-black: #000000;
   }
   .dark {
-
     --my-white: #0f172a;
     --my-neutral-50: #020617;
     --my-neutral-100: #1e293b;
@@ -81,3 +80,7 @@ body {
 }
 
 @custom-variant dark (&:where(.dark, .dark *));
+`;
+
+fs.writeFileSync('src/index.css', css);
+console.log('Fixed css');

@@ -18,7 +18,7 @@ function FormattedMessage({ text }: { text: string }) {
         );
       } else if (part.startsWith("*") && part.endsWith("*")) {
         return (
-          <em key={index} className="text-neutral-900 font-serif font-semibold italic">
+          <em key={index} className="text-neutral-900 dark:text-slate-100 font-serif font-semibold italic">
             {part.slice(1, -1)}
           </em>
         );
@@ -66,7 +66,7 @@ function FormattedMessage({ text }: { text: string }) {
           return (
             <div key={idx} className="flex items-start gap-2.5 my-2 pl-1 leading-relaxed">
               <span className="w-1.5 h-1.5 bg-amber-500 rounded-full shrink-0 mt-1.5 shadow shadow-amber-500/60" />
-              <div className="flex-1 text-[12.5px] font-medium text-neutral-800">
+              <div className="flex-1 text-[12.5px] font-medium text-neutral-800 dark:text-slate-200">
                 {parseInlineStyles(clean)}
               </div>
             </div>
@@ -83,7 +83,7 @@ function FormattedMessage({ text }: { text: string }) {
               <span className="inline-flex items-center justify-center w-5 h-5 rounded-full bg-amber-500/10 border border-amber-500/20 text-amber-600 text-[10px] font-mono font-black shrink-0 mt-0.5">
                 {num}
               </span>
-              <div className="flex-1 pt-0.5 text-[12.5px] font-medium text-neutral-800">
+              <div className="flex-1 pt-0.5 text-[12.5px] font-medium text-neutral-800 dark:text-slate-200">
                 {parseInlineStyles(content)}
               </div>
             </div>
@@ -94,7 +94,7 @@ function FormattedMessage({ text }: { text: string }) {
         if (trimmed.startsWith(">")) {
           const clean = trimmed.replace(/^>\s*/, "");
           return (
-            <blockquote key={idx} className="pl-3.5 border-l-2 border-amber-500 bg-amber-500/5 py-1.5 px-2.5 rounded-r-xl my-2 text-xs text-neutral-700 italic font-medium leading-relaxed">
+            <blockquote key={idx} className="pl-3.5 border-l-2 border-amber-500 bg-amber-500/5 py-1.5 px-2.5 rounded-r-xl my-2 text-xs text-neutral-700 dark:text-slate-300 italic font-medium leading-relaxed">
               {parseInlineStyles(clean)}
             </blockquote>
           );
@@ -102,7 +102,7 @@ function FormattedMessage({ text }: { text: string }) {
 
         // Default: Regular text block
         return (
-          <p key={idx} className="text-neutral-700 font-medium text-[13px] leading-relaxed pl-1 my-1">
+          <p key={idx} className="text-neutral-700 dark:text-slate-300 font-medium text-[13px] leading-relaxed pl-1 my-1">
             {parseInlineStyles(trimmed)}
           </p>
         );
@@ -231,12 +231,12 @@ export default function HaiasiChatbot({ onLogActivity, username }: HaiasiChatbot
 
       {/* Chat Window */}
       {isOpen && (
-        <div className={`fixed z-50 bg-white rounded-2xl shadow-2xl overflow-hidden border border-amber-500/20 flex flex-col animate-in fade-in duration-300 ${isMaximized ? "inset-4" : "bottom-18 left-0 w-[360px] md:w-[400px] h-[520px] absolute"}`}>
+        <div className={`fixed z-50 bg-white dark:bg-slate-900 rounded-2xl shadow-2xl overflow-hidden border border-amber-500/20 flex flex-col animate-in fade-in duration-300 ${isMaximized ? "inset-4" : "bottom-18 left-0 w-[360px] md:w-[400px] h-[520px] absolute"}`}>
           
           {/* Header */}
           <header className="bg-neutral-900 text-white p-4 flex justify-between items-center border-b-2 border-amber-500">
             <div className="flex items-center gap-3">
-              <div className="w-9 h-9 rounded-full bg-amber-500 flex items-center justify-center text-neutral-900 font-bold text-sm shadow-md">
+              <div className="w-9 h-9 rounded-full bg-amber-500 flex items-center justify-center text-neutral-900 dark:text-slate-100 font-bold text-sm shadow-md">
                 H
               </div>
               <div>
@@ -278,12 +278,12 @@ export default function HaiasiChatbot({ onLogActivity, username }: HaiasiChatbot
                 key={msg.id}
                 className={`max-w-[85%] px-4 py-3 rounded-2xl text-[13px] leading-relaxed shadow-sm border ${
                   msg.sender === 'user'
-                    ? 'bg-amber-500 text-neutral-900 font-medium self-end rounded-br-none border-amber-400/40 shadow-amber-500/10'
-                    : 'bg-white text-neutral-800 self-start rounded-bl-none border-neutral-100'
+                    ? 'bg-amber-500 text-neutral-900 dark:text-slate-100 font-medium self-end rounded-br-none border-amber-400/40 shadow-amber-500/10'
+                    : 'bg-white dark:bg-slate-900 text-neutral-800 dark:text-slate-200 self-start rounded-bl-none border-neutral-100 dark:border-slate-800'
                 }`}
               >
                 {msg.sender === 'user' ? (
-                  <div className="whitespace-pre-line font-medium text-neutral-900">
+                  <div className="whitespace-pre-line font-medium text-neutral-900 dark:text-slate-100">
                     {msg.text}
                   </div>
                 ) : (
@@ -293,7 +293,7 @@ export default function HaiasiChatbot({ onLogActivity, username }: HaiasiChatbot
             ))}
             
             {isTyping && (
-              <div className="bg-white border border-neutral-150 rounded-2xl rounded-bl-none px-4 py-3 self-start shadow-sm text-xs text-neutral-500 flex items-center gap-2">
+              <div className="bg-white dark:bg-slate-900 border border-neutral-150 dark:border-slate-800 rounded-2xl rounded-bl-none px-4 py-3 self-start shadow-sm text-xs text-neutral-500 dark:text-slate-400 flex items-center gap-2">
                 <span>Haiasi is styling...</span>
                 <span className="flex gap-1">
                   <span className="w-1.5 h-1.5 bg-neutral-400 rounded-full animate-bounce" />
@@ -306,12 +306,12 @@ export default function HaiasiChatbot({ onLogActivity, username }: HaiasiChatbot
           </div>
 
           {/* Sizing & Slogans suggestions */}
-          <div className="px-4 py-2 bg-white border-t border-neutral-100 flex gap-2 overflow-x-auto scrollbar-none whitespace-nowrap scroll-smooth">
+          <div className="px-4 py-2 bg-white dark:bg-slate-900 border-t border-neutral-100 dark:border-slate-800 flex gap-2 overflow-x-auto scrollbar-none whitespace-nowrap scroll-smooth">
             {suggestionChips.map((chip, idx) => (
               <button
                 key={idx}
                 onClick={() => handleSend(chip.prompt)}
-                className="bg-neutral-100 text-neutral-700 hover:bg-amber-500 hover:text-neutral-900 px-3 py-1.5 rounded-full text-xs font-medium border border-neutral-200 transition-colors cursor-pointer shrink-0"
+                className="bg-neutral-100 dark:bg-slate-800 text-neutral-700 dark:text-slate-300 hover:bg-amber-500 hover:text-neutral-900 dark:text-slate-100 px-3 py-1.5 rounded-full text-xs font-medium border border-neutral-200 dark:border-slate-700 transition-colors cursor-pointer shrink-0"
               >
                 {chip.label}
               </button>
@@ -319,12 +319,12 @@ export default function HaiasiChatbot({ onLogActivity, username }: HaiasiChatbot
           </div>
 
           {/* Chat Inputs */}
-          <div className="p-3 border-t border-neutral-100 bg-white flex flex-col gap-2.5">
+          <div className="p-3 border-t border-neutral-100 dark:border-slate-800 bg-white dark:bg-slate-900 flex flex-col gap-2.5">
             <div className="flex gap-2.5">
               {messages.length > 1 && (
                 <button 
                   onClick={handleClearChat} 
-                  className="w-10 h-10 border border-neutral-200 text-neutral-500 hover:text-red-500 hover:bg-red-50 hover:border-red-200 rounded-full flex items-center justify-center transition-all duration-300 shadow-sm cursor-pointer shrink-0"
+                  className="w-10 h-10 border border-neutral-200 dark:border-slate-700 text-neutral-500 dark:text-slate-400 hover:text-red-500 hover:bg-red-50 hover:border-red-200 rounded-full flex items-center justify-center transition-all duration-300 shadow-sm cursor-pointer shrink-0"
                   title="Delete Chat History"
                   id="delete-chat-bottom-btn"
                 >
@@ -337,18 +337,18 @@ export default function HaiasiChatbot({ onLogActivity, username }: HaiasiChatbot
                 onChange={e => setInput(e.target.value)}
                 onKeyDown={e => e.key === 'Enter' && handleSend(input)}
                 placeholder="Ask me styling, fabrics or design advice..."
-                className="flex-1 px-4 py-2.5 bg-neutral-50 border border-neutral-200 rounded-full text-[13px] focus:outline-none focus:border-amber-500 focus:bg-white transition-all font-medium"
+                className="flex-1 px-4 py-2.5 bg-neutral-50 dark:bg-slate-950 border border-neutral-200 dark:border-slate-700 rounded-full text-[13px] focus:outline-none focus:border-amber-500 focus:bg-white dark:bg-slate-900 transition-all font-medium"
               />
               <button
                 onClick={() => handleSend(input)}
-                className="w-10 h-10 bg-amber-500 text-neutral-900 rounded-full flex items-center justify-center hover:bg-neutral-900 hover:text-white transition-all duration-300 shadow shrink-0 cursor-pointer"
+                className="w-10 h-10 bg-amber-500 text-neutral-900 dark:text-slate-100 rounded-full flex items-center justify-center hover:bg-neutral-900 hover:text-white transition-all duration-300 shadow shrink-0 cursor-pointer"
               >
                 <Send className="w-4 h-4" />
               </button>
             </div>
             <button 
               onClick={() => { setIsOpen(false); setIsMaximized(false); }}
-              className="w-full py-2 text-xs text-neutral-500 hover:text-neutral-900 hover:bg-neutral-100 rounded-lg transition-colors cursor-pointer text-center"
+              className="w-full py-2 text-xs text-neutral-500 dark:text-slate-400 hover:text-neutral-900 dark:text-slate-100 hover:bg-neutral-100 dark:bg-slate-800 rounded-lg transition-colors cursor-pointer text-center"
             >
               Close & Back to Dashboard
             </button>

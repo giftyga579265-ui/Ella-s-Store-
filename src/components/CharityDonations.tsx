@@ -213,7 +213,7 @@ export default function CharityDonations({
         <h2 className="font-sans text-3xl md:text-5xl text-neutral-950 font-black tracking-tight leading-tight">
           Philanthropic Sponsorships
         </h2>
-        <p className="text-neutral-500 text-xs md:text-sm leading-relaxed">
+        <p className="text-neutral-500 dark:text-slate-400 text-xs md:text-sm leading-relaxed">
           At Ella's Store, we believe beauty lies in our communities. A percentage of all boutique couture earnings is split among local children’s homes, education, and health clinics in Accra, Ghana.
         </p>
       </div>
@@ -225,11 +225,11 @@ export default function CharityDonations({
           return (
             <div 
               key={charity.id} 
-              className="bg-white rounded-3xl border border-neutral-200/80 shadow-sm overflow-hidden flex flex-col justify-between hover:border-neutral-300 transition-all hover:shadow-md group animate-in fade-in duration-300"
+              className="bg-white dark:bg-slate-900 rounded-3xl border border-neutral-200/80 shadow-sm overflow-hidden flex flex-col justify-between hover:border-neutral-300 transition-all hover:shadow-md group animate-in fade-in duration-300"
             >
               <div>
                 {/* Image Section */}
-                <div className="relative h-48 bg-neutral-100 overflow-hidden">
+                <div className="relative h-48 bg-neutral-100 dark:bg-slate-800 overflow-hidden">
                   <img 
                     src={charity.imageUrl || "https://images.unsplash.com/photo-1488521787991-ed7bbaae773c?q=80&w=1200&auto=format&fit=crop"} 
                     alt={charity.name}
@@ -245,10 +245,10 @@ export default function CharityDonations({
                 {/* Info block */}
                 <div className="p-6 space-y-4">
                   <div className="space-y-1">
-                    <h3 className="font-sans text-base font-black text-neutral-900 group-hover:text-indigo-600 transition-colors">
+                    <h3 className="font-sans text-base font-black text-neutral-900 dark:text-slate-100 group-hover:text-indigo-600 transition-colors">
                       {charity.name}
                     </h3>
-                    <p className="text-[11px] text-neutral-500 leading-relaxed font-medium">
+                    <p className="text-[11px] text-neutral-500 dark:text-slate-400 leading-relaxed font-medium">
                       {charity.description}
                     </p>
                   </div>
@@ -258,16 +258,16 @@ export default function CharityDonations({
                     <div className="flex justify-between items-end text-xs">
                       <div>
                         <span className="text-neutral-400 text-[10px] uppercase font-mono font-bold block">Current Balance</span>
-                        <span className="font-sans text-neutral-900 font-extrabold text-sm">₵{charity.currentAmount}</span>
+                        <span className="font-sans text-neutral-900 dark:text-slate-100 font-extrabold text-sm">₵{charity.currentAmount}</span>
                       </div>
                       <div className="text-right">
                         <span className="text-neutral-400 text-[10px] uppercase font-mono font-bold block">Funding Goal</span>
-                        <span className="text-neutral-500 font-bold">₵{charity.targetAmount}</span>
+                        <span className="text-neutral-500 dark:text-slate-400 font-bold">₵{charity.targetAmount}</span>
                       </div>
                     </div>
 
                     {/* Progress Bar */}
-                    <div className="relative w-full h-2.5 bg-neutral-100 rounded-full overflow-hidden border border-neutral-200/40">
+                    <div className="relative w-full h-2.5 bg-neutral-100 dark:bg-slate-800 rounded-full overflow-hidden border border-neutral-200/40">
                       <motion.div 
                         initial={{ width: 0 }}
                         animate={{ width: `${progressPercent}%` }}
@@ -306,14 +306,14 @@ export default function CharityDonations({
               initial={{ scale: 0.95, opacity: 0 }}
               animate={{ scale: 1, opacity: 1 }}
               exit={{ scale: 0.95, opacity: 0 }}
-              className="bg-white rounded-3xl border border-neutral-200 shadow-2xl p-6 max-w-md w-full space-y-6"
+              className="bg-white dark:bg-slate-900 rounded-3xl border border-neutral-200 dark:border-slate-700 shadow-2xl p-6 max-w-md w-full space-y-6"
             >
               {/* Header */}
               <div className="space-y-1.5 text-center">
                 <div className="w-12 h-12 rounded-full bg-rose-50 border border-rose-100 flex items-center justify-center text-rose-500 mx-auto">
                   <Heart className="w-6 h-6 animate-pulse" />
                 </div>
-                <h3 className="font-sans text-lg font-black text-neutral-900">Outreach Contribution</h3>
+                <h3 className="font-sans text-lg font-black text-neutral-900 dark:text-slate-100">Outreach Contribution</h3>
                 <p className="text-neutral-400 text-[10px] max-w-[280px] mx-auto">
                   100% of your sponsor contribution goes directly to the {selectedCharity.name} program.
                 </p>
@@ -333,7 +333,7 @@ export default function CharityDonations({
                         className={`py-2 text-xs font-black rounded-xl border transition-all cursor-pointer ${
                           active 
                             ? "bg-indigo-600 text-white border-indigo-600 shadow-md shadow-indigo-600/10" 
-                            : "bg-neutral-50 border-neutral-200 text-neutral-700 hover:bg-neutral-100"
+                            : "bg-neutral-50 dark:bg-slate-950 border-neutral-200 dark:border-slate-700 text-neutral-700 dark:text-slate-300 hover:bg-neutral-100 dark:bg-slate-800"
                         }`}
                       >
                         ₵{preset}
@@ -352,7 +352,7 @@ export default function CharityDonations({
                     type="number" 
                     value={donationAmount} 
                     onChange={e => setDonationAmount(e.target.value)} 
-                    className="w-full pl-8 pr-4 py-2.5 border border-neutral-200 rounded-xl text-xs font-bold text-neutral-900 bg-neutral-50 focus:outline-none focus:border-indigo-500 focus:bg-white"
+                    className="w-full pl-8 pr-4 py-2.5 border border-neutral-200 dark:border-slate-700 rounded-xl text-xs font-bold text-neutral-900 dark:text-slate-100 bg-neutral-50 dark:bg-slate-950 focus:outline-none focus:border-indigo-500 focus:bg-white dark:bg-slate-900"
                     placeholder="Amount"
                     min="1"
                   />
@@ -374,7 +374,7 @@ export default function CharityDonations({
                       momo
                     </div>
                     <div>
-                      <p className="font-black text-xs text-neutral-900">MTN Mobile Money Wallet</p>
+                      <p className="font-black text-xs text-neutral-900 dark:text-slate-100">MTN Mobile Money Wallet</p>
                       <p className="text-[10px] text-amber-800 font-bold">Secure Redirect to Ghana Wallet &bull; Active</p>
                     </div>
                   </div>
@@ -385,15 +385,15 @@ export default function CharityDonations({
                 <button 
                   disabled={loading} 
                   onClick={() => handlePayment('GooglePay')} 
-                  className="w-full p-4 border border-neutral-200 rounded-2xl flex items-center justify-between hover:bg-neutral-50 transition-colors cursor-pointer disabled:opacity-50 text-left group"
+                  className="w-full p-4 border border-neutral-200 dark:border-slate-700 rounded-2xl flex items-center justify-between hover:bg-neutral-50 dark:bg-slate-950 transition-colors cursor-pointer disabled:opacity-50 text-left group"
                 >
                   <div className="flex items-center gap-3">
                     <div className="w-10 h-10 rounded-xl bg-neutral-900 text-white flex items-center justify-center border border-neutral-800 shrink-0 shadow-sm">
                       <CreditCard className="w-5 h-5 text-indigo-400" />
                     </div>
                     <div>
-                      <p className="font-black text-xs text-neutral-900">Google Pay / Stripe</p>
-                      <p className="text-[10px] text-neutral-500">Secure Direct Card Gateway</p>
+                      <p className="font-black text-xs text-neutral-900 dark:text-slate-100">Google Pay / Stripe</p>
+                      <p className="text-[10px] text-neutral-500 dark:text-slate-400">Secure Direct Card Gateway</p>
                     </div>
                   </div>
                   <ChevronRight className="w-4 h-4 text-neutral-400 group-hover:text-indigo-600 group-hover:translate-x-0.5 transition-all" />
@@ -405,7 +405,7 @@ export default function CharityDonations({
                 <button 
                   disabled={loading} 
                   onClick={() => setSelectedCharity(null)} 
-                  className="text-neutral-500 hover:text-neutral-900 text-xs font-bold underline cursor-pointer disabled:opacity-50"
+                  className="text-neutral-500 dark:text-slate-400 hover:text-neutral-900 dark:text-slate-100 text-xs font-bold underline cursor-pointer disabled:opacity-50"
                 >
                   Close & return
                 </button>
@@ -425,7 +425,7 @@ export default function CharityDonations({
             >
               
               {/* Left Panel: MTN Brand Portal */}
-              <div className="flex-1 bg-[#FFCC00] p-8 flex flex-col justify-between text-neutral-900 relative">
+              <div className="flex-1 bg-[#FFCC00] p-8 flex flex-col justify-between text-neutral-900 dark:text-slate-100 relative">
                 {/* Background design accents */}
                 <div className="absolute top-0 right-0 w-32 h-32 bg-amber-400 rounded-full filter blur-xl opacity-30 -mr-16 -mt-16"></div>
                 
@@ -437,11 +437,11 @@ export default function CharityDonations({
                         MTN
                       </div>
                       <div>
-                        <span className="text-[10px] font-black uppercase tracking-widest text-neutral-800 font-mono block">GHANA</span>
+                        <span className="text-[10px] font-black uppercase tracking-widest text-neutral-800 dark:text-slate-200 font-mono block">GHANA</span>
                         <span className="text-[11px] font-extrabold text-neutral-950 block -mt-1">Mobile Money</span>
                       </div>
                     </div>
-                    <div className="bg-neutral-900/10 px-2.5 py-1 rounded-full border border-neutral-900/15 text-[9px] font-black uppercase flex items-center gap-1 text-neutral-900">
+                    <div className="bg-neutral-900/10 px-2.5 py-1 rounded-full border border-neutral-900/15 text-[9px] font-black uppercase flex items-center gap-1 text-neutral-900 dark:text-slate-100">
                       <Lock className="w-3 h-3" />
                       <span>SECURE SSL</span>
                     </div>
@@ -449,18 +449,18 @@ export default function CharityDonations({
 
                   {/* Merchant information block */}
                   <div className="p-5 bg-neutral-900/5 rounded-2xl border border-neutral-900/10 space-y-3">
-                    <p className="text-[10px] font-bold uppercase tracking-wider text-neutral-700 font-mono">Bespoke Merchant Portal</p>
+                    <p className="text-[10px] font-bold uppercase tracking-wider text-neutral-700 dark:text-slate-300 font-mono">Bespoke Merchant Portal</p>
                     <div className="space-y-1">
-                      <p className="text-xs font-black text-neutral-900">ELLA COUTURE OUTREACH</p>
-                      <p className="text-[10px] text-neutral-700">Account ID: <span className="font-mono font-bold">MC-0248899637</span></p>
+                      <p className="text-xs font-black text-neutral-900 dark:text-slate-100">ELLA COUTURE OUTREACH</p>
+                      <p className="text-[10px] text-neutral-700 dark:text-slate-300">Account ID: <span className="font-mono font-bold">MC-0248899637</span></p>
                     </div>
                     <hr className="border-neutral-900/10" />
                     <div className="flex justify-between items-end">
                       <div>
-                        <p className="text-[9px] text-neutral-600 font-bold uppercase">Sponsorship Amount</p>
-                        <p className="text-xl font-black text-neutral-900 font-mono">GHS {parseFloat(donationAmount).toFixed(2)}</p>
+                        <p className="text-[9px] text-neutral-600 dark:text-slate-400 font-bold uppercase">Sponsorship Amount</p>
+                        <p className="text-xl font-black text-neutral-900 dark:text-slate-100 font-mono">GHS {parseFloat(donationAmount).toFixed(2)}</p>
                       </div>
-                      <div className="text-right text-[10px] text-neutral-600 font-bold">
+                      <div className="text-right text-[10px] text-neutral-600 dark:text-slate-400 font-bold">
                         <p>No Fees Applied</p>
                         <p className="text-indigo-900 font-extrabold">Outreach Rate 1:1</p>
                       </div>
@@ -470,11 +470,11 @@ export default function CharityDonations({
 
                 {/* Secure footer info */}
                 <div className="mt-8 space-y-2">
-                  <div className="flex items-center gap-2 text-xs text-neutral-800 font-semibold">
-                    <Shield className="w-4 h-4 text-neutral-900" />
+                  <div className="flex items-center gap-2 text-xs text-neutral-800 dark:text-slate-200 font-semibold">
+                    <Shield className="w-4 h-4 text-neutral-900 dark:text-slate-100" />
                     <span>Bank-grade security authorization</span>
                   </div>
-                  <p className="text-[9px] text-neutral-700 leading-normal">
+                  <p className="text-[9px] text-neutral-700 dark:text-slate-300 leading-normal">
                     This is an active MTN Ghana MoMo secure wallet gateway simulation ensuring instant, real-time Firestore database verification and updates.
                   </p>
                 </div>
@@ -509,7 +509,7 @@ export default function CharityDonations({
                   <form onSubmit={handleMomoSubmitDetails} className="space-y-6">
                     <div className="space-y-1">
                       <h4 className="text-sm font-black text-neutral-100">MoMo Wallet Authentication</h4>
-                      <p className="text-xs text-neutral-500">Provide your MTN mobile phone number & PIN below.</p>
+                      <p className="text-xs text-neutral-500 dark:text-slate-400">Provide your MTN mobile phone number & PIN below.</p>
                     </div>
 
                     {momoError && (
@@ -524,7 +524,7 @@ export default function CharityDonations({
                       <div className="space-y-1">
                         <label className="text-[10px] font-black uppercase tracking-wider text-neutral-400 block font-mono">MTN Ghana Phone Number</label>
                         <div className="relative">
-                          <span className="absolute left-4 top-3 text-xs font-bold text-neutral-500 font-mono">+233</span>
+                          <span className="absolute left-4 top-3 text-xs font-bold text-neutral-500 dark:text-slate-400 font-mono">+233</span>
                           <input 
                             required
                             type="tel" 
@@ -575,7 +575,7 @@ export default function CharityDonations({
                   <form onSubmit={handleMomoVerifyOtp} className="space-y-6">
                     <div className="space-y-1">
                       <h4 className="text-sm font-black text-neutral-100">SMS Verification Code</h4>
-                      <p className="text-xs text-neutral-500">A one-time OTP was sent via SMS to <span className="text-amber-400 font-bold font-mono">{momoPhone}</span>.</p>
+                      <p className="text-xs text-neutral-500 dark:text-slate-400">A one-time OTP was sent via SMS to <span className="text-amber-400 font-bold font-mono">{momoPhone}</span>.</p>
                     </div>
 
                     {momoError && (
@@ -622,7 +622,7 @@ export default function CharityDonations({
                   <div className="space-y-5 flex flex-col items-center">
                     <div className="text-center space-y-1 w-full">
                       <h4 className="text-xs font-black uppercase tracking-wider text-neutral-400 font-mono">Step 4: Push Notification simulation</h4>
-                      <p className="text-[10px] text-neutral-500">We triggered a secure USSD dialog popup on your virtual phone screen below to complete GHS authorization.</p>
+                      <p className="text-[10px] text-neutral-500 dark:text-slate-400">We triggered a secure USSD dialog popup on your virtual phone screen below to complete GHS authorization.</p>
                     </div>
 
                     {/* Highly polished iPhone/Android USSD Emulator */}

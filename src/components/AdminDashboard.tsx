@@ -8,6 +8,8 @@ import {
 import CustomerLiveMap from "./CustomerLiveMap";
 import DeliveryPage from "./DeliveryPage";
 import CharityManager from "./CharityManager";
+// @ts-ignore
+import Logo from "../assets/images/ellas_store_logo_1782860468627.jpg";
 import GarmentExtractor from "./GarmentExtractor";
 import { 
   LayoutDashboard, ShoppingCart, Shirt, Users, User, CreditCard, 
@@ -999,7 +1001,7 @@ export default function AdminDashboard({
           "info"
         );
       }}
-      className="text-xs px-3.5 py-2 rounded-xl border border-neutral-200 bg-white hover:bg-neutral-50 text-neutral-800 transition-all font-bold flex items-center gap-1.5 shadow-sm cursor-pointer inline-flex shrink-0 self-center"
+      className="text-xs px-3.5 py-2 rounded-xl border border-neutral-200 dark:border-slate-700 bg-white dark:bg-slate-900 hover:bg-neutral-50 dark:bg-slate-950 text-neutral-800 dark:text-slate-200 transition-all font-bold flex items-center gap-1.5 shadow-sm cursor-pointer inline-flex shrink-0 self-center"
       title={isPageMaximized ? "Show Sidebar navigation menu" : "Maximize active page workspace"}
     >
       {isPageMaximized ? <Minimize2 className="w-3.5 h-3.5" /> : <Maximize2 className="w-3.5 h-3.5" />}
@@ -1047,7 +1049,7 @@ export default function AdminDashboard({
       {!maximized && (
         <div className="fixed inset-0 bg-slate-950/70 backdrop-blur-sm z-45 animate-in fade-in duration-200" onClick={() => setMinimized(true)} />
       )}
-      <div className={`fixed bg-neutral-100 z-50 flex flex-col ${maximized ? 'inset-0' : 'inset-4 md:inset-10 rounded-3xl shadow-2xl border border-neutral-200 overflow-hidden'}`} id="admin-operations-panel">
+      <div className={`fixed bg-neutral-100 dark:bg-slate-800 z-50 flex flex-col ${maximized ? 'inset-0' : 'inset-4 md:inset-10 rounded-3xl shadow-2xl border border-neutral-200 dark:border-slate-700 overflow-hidden'}`} id="admin-operations-panel">
         {/* Header */}
         <header className="bg-neutral-950 text-white px-6 py-4.5 flex justify-between items-center shadow-md">
           <div className="flex items-center gap-3">
@@ -1057,8 +1059,8 @@ export default function AdminDashboard({
             >
               <Menu className="w-5 h-5" />
             </button>
-            <div className="w-10 h-10 rounded-xl bg-amber-500 flex items-center justify-center text-neutral-900 font-serif font-black text-xl shadow">
-              E
+            <div className="w-10 h-10 rounded-xl overflow-hidden flex items-center justify-center shadow border border-amber-500/30">
+              <img src={Logo} alt="Logo" className="w-full h-full object-cover" />
             </div>
             <div>
               <h1 className="font-serif text-lg tracking-wider">Ella's Store</h1>
@@ -1093,7 +1095,7 @@ export default function AdminDashboard({
 
             <button
               onClick={onClose}
-              className="bg-amber-500 hover:bg-amber-600 text-neutral-900 px-4 py-2 rounded-xl text-xs font-bold tracking-wide transition-all duration-300 shadow flex items-center gap-1.5 cursor-pointer"
+              className="bg-amber-500 hover:bg-amber-600 text-neutral-900 dark:text-slate-100 px-4 py-2 rounded-xl text-xs font-bold tracking-wide transition-all duration-300 shadow flex items-center gap-1.5 cursor-pointer"
               id="admin-logout-btn"
             >
               <LogOut className="w-3.5 h-3.5" />
@@ -1141,16 +1143,16 @@ export default function AdminDashboard({
                       }}
                       className={`w-full flex items-center justify-between px-4 py-3 rounded-xl text-xs font-semibold tracking-wide transition-all duration-300 group ${
                         activeTab === tab.id
-                          ? "bg-amber-500 text-neutral-900 shadow-md font-bold"
+                          ? "bg-amber-500 text-neutral-900 dark:text-slate-100 shadow-md font-bold"
                           : "hover:bg-neutral-800 hover:text-white"
                       }`}
                     >
                       <div className="flex items-center gap-3">
-                        <Icon className={`w-4 h-4 transition-colors group-hover:scale-110 duration-300 ${activeTab === tab.id ? 'text-neutral-900' : 'text-amber-500'}`} />
+                        <Icon className={`w-4 h-4 transition-colors group-hover:scale-110 duration-300 ${activeTab === tab.id ? 'text-neutral-900 dark:text-slate-100' : 'text-amber-500'}`} />
                         <span>{tab.label}</span>
                       </div>
                       {tab.count !== undefined && tab.count > 0 && (
-                        <span className={`px-2 py-0.5 rounded-full text-[9px] font-black font-mono ${activeTab === tab.id ? 'bg-neutral-900 text-white' : 'bg-amber-500 text-neutral-900'}`}>
+                        <span className={`px-2 py-0.5 rounded-full text-[9px] font-black font-mono ${activeTab === tab.id ? 'bg-neutral-900 text-white' : 'bg-amber-500 text-neutral-900 dark:text-slate-100'}`}>
                           {tab.count}
                         </span>
                       )}
@@ -1172,7 +1174,7 @@ export default function AdminDashboard({
               </a>
             </div>
 
-            <div className="px-6 py-4 border-t border-neutral-800 text-[10px] text-neutral-500 font-mono flex flex-col gap-1">
+            <div className="px-6 py-4 border-t border-neutral-800 text-[10px] text-neutral-500 dark:text-slate-400 font-mono flex flex-col gap-1">
               <p>Admin Terminal: Online</p>
               <p className="text-[9px]">Build Version v1.4.2</p>
             </div>
@@ -1180,15 +1182,15 @@ export default function AdminDashboard({
         )}
 
         {/* Dashboard Main Console */}
-        <main className="flex-1 bg-neutral-100 p-8 overflow-y-auto">
+        <main className="flex-1 bg-neutral-100 dark:bg-slate-800 p-8 overflow-y-auto">
           
           {/* TAB 1: Dashboard Overview */}
           {activeTab === "dashboard" && (
             <div className="space-y-8 animate-in fade-in duration-300">
               <div className="border-b border-neutral-250 pb-4 flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4">
                 <div>
-                  <h2 className="font-serif text-2xl text-neutral-900 font-medium">Operations Dashboard Overview</h2>
-                  <p className="text-xs text-neutral-500">Live operational stats and fulfillment pipelines for Ella's Store.</p>
+                  <h2 className="font-serif text-2xl text-neutral-900 dark:text-slate-100 font-medium">Operations Dashboard Overview</h2>
+                  <p className="text-xs text-neutral-500 dark:text-slate-400">Live operational stats and fulfillment pipelines for Ella's Store.</p>
                 </div>
                 <PageToggleBtn />
               </div>
@@ -1210,10 +1212,10 @@ export default function AdminDashboard({
                 ].map((stat, idx) => {
                   const Icon = stat.icon;
                   return (
-                    <div key={idx} className="bg-white p-6 rounded-2xl border border-neutral-200/60 shadow-sm flex items-center justify-between hover:border-amber-500/40 transition-colors group">
+                    <div key={idx} className="bg-white dark:bg-slate-900 p-6 rounded-2xl border border-neutral-200/60 shadow-sm flex items-center justify-between hover:border-amber-500/40 transition-colors group">
                       <div className="space-y-1">
-                        <span className="text-[10px] font-bold tracking-wider text-neutral-500 uppercase">{stat.label}</span>
-                        <h3 className="text-2xl font-serif text-neutral-900 group-hover:text-amber-600 transition-colors duration-300">{stat.val}</h3>
+                        <span className="text-[10px] font-bold tracking-wider text-neutral-500 dark:text-slate-400 uppercase">{stat.label}</span>
+                        <h3 className="text-2xl font-serif text-neutral-900 dark:text-slate-100 group-hover:text-amber-600 transition-colors duration-300">{stat.val}</h3>
                         <p className="text-[10px] text-neutral-400 font-medium">{stat.desc}</p>
                       </div>
                       <div className="w-11 h-10 rounded-xl bg-amber-100 flex items-center justify-center text-amber-600">
@@ -1237,13 +1239,13 @@ export default function AdminDashboard({
               </div>
 
               {/* Database Slate Administration Panel */}
-              <div className="bg-white p-6 rounded-3xl border border-neutral-200/60 shadow-sm space-y-4 animate-in slide-in-from-bottom-2 duration-350">
+              <div className="bg-white dark:bg-slate-900 p-6 rounded-3xl border border-neutral-200/60 shadow-sm space-y-4 animate-in slide-in-from-bottom-2 duration-350">
                 <div>
-                  <h3 className="font-serif text-lg text-neutral-900 font-medium flex items-center gap-2">
-                    <Trash2 className="w-5 h-5 text-neutral-500" />
+                  <h3 className="font-serif text-lg text-neutral-900 dark:text-slate-100 font-medium flex items-center gap-2">
+                    <Trash2 className="w-5 h-5 text-neutral-500 dark:text-slate-400" />
                     Pristine Database & Demo Seeding Controls
                   </h3>
-                  <p className="text-xs text-neutral-500">Ella's store starts as a clean slate for real products. Click below to either purge all live collections or re-seed high-fidelity sample collections.</p>
+                  <p className="text-xs text-neutral-500 dark:text-slate-400">Ella's store starts as a clean slate for real products. Click below to either purge all live collections or re-seed high-fidelity sample collections.</p>
                 </div>
                 <div className="flex flex-wrap gap-3 pt-1">
                   <button
@@ -1266,7 +1268,7 @@ export default function AdminDashboard({
                   <button
                     type="button"
                     onClick={onSeedDemoData}
-                    className="px-4 py-2.5 rounded-xl text-xs font-bold bg-amber-500 text-neutral-900 hover:bg-neutral-900 hover:text-white transition-all shadow cursor-pointer"
+                    className="px-4 py-2.5 rounded-xl text-xs font-bold bg-amber-500 text-neutral-900 dark:text-slate-100 hover:bg-neutral-900 hover:text-white transition-all shadow cursor-pointer"
                   >
                     Seed Elegant Boutique Demo Data
                   </button>
@@ -1290,13 +1292,13 @@ export default function AdminDashboard({
             <div className="space-y-6 animate-in fade-in duration-300">
               <div className="border-b border-neutral-250 pb-4 flex justify-between items-center flex-wrap gap-4">
                 <div>
-                  <h2 className="font-serif text-2xl text-neutral-900 font-medium">Fulfillment Order Queues</h2>
-                  <p className="text-xs text-neutral-500">Approve, route, or archive client checkout transactions.</p>
+                  <h2 className="font-serif text-2xl text-neutral-900 dark:text-slate-100 font-medium">Fulfillment Order Queues</h2>
+                  <p className="text-xs text-neutral-500 dark:text-slate-400">Approve, route, or archive client checkout transactions.</p>
                 </div>
                 <PageToggleBtn />
               </div>
 
-              <div className="bg-white rounded-2xl border border-neutral-200/60 overflow-hidden shadow-sm">
+              <div className="bg-white dark:bg-slate-900 rounded-2xl border border-neutral-200/60 overflow-hidden shadow-sm">
                 <div className="overflow-x-auto">
                   <table className="w-full border-collapse text-left text-xs">
                     <thead>
@@ -1314,10 +1316,10 @@ export default function AdminDashboard({
                       {orders.map(order => (
                         <tr key={order.id} className="hover:bg-neutral-50/50">
                           <td className="p-4 font-mono font-bold text-amber-600">{order.id}</td>
-                          <td className="p-4 font-semibold text-neutral-800">{order.customer}</td>
-                          <td className="p-4 font-medium text-neutral-600">{order.items.join(", ")}</td>
-                          <td className="p-4 font-black font-mono text-neutral-900">₵{order.total.toFixed(2)}</td>
-                          <td className="p-4 font-medium text-neutral-500">{order.date}</td>
+                          <td className="p-4 font-semibold text-neutral-800 dark:text-slate-200">{order.customer}</td>
+                          <td className="p-4 font-medium text-neutral-600 dark:text-slate-400">{order.items.join(", ")}</td>
+                          <td className="p-4 font-black font-mono text-neutral-900 dark:text-slate-100">₵{order.total.toFixed(2)}</td>
+                          <td className="p-4 font-medium text-neutral-500 dark:text-slate-400">{order.date}</td>
                           <td className="p-4">
                             <span className={`px-2.5 py-1 rounded-full text-[10px] font-bold tracking-wide capitalize ${
                               order.status === 'completed' ? 'bg-green-100 text-green-700' :
@@ -1359,7 +1361,7 @@ export default function AdminDashboard({
                                       const cust = customers.find(c => c.name === order.customer);
                                       generateOrderReportPDF(order, cust);
                                     }}
-                                    className="bg-neutral-100 text-neutral-600 p-1.5 rounded-lg hover:bg-neutral-200"
+                                    className="bg-neutral-100 dark:bg-slate-800 text-neutral-600 dark:text-slate-400 p-1.5 rounded-lg hover:bg-neutral-200"
                                     title="Print Invoice"
                                   >
                                     <Printer className="w-4 h-4" />
@@ -1395,8 +1397,8 @@ export default function AdminDashboard({
             <div className="space-y-6 animate-in fade-in duration-300">
               <div className="border-b border-neutral-250 pb-4 flex justify-between items-center flex-wrap gap-4">
                 <div>
-                  <h2 className="font-serif text-2xl text-neutral-900 font-medium">Catalog Product Listings</h2>
-                  <p className="text-xs text-neutral-500">Inject, update, or delete products directly from the store's shelves.</p>
+                  <h2 className="font-serif text-2xl text-neutral-900 dark:text-slate-100 font-medium">Catalog Product Listings</h2>
+                  <p className="text-xs text-neutral-500 dark:text-slate-400">Inject, update, or delete products directly from the store's shelves.</p>
                 </div>
                 
                 <div className="flex items-center gap-3 ml-auto flex-wrap animate-in fade-in">
@@ -1412,7 +1414,7 @@ export default function AdminDashboard({
                       setProductImage("");
                       setShowProductForm(!showProductForm);
                     }}
-                    className="bg-amber-500 text-neutral-900 hover:bg-neutral-950 hover:text-white px-4 py-2.5 rounded-xl text-xs font-bold tracking-wide transition-all shadow-md flex items-center gap-1.5"
+                    className="bg-amber-500 text-neutral-900 dark:text-slate-100 hover:bg-neutral-950 hover:text-white px-4 py-2.5 rounded-xl text-xs font-bold tracking-wide transition-all shadow-md flex items-center gap-1.5"
                   >
                     <Plus className="w-4 h-4" />
                     Add New Product
@@ -1422,30 +1424,30 @@ export default function AdminDashboard({
 
               {/* Product Add/Edit Form Panel */}
               {showProductForm && (
-                <form onSubmit={handleProductSubmit} className="bg-white p-6 rounded-2xl border border-neutral-200/60 shadow-md max-w-2xl animate-in slide-in-from-top-4 duration-300 space-y-4">
-                  <h3 className="font-serif text-lg text-neutral-900 border-b border-neutral-100 pb-2">
+                <form onSubmit={handleProductSubmit} className="bg-white dark:bg-slate-900 p-6 rounded-2xl border border-neutral-200/60 shadow-md max-w-2xl animate-in slide-in-from-top-4 duration-300 space-y-4">
+                  <h3 className="font-serif text-lg text-neutral-900 dark:text-slate-100 border-b border-neutral-100 dark:border-slate-800 pb-2">
                     {editingProductId ? `Edit Catalog Listing (ID: ${editingProductId})` : "Create Catalog Listing"}
                   </h3>
                   
                   <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                     <div className="space-y-1.5">
-                      <label className="text-xs font-semibold text-neutral-600 block">Product Name</label>
+                      <label className="text-xs font-semibold text-neutral-600 dark:text-slate-400 block">Product Name</label>
                       <input
                         type="text"
                         value={productName}
                         onChange={e => setProductName(e.target.value)}
                         placeholder="e.g. Traditional Lace Gown"
-                        className="w-full px-4 py-2.5 text-xs border border-neutral-200 rounded-xl focus:outline-none focus:border-amber-500"
+                        className="w-full px-4 py-2.5 text-xs border border-neutral-200 dark:border-slate-700 rounded-xl focus:outline-none focus:border-amber-500"
                         required
                       />
                     </div>
 
                     <div className="space-y-1.5">
-                      <label className="text-xs font-semibold text-neutral-600 block">Category Group</label>
+                      <label className="text-xs font-semibold text-neutral-600 dark:text-slate-400 block">Category Group</label>
                       <select
                         value={productCategory}
                         onChange={e => setProductCategory(e.target.value)}
-                        className="w-full px-4 py-2.5 text-xs border border-neutral-200 rounded-xl focus:outline-none focus:border-amber-500 bg-white"
+                        className="w-full px-4 py-2.5 text-xs border border-neutral-200 dark:border-slate-700 rounded-xl focus:outline-none focus:border-amber-500 bg-white dark:bg-slate-900"
                       >
                         <option value="dresses">Dresses</option>
                         <option value="accessories">Accessories</option>
@@ -1456,7 +1458,7 @@ export default function AdminDashboard({
                     </div>
 
                     <div className="space-y-1.5">
-                      <label className="text-xs font-semibold text-neutral-600 block">Price in Cedis (₵)</label>
+                      <label className="text-xs font-semibold text-neutral-600 dark:text-slate-400 block">Price in Cedis (₵)</label>
                       <input
                         type="number"
                         value={productPrice}
@@ -1464,39 +1466,39 @@ export default function AdminDashboard({
                         placeholder="e.g. 250"
                         min="0"
                         step="0.01"
-                        className="w-full px-4 py-2.5 text-xs border border-neutral-200 rounded-xl focus:outline-none focus:border-amber-500"
+                        className="w-full px-4 py-2.5 text-xs border border-neutral-200 dark:border-slate-700 rounded-xl focus:outline-none focus:border-amber-500"
                         required
                       />
                     </div>
 
                     <div className="space-y-1.5">
-                      <label className="text-xs font-semibold text-neutral-600 block">Inventory Stock Count</label>
+                      <label className="text-xs font-semibold text-neutral-600 dark:text-slate-400 block">Inventory Stock Count</label>
                       <input
                         type="number"
                         value={productStock}
                         onChange={e => setProductStock(e.target.value)}
                         placeholder="e.g. 15"
                         min="0"
-                        className="w-full px-4 py-2.5 text-xs border border-neutral-200 rounded-xl focus:outline-none focus:border-amber-500"
+                        className="w-full px-4 py-2.5 text-xs border border-neutral-200 dark:border-slate-700 rounded-xl focus:outline-none focus:border-amber-500"
                         required
                       />
                     </div>
                   </div>
 
                   <div className="space-y-1.5">
-                    <label className="text-xs font-semibold text-neutral-600 block">Product Sizing & Details Description</label>
+                    <label className="text-xs font-semibold text-neutral-600 dark:text-slate-400 block">Product Sizing & Details Description</label>
                     <textarea
                       value={productDescription}
                       onChange={e => setProductDescription(e.target.value)}
                       placeholder="Write fabric features, sizing details, colors..."
                       rows={3}
-                      className="w-full px-4 py-2.5 text-xs border border-neutral-200 rounded-xl focus:outline-none focus:border-amber-500"
+                      className="w-full px-4 py-2.5 text-xs border border-neutral-200 dark:border-slate-700 rounded-xl focus:outline-none focus:border-amber-500"
                       required
                     />
                   </div>
 
                   <div className="space-y-1.5">
-                    <label className="text-xs font-semibold text-neutral-600 block font-serif">Product Image Asset</label>
+                    <label className="text-xs font-semibold text-neutral-600 dark:text-slate-400 block font-serif">Product Image Asset</label>
                     <div className="border-2 border-dashed border-neutral-250 p-6 rounded-2xl text-center hover:border-amber-500 transition-colors relative cursor-pointer group bg-neutral-50/50">
                       <input 
                         type="file" 
@@ -1505,10 +1507,10 @@ export default function AdminDashboard({
                         className="absolute inset-0 opacity-0 cursor-pointer w-full h-full"
                       />
                       <ImageIcon className="w-8 h-8 mx-auto text-neutral-400 group-hover:text-amber-500 transition-colors mb-2" />
-                      <p className="text-xs text-neutral-600 font-medium">Click to select product image file (Base64 conversion)</p>
+                      <p className="text-xs text-neutral-600 dark:text-slate-400 font-medium">Click to select product image file (Base64 conversion)</p>
                       {productImage && (
                         <div className="mt-4 max-w-xs mx-auto">
-                          <img src={productImage} alt="Base64 preview" className="rounded-xl border border-neutral-200 shadow-sm max-h-40 object-cover mx-auto" />
+                          <img src={productImage} alt="Base64 preview" className="rounded-xl border border-neutral-200 dark:border-slate-700 shadow-sm max-h-40 object-cover mx-auto" />
                           <p className="text-[9px] text-green-600 mt-1.5 font-bold">✓ Image attached securely</p>
                         </div>
                       )}
@@ -1516,10 +1518,10 @@ export default function AdminDashboard({
                   </div>
 
                   {/* Interactive Elements and AR Virtual Try-On Settings */}
-                  <div className="border border-neutral-200 rounded-2xl p-5 bg-neutral-50/40 space-y-4">
-                    <div className="flex items-center gap-1.5 pb-2 border-b border-neutral-100">
+                  <div className="border border-neutral-200 dark:border-slate-700 rounded-2xl p-5 bg-neutral-50/40 space-y-4">
+                    <div className="flex items-center gap-1.5 pb-2 border-b border-neutral-100 dark:border-slate-800">
                       <Sparkles className="w-4 h-4 text-indigo-500 animate-pulse" />
-                      <h4 className="text-xs font-black uppercase tracking-wider text-neutral-800">
+                      <h4 className="text-xs font-black uppercase tracking-wider text-neutral-800 dark:text-slate-200">
                         Interactive Showcase & AR Try-On
                       </h4>
                     </div>
@@ -1527,7 +1529,7 @@ export default function AdminDashboard({
                     {/* 1. Showcase Video */}
                     <div className="space-y-1.5">
                       <div className="flex justify-between items-center">
-                        <label className="text-xs font-semibold text-neutral-600 block">Showcase Video URL / Embed</label>
+                        <label className="text-xs font-semibold text-neutral-600 dark:text-slate-400 block">Showcase Video URL / Embed</label>
                         <button
                           type="button"
                           onClick={() => setProductVideoUrl("https://assets.mixkit.co/videos/preview/mixkit-beautiful-woman-in-fashion-dress-posing-41838-large.mp4")}
@@ -1541,14 +1543,14 @@ export default function AdminDashboard({
                         value={productVideoUrl}
                         onChange={e => setProductVideoUrl(e.target.value)}
                         placeholder="e.g. https://assets.mixkit.co/.../video.mp4"
-                        className="w-full px-4 py-2 bg-white border border-neutral-200 rounded-xl text-xs focus:outline-none focus:border-indigo-500"
+                        className="w-full px-4 py-2 bg-white dark:bg-slate-900 border border-neutral-200 dark:border-slate-700 rounded-xl text-xs focus:outline-none focus:border-indigo-500"
                       />
                     </div>
 
                     {/* 2. 360-degree Interactive View */}
                     <div className="space-y-1.5">
                       <div className="flex justify-between items-center">
-                        <label className="text-xs font-semibold text-neutral-600 block">360° Frame Sequences (Images)</label>
+                        <label className="text-xs font-semibold text-neutral-600 dark:text-slate-400 block">360° Frame Sequences (Images)</label>
                         <button
                           type="button"
                           onClick={() => setProductImages360([
@@ -1571,7 +1573,7 @@ export default function AdminDashboard({
                         <div className="space-y-2">
                           <div className="grid grid-cols-6 gap-2">
                             {productImages360.map((url, idx) => (
-                              <div key={idx} className="relative aspect-square rounded-lg border border-neutral-200 overflow-hidden bg-white">
+                              <div key={idx} className="relative aspect-square rounded-lg border border-neutral-200 dark:border-slate-700 overflow-hidden bg-white dark:bg-slate-900">
                                 <img src={url} alt={`Angle ${idx + 1}`} className="w-full h-full object-cover" />
                                 <button
                                   type="button"
@@ -1586,7 +1588,7 @@ export default function AdminDashboard({
                           <p className="text-[10px] text-green-600 font-bold">✓ {productImages360.length} rotational frame views successfully mapped</p>
                         </div>
                       ) : (
-                        <div className="p-3 bg-neutral-100/50 text-neutral-500 rounded-xl text-center border border-dashed border-neutral-200 text-[11px]">
+                        <div className="p-3 bg-neutral-100/50 text-neutral-500 dark:text-slate-400 rounded-xl text-center border border-dashed border-neutral-200 dark:border-slate-700 text-[11px]">
                           No 360° rotation sequence active. Tap load preset to configure.
                         </div>
                       )}
@@ -1595,7 +1597,7 @@ export default function AdminDashboard({
                     {/* 3. AR Virtual Try-On Asset */}
                     <div className="space-y-1.5">
                       <div className="flex justify-between items-center">
-                        <label className="text-xs font-semibold text-neutral-600 block">AR Try-on Gown Overlay (Transparent PNG)</label>
+                        <label className="text-xs font-semibold text-neutral-600 dark:text-slate-400 block">AR Try-on Gown Overlay (Transparent PNG)</label>
                         <button
                           type="button"
                           onClick={() => setProductTryOnImage("https://pngimg.com/uploads/dress/dress_PNG20.png")}
@@ -1604,16 +1606,16 @@ export default function AdminDashboard({
                           ✨ Load Demo Gold Gown PNG
                         </button>
                       </div>
-                      <div className="border border-dashed border-neutral-200 p-4 rounded-xl text-center hover:border-indigo-500 transition-colors relative cursor-pointer bg-white">
+                      <div className="border border-dashed border-neutral-200 dark:border-slate-700 p-4 rounded-xl text-center hover:border-indigo-500 transition-colors relative cursor-pointer bg-white dark:bg-slate-900">
                         <input 
                           type="file" 
                           accept="image/png" 
                           onChange={e => handleImageUpload(e, setProductTryOnImage)}
                           className="absolute inset-0 opacity-0 cursor-pointer w-full h-full"
                         />
-                        <span className="text-[11px] text-neutral-600 font-medium">Click to upload transparent garment overlay file (PNG only)</span>
+                        <span className="text-[11px] text-neutral-600 dark:text-slate-400 font-medium">Click to upload transparent garment overlay file (PNG only)</span>
                         {productTryOnImage && (
-                          <div className="mt-3 max-w-[120px] mx-auto relative bg-neutral-100 p-2 rounded-xl border border-neutral-200">
+                          <div className="mt-3 max-w-[120px] mx-auto relative bg-neutral-100 dark:bg-slate-800 p-2 rounded-xl border border-neutral-200 dark:border-slate-700">
                             <img src={productTryOnImage} alt="AR try-on overlay" className="max-h-24 mx-auto object-contain" />
                             <p className="text-[8px] text-indigo-600 mt-1 font-bold">✓ AR Dress Ready</p>
                           </div>
@@ -1625,14 +1627,14 @@ export default function AdminDashboard({
                   <div className="flex gap-3.5 pt-3">
                     <button
                       type="submit"
-                      className="bg-amber-500 hover:bg-amber-600 text-neutral-900 px-5 py-2.5 rounded-xl text-xs font-black tracking-wide transition-all shadow"
+                      className="bg-amber-500 hover:bg-amber-600 text-neutral-900 dark:text-slate-100 px-5 py-2.5 rounded-xl text-xs font-black tracking-wide transition-all shadow"
                     >
                       {editingProductId ? "Update listing" : "Publish to shelves"}
                     </button>
                     <button
                       type="button"
                       onClick={() => setShowProductForm(false)}
-                      className="bg-neutral-100 hover:bg-neutral-200 text-neutral-600 px-5 py-2.5 rounded-xl text-xs font-bold transition-all border border-neutral-200"
+                      className="bg-neutral-100 dark:bg-slate-800 hover:bg-neutral-200 text-neutral-600 dark:text-slate-400 px-5 py-2.5 rounded-xl text-xs font-bold transition-all border border-neutral-200 dark:border-slate-700"
                     >
                       Cancel operations
                     </button>
@@ -1641,7 +1643,7 @@ export default function AdminDashboard({
               )}
 
               {/* Products Table */}
-              <div className="bg-white rounded-2xl border border-neutral-200/60 overflow-hidden shadow-sm">
+              <div className="bg-white dark:bg-slate-900 rounded-2xl border border-neutral-200/60 overflow-hidden shadow-sm">
                 <div className="overflow-x-auto">
                   <table className="w-full border-collapse text-left text-xs">
                     <thead>
@@ -1658,16 +1660,16 @@ export default function AdminDashboard({
                       {products.map(prod => (
                         <tr key={prod.id} className="hover:bg-neutral-50/50">
                           <td className="p-4">
-                            <img src={prod.image} alt={prod.name} className="w-12 h-12 rounded-xl object-cover border border-neutral-200 shadow-sm" />
+                            <img src={prod.image} alt={prod.name} className="w-12 h-12 rounded-xl object-cover border border-neutral-200 dark:border-slate-700 shadow-sm" />
                           </td>
-                          <td className="p-4 font-bold text-neutral-800">
+                          <td className="p-4 font-bold text-neutral-800 dark:text-slate-200">
                             <div>
                               <p className="text-sm font-semibold">{prod.name}</p>
                               <span className="text-[10px] text-neutral-400 font-medium font-serif line-clamp-1">{prod.description}</span>
                             </div>
                           </td>
-                          <td className="p-4 font-semibold text-neutral-600 capitalize">{prod.category}</td>
-                          <td className="p-4 font-black font-mono text-neutral-900">₵{prod.price.toFixed(2)}</td>
+                          <td className="p-4 font-semibold text-neutral-600 dark:text-slate-400 capitalize">{prod.category}</td>
+                          <td className="p-4 font-black font-mono text-neutral-900 dark:text-slate-100">₵{prod.price.toFixed(2)}</td>
                           <td className="p-4">
                             <span className={`px-2.5 py-1 rounded-full text-[10px] font-bold tracking-wide ${
                               prod.stock === 0 ? 'bg-red-100 text-red-700' :
@@ -1681,13 +1683,13 @@ export default function AdminDashboard({
                             <div className="flex justify-center gap-2">
                               <button
                                 onClick={() => startEditProduct(prod)}
-                                className="w-8 h-8 rounded-lg bg-neutral-100 hover:bg-amber-100 text-neutral-700 hover:text-amber-800 flex items-center justify-center transition-colors border border-neutral-200"
+                                className="w-8 h-8 rounded-lg bg-neutral-100 dark:bg-slate-800 hover:bg-amber-100 text-neutral-700 dark:text-slate-300 hover:text-amber-800 flex items-center justify-center transition-colors border border-neutral-200 dark:border-slate-700"
                               >
                                 <Edit className="w-3.5 h-3.5" />
                               </button>
                               <button
                                 onClick={() => handleDeleteProduct(prod.id, prod.name)}
-                                className="w-8 h-8 rounded-lg bg-neutral-100 hover:bg-red-100 text-neutral-700 hover:text-red-750 flex items-center justify-center transition-colors border border-neutral-200"
+                                className="w-8 h-8 rounded-lg bg-neutral-100 dark:bg-slate-800 hover:bg-red-100 text-neutral-700 dark:text-slate-300 hover:text-red-750 flex items-center justify-center transition-colors border border-neutral-200 dark:border-slate-700"
                               >
                                 <Trash2 className="w-3.5 h-3.5" />
                               </button>
@@ -1707,20 +1709,20 @@ export default function AdminDashboard({
             <div className="space-y-6 animate-in fade-in duration-300">
               <div className="flex items-center justify-between border-b border-neutral-250 pb-4">
                 <div>
-                  <h2 className="font-serif text-2xl text-neutral-900 font-medium">Charity Management</h2>
-                  <p className="text-xs text-neutral-500">Create and manage charity projects.</p>
+                  <h2 className="font-serif text-2xl text-neutral-900 dark:text-slate-100 font-medium">Charity Management</h2>
+                  <p className="text-xs text-neutral-500 dark:text-slate-400">Create and manage charity projects.</p>
                 </div>
               </div>
               
               <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-                <div className="bg-white p-6 rounded-2xl border border-neutral-200 shadow-sm">
-                  <h3 className="text-sm font-bold text-neutral-900 mb-4">Charity List</h3>
+                <div className="bg-white dark:bg-slate-900 p-6 rounded-2xl border border-neutral-200 dark:border-slate-700 shadow-sm">
+                  <h3 className="text-sm font-bold text-neutral-900 dark:text-slate-100 mb-4">Charity List</h3>
                   <div className="space-y-2">
                     {charityData.map(c => (
-                      <div key={c.id} className="p-4 border border-neutral-100 rounded-lg flex justify-between items-center">
+                      <div key={c.id} className="p-4 border border-neutral-100 dark:border-slate-800 rounded-lg flex justify-between items-center">
                         <div>
                           <p className="font-bold">{c.name}</p>
-                          <p className="text-xs text-neutral-500">{c.description}</p>
+                          <p className="text-xs text-neutral-500 dark:text-slate-400">{c.description}</p>
                         </div>
                         <p className="font-bold">₵{c.currentAmount} / ₵{c.targetAmount}</p>
                       </div>
@@ -1736,13 +1738,13 @@ export default function AdminDashboard({
             <div className="space-y-6 animate-in fade-in duration-300">
               <div className="flex items-center justify-between border-b border-neutral-250 pb-4">
                 <div>
-                  <h2 className="font-serif text-2xl text-neutral-900 font-medium">Boutique Conference Manager</h2>
-                  <p className="text-xs text-neutral-500">Track and manage live client video fittings, recorded web streams, and text chats.</p>
+                  <h2 className="font-serif text-2xl text-neutral-900 dark:text-slate-100 font-medium">Boutique Conference Manager</h2>
+                  <p className="text-xs text-neutral-500 dark:text-slate-400">Track and manage live client video fittings, recorded web streams, and text chats.</p>
                 </div>
                 {selectedAdminConf && (
                   <button
                     onClick={() => setSelectedAdminConf(null)}
-                    className="px-4 py-2 bg-neutral-100 hover:bg-neutral-200 text-neutral-800 rounded-xl text-xs font-bold transition-all"
+                    className="px-4 py-2 bg-neutral-100 dark:bg-slate-800 hover:bg-neutral-200 text-neutral-800 dark:text-slate-200 rounded-xl text-xs font-bold transition-all"
                   >
                     ← Back to List
                   </button>
@@ -1754,54 +1756,54 @@ export default function AdminDashboard({
                 <div className="space-y-6">
                   {/* Summary Metrics */}
                   <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
-                    <div className="bg-white p-6 rounded-2xl border border-neutral-200 shadow-sm flex items-center gap-4">
+                    <div className="bg-white dark:bg-slate-900 p-6 rounded-2xl border border-neutral-200 dark:border-slate-700 shadow-sm flex items-center gap-4">
                       <div className="w-12 h-12 rounded-xl bg-indigo-50 text-indigo-600 flex items-center justify-center border border-indigo-100 shrink-0">
                         <Video className="w-6 h-6" />
                       </div>
                       <div>
                         <p className="text-[10px] uppercase font-black tracking-wider text-neutral-400 font-mono">Active Rooms</p>
-                        <p className="text-2xl font-bold text-neutral-900">{adminConferences.filter(c => c.status === "active").length}</p>
+                        <p className="text-2xl font-bold text-neutral-900 dark:text-slate-100">{adminConferences.filter(c => c.status === "active").length}</p>
                       </div>
                     </div>
 
-                    <div className="bg-white p-6 rounded-2xl border border-neutral-200 shadow-sm flex items-center gap-4">
+                    <div className="bg-white dark:bg-slate-900 p-6 rounded-2xl border border-neutral-200 dark:border-slate-700 shadow-sm flex items-center gap-4">
                       <div className="w-12 h-12 rounded-xl bg-emerald-50 text-emerald-600 flex items-center justify-center border border-emerald-100 shrink-0">
                         <Film className="w-6 h-6" />
                       </div>
                       <div>
                         <p className="text-[10px] uppercase font-black tracking-wider text-neutral-400 font-mono">Recorded Sessions</p>
-                        <p className="text-2xl font-bold text-neutral-900">{adminConferences.filter(c => c.videoRecordedUrl).length}</p>
+                        <p className="text-2xl font-bold text-neutral-900 dark:text-slate-100">{adminConferences.filter(c => c.videoRecordedUrl).length}</p>
                       </div>
                     </div>
 
-                    <div className="bg-white p-6 rounded-2xl border border-neutral-200 shadow-sm flex items-center gap-4">
+                    <div className="bg-white dark:bg-slate-900 p-6 rounded-2xl border border-neutral-200 dark:border-slate-700 shadow-sm flex items-center gap-4">
                       <div className="w-12 h-12 rounded-xl bg-amber-50 text-amber-600 flex items-center justify-center border border-amber-100 shrink-0">
                         <MessageCircle className="w-6 h-6" />
                       </div>
                       <div>
                         <p className="text-[10px] uppercase font-black tracking-wider text-neutral-400 font-mono">Total Rooms Logged</p>
-                        <p className="text-2xl font-bold text-neutral-900">{adminConferences.length}</p>
+                        <p className="text-2xl font-bold text-neutral-900 dark:text-slate-100">{adminConferences.length}</p>
                       </div>
                     </div>
                   </div>
 
                   {/* Rooms Table */}
-                  <div className="bg-white rounded-2xl border border-neutral-200 shadow-sm overflow-hidden">
-                    <div className="p-4 border-b border-neutral-150 flex items-center justify-between">
-                      <h3 className="text-xs font-black uppercase tracking-wider text-neutral-500">Boutique Call Records</h3>
+                  <div className="bg-white dark:bg-slate-900 rounded-2xl border border-neutral-200 dark:border-slate-700 shadow-sm overflow-hidden">
+                    <div className="p-4 border-b border-neutral-150 dark:border-slate-800 flex items-center justify-between">
+                      <h3 className="text-xs font-black uppercase tracking-wider text-neutral-500 dark:text-slate-400">Boutique Call Records</h3>
                     </div>
 
                     {adminConferences.length === 0 ? (
                       <div className="p-12 text-center text-neutral-400 space-y-2">
                         <VideoOff className="w-10 h-10 mx-auto text-neutral-300" />
-                        <h4 className="font-bold text-neutral-700">No Conference Logs</h4>
+                        <h4 className="font-bold text-neutral-700 dark:text-slate-300">No Conference Logs</h4>
                         <p className="text-xs max-w-sm mx-auto">Call sessions appear here automatically when clients start a fitting room or a live bridal consultation.</p>
                       </div>
                     ) : (
                       <div className="overflow-x-auto">
                         <table className="w-full text-left border-collapse text-xs">
                           <thead>
-                            <tr className="bg-neutral-50 text-neutral-500 border-b border-neutral-200 font-semibold uppercase tracking-wider">
+                            <tr className="bg-neutral-50 dark:bg-slate-950 text-neutral-500 dark:text-slate-400 border-b border-neutral-200 dark:border-slate-700 font-semibold uppercase tracking-wider">
                               <th className="p-4">Room Subject / Topic</th>
                               <th className="p-4">Host Name</th>
                               <th className="p-4">Created At</th>
@@ -1811,18 +1813,18 @@ export default function AdminDashboard({
                               <th className="p-4 text-right">Actions</th>
                             </tr>
                           </thead>
-                          <tbody className="divide-y divide-neutral-100 font-medium text-neutral-700">
+                          <tbody className="divide-y divide-neutral-100 font-medium text-neutral-700 dark:text-slate-300">
                             {adminConferences.map((conf) => (
                               <tr key={conf.id} className="hover:bg-neutral-50/50 transition-colors">
                                 <td className="p-4">
-                                  <span className="font-bold text-neutral-900 block">{conf.name}</span>
+                                  <span className="font-bold text-neutral-900 dark:text-slate-100 block">{conf.name}</span>
                                   <span className="text-[10px] text-neutral-400 font-mono block">ID: {conf.id}</span>
                                 </td>
-                                <td className="p-4 text-neutral-900">{conf.hostName}</td>
-                                <td className="p-4 text-neutral-500">{conf.createdAt}</td>
+                                <td className="p-4 text-neutral-900 dark:text-slate-100">{conf.hostName}</td>
+                                <td className="p-4 text-neutral-500 dark:text-slate-400">{conf.createdAt}</td>
                                 <td className="p-4">
                                   <span className={`px-2 py-0.5 rounded-full text-[9px] font-bold uppercase ${
-                                    conf.status === "active" ? "bg-emerald-100 text-emerald-800" : "bg-neutral-200 text-neutral-600"
+                                    conf.status === "active" ? "bg-emerald-100 text-emerald-800" : "bg-neutral-200 text-neutral-600 dark:text-slate-400"
                                   }`}>
                                     {conf.status}
                                   </span>
@@ -1837,7 +1839,7 @@ export default function AdminDashboard({
                                     <span className="text-neutral-400 font-mono text-[10px]">None</span>
                                   )}
                                 </td>
-                                <td className="p-4 text-center font-bold text-neutral-900">{conf.totalChatsCount || 0}</td>
+                                <td className="p-4 text-center font-bold text-neutral-900 dark:text-slate-100">{conf.totalChatsCount || 0}</td>
                                 <td className="p-4 text-right">
                                   <div className="flex items-center justify-end gap-1.5">
                                     <button
@@ -1853,7 +1855,7 @@ export default function AdminDashboard({
                                           await updateDoc(doc(db, "conferences", conf.id), { status: "ended" });
                                           onShowToast("Call Ended", `Terminated active call for room ID: ${conf.id}`, "info");
                                         }}
-                                        className="px-2 py-1.5 bg-neutral-100 hover:bg-rose-50 text-neutral-600 hover:text-rose-600 rounded-lg text-[10px] font-bold transition-all border border-neutral-200 hover:border-rose-100"
+                                        className="px-2 py-1.5 bg-neutral-100 dark:bg-slate-800 hover:bg-rose-50 text-neutral-600 dark:text-slate-400 hover:text-rose-600 rounded-lg text-[10px] font-bold transition-all border border-neutral-200 dark:border-slate-700 hover:border-rose-100"
                                       >
                                         End Call
                                       </button>
@@ -1865,7 +1867,7 @@ export default function AdminDashboard({
                                           onShowToast("Log Deleted", "Successfully removed call record.", "success");
                                         }
                                       }}
-                                      className="p-1.5 bg-neutral-100 hover:bg-red-50 text-neutral-600 hover:text-red-600 rounded-lg transition-all border border-neutral-200 hover:border-red-100"
+                                      className="p-1.5 bg-neutral-100 dark:bg-slate-800 hover:bg-red-50 text-neutral-600 dark:text-slate-400 hover:text-red-600 rounded-lg transition-all border border-neutral-200 dark:border-slate-700 hover:border-red-100"
                                     >
                                       <Trash2 className="w-3.5 h-3.5" />
                                     </button>
@@ -1884,8 +1886,8 @@ export default function AdminDashboard({
                 <div className="grid grid-cols-1 lg:grid-cols-12 gap-6">
                   {/* Left panel: Video Player & Meta */}
                   <div className="lg:col-span-7 space-y-6">
-                    <div className="bg-white p-6 rounded-2xl border border-neutral-200 shadow-sm space-y-4">
-                      <h3 className="text-sm font-bold text-neutral-900 border-b border-neutral-100 pb-2">
+                    <div className="bg-white dark:bg-slate-900 p-6 rounded-2xl border border-neutral-200 dark:border-slate-700 shadow-sm space-y-4">
+                      <h3 className="text-sm font-bold text-neutral-900 dark:text-slate-100 border-b border-neutral-100 dark:border-slate-800 pb-2">
                         Stored Video Playback
                       </h3>
 
@@ -1896,16 +1898,16 @@ export default function AdminDashboard({
                             controls
                             className="w-full rounded-2xl bg-black aspect-video shadow-md border border-neutral-800"
                           />
-                          <div className="flex justify-between items-center bg-neutral-50 p-3 rounded-xl text-[10px] font-mono text-neutral-500 border border-neutral-100">
+                          <div className="flex justify-between items-center bg-neutral-50 dark:bg-slate-950 p-3 rounded-xl text-[10px] font-mono text-neutral-500 dark:text-slate-400 border border-neutral-100 dark:border-slate-800">
                             <span>Status: Local WebM Blob</span>
                             <span>Duration: {selectedAdminConf.recordingDurationSec || 15} seconds</span>
                           </div>
                         </div>
                       ) : (
-                        <div className="border border-neutral-200/60 rounded-2xl bg-neutral-50 p-10 text-center space-y-3">
+                        <div className="border border-neutral-200/60 rounded-2xl bg-neutral-50 dark:bg-slate-950 p-10 text-center space-y-3">
                           <VideoOff className="w-10 h-10 text-neutral-300 mx-auto" />
-                          <h4 className="font-bold text-neutral-700 text-xs">No Stream Recording Available</h4>
-                          <p className="text-[11px] text-neutral-500 max-w-sm mx-auto">
+                          <h4 className="font-bold text-neutral-700 dark:text-slate-300 text-xs">No Stream Recording Available</h4>
+                          <p className="text-[11px] text-neutral-500 dark:text-slate-400 max-w-sm mx-auto">
                             The client did not record webcam frames during this fitting session, or the session was kept text-only. The complete chat history is archived.
                           </p>
                         </div>
@@ -1913,22 +1915,22 @@ export default function AdminDashboard({
 
                       <div className="space-y-3 pt-2">
                         <h4 className="text-xs font-black uppercase text-neutral-400 font-mono tracking-wider">Session Meta</h4>
-                        <div className="grid grid-cols-2 gap-4 text-xs font-medium text-neutral-600 bg-neutral-50 p-4 rounded-xl border border-neutral-100">
+                        <div className="grid grid-cols-2 gap-4 text-xs font-medium text-neutral-600 dark:text-slate-400 bg-neutral-50 dark:bg-slate-950 p-4 rounded-xl border border-neutral-100 dark:border-slate-800">
                           <div>
                             <span className="text-[10px] text-neutral-400 font-mono block uppercase">Room Subject</span>
-                            <span className="font-bold text-neutral-900">{selectedAdminConf.name}</span>
+                            <span className="font-bold text-neutral-900 dark:text-slate-100">{selectedAdminConf.name}</span>
                           </div>
                           <div>
                             <span className="text-[10px] text-neutral-400 font-mono block uppercase">Conference Room ID</span>
-                            <span className="font-mono text-neutral-800">{selectedAdminConf.id}</span>
+                            <span className="font-mono text-neutral-800 dark:text-slate-200">{selectedAdminConf.id}</span>
                           </div>
                           <div>
                             <span className="text-[10px] text-neutral-400 font-mono block uppercase">Client Host</span>
-                            <span className="text-neutral-900">{selectedAdminConf.hostName}</span>
+                            <span className="text-neutral-900 dark:text-slate-100">{selectedAdminConf.hostName}</span>
                           </div>
                           <div>
                             <span className="text-[10px] text-neutral-400 font-mono block uppercase">Host Email</span>
-                            <span className="text-neutral-900 font-mono">{selectedAdminConf.hostEmail}</span>
+                            <span className="text-neutral-900 dark:text-slate-100 font-mono">{selectedAdminConf.hostEmail}</span>
                           </div>
                         </div>
                       </div>
@@ -1937,10 +1939,10 @@ export default function AdminDashboard({
 
                   {/* Right panel: Chat Transcript */}
                   <div className="lg:col-span-5 space-y-6">
-                    <div className="bg-white p-6 rounded-2xl border border-neutral-200 shadow-sm flex flex-col h-[520px] justify-between">
+                    <div className="bg-white dark:bg-slate-900 p-6 rounded-2xl border border-neutral-200 dark:border-slate-700 shadow-sm flex flex-col h-[520px] justify-between">
                       <div>
-                        <div className="flex items-center justify-between border-b border-neutral-100 pb-3 mb-4">
-                          <h3 className="text-sm font-bold text-neutral-900">Recorded Text Chats</h3>
+                        <div className="flex items-center justify-between border-b border-neutral-100 dark:border-slate-800 pb-3 mb-4">
+                          <h3 className="text-sm font-bold text-neutral-900 dark:text-slate-100">Recorded Text Chats</h3>
                           <span className="px-2.5 py-0.5 bg-indigo-50 text-indigo-700 text-[10px] font-mono font-bold rounded-full">
                             {adminConfChats.length} messages
                           </span>
@@ -1955,16 +1957,16 @@ export default function AdminDashboard({
                             </div>
                           ) : (
                             adminConfChats.map((m) => (
-                              <div key={m.id} className="p-3 bg-neutral-50 border border-neutral-100 rounded-xl space-y-2">
+                              <div key={m.id} className="p-3 bg-neutral-50 dark:bg-slate-950 border border-neutral-100 dark:border-slate-800 rounded-xl space-y-2">
                                 <div className="flex justify-between items-center">
                                   <span className="text-[10px] font-bold text-indigo-600 font-mono">{m.sender}</span>
                                   <span className="text-[9px] text-neutral-400 font-mono">
                                     {m.timestamp ? new Date(m.timestamp.seconds * 1000).toLocaleTimeString([], {hour: '2-digit', minute:'2-digit'}) : "Just now"}
                                   </span>
                                 </div>
-                                <p className="text-xs text-neutral-700 leading-relaxed break-words">{m.text}</p>
+                                <p className="text-xs text-neutral-700 dark:text-slate-300 leading-relaxed break-words">{m.text}</p>
                                 {m.file && (
-                                  <div className="p-2 bg-white border border-neutral-200 rounded-lg space-y-1 max-w-[180px] overflow-hidden text-left">
+                                  <div className="p-2 bg-white dark:bg-slate-900 border border-neutral-200 dark:border-slate-700 rounded-lg space-y-1 max-w-[180px] overflow-hidden text-left">
                                     {m.file.type?.startsWith("image/") ? (
                                       <a href={m.file.url} target="_blank" rel="noreferrer" className="block overflow-hidden rounded">
                                         <img src={m.file.url} alt={m.file.name} className="w-full h-auto max-h-[80px] object-cover rounded" referrerPolicy="no-referrer" />
@@ -1978,9 +1980,9 @@ export default function AdminDashboard({
                                       <div className="flex items-center gap-1.5">
                                         <FileText className="w-4 h-4 text-indigo-400 shrink-0" />
                                         <div className="flex-1 min-w-0">
-                                          <p className="text-[8px] text-neutral-600 truncate font-bold">{m.file.name}</p>
+                                          <p className="text-[8px] text-neutral-600 dark:text-slate-400 truncate font-bold">{m.file.name}</p>
                                         </div>
-                                        <a href={m.file.url} download={m.file.name} className="p-0.5 text-neutral-450 hover:text-neutral-900 bg-neutral-100 rounded" title="Download">
+                                        <a href={m.file.url} download={m.file.name} className="p-0.5 text-neutral-450 hover:text-neutral-900 dark:text-slate-100 bg-neutral-100 dark:bg-slate-800 rounded" title="Download">
                                           <Download className="w-3 h-3" />
                                         </a>
                                       </div>
@@ -1994,7 +1996,7 @@ export default function AdminDashboard({
                       </div>
 
                       {/* Download transcript block */}
-                      <div className="border-t border-neutral-100 pt-4 flex gap-2">
+                      <div className="border-t border-neutral-100 dark:border-slate-800 pt-4 flex gap-2">
                         <button
                           disabled={adminConfChats.length === 0}
                           onClick={() => {
@@ -2028,15 +2030,15 @@ export default function AdminDashboard({
             <div className="space-y-6 animate-in fade-in duration-300">
               <div className="border-b border-neutral-250 pb-4 flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4">
                 <div>
-                  <h2 className="font-serif text-2xl text-neutral-900 font-medium font-bold">Recorded Media Files Locker</h2>
-                  <p className="text-xs text-neutral-500">Secure directory recording customer uploaded images, audio clips, documents, and other conference items.</p>
+                  <h2 className="font-serif text-2xl text-neutral-900 dark:text-slate-100 font-medium font-bold">Recorded Media Files Locker</h2>
+                  <p className="text-xs text-neutral-500 dark:text-slate-400">Secure directory recording customer uploaded images, audio clips, documents, and other conference items.</p>
                 </div>
                 <PageToggleBtn />
               </div>
 
               {/* Statistics Row */}
               <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-5">
-                <div className="bg-white border border-neutral-200 p-5 rounded-2xl shadow-sm flex items-center gap-4">
+                <div className="bg-white dark:bg-slate-900 border border-neutral-200 dark:border-slate-700 p-5 rounded-2xl shadow-sm flex items-center gap-4">
                   <div className="w-12 h-12 bg-indigo-50 text-indigo-600 rounded-xl flex items-center justify-center font-bold">
                     {uploadedFiles.length}
                   </div>
@@ -2046,7 +2048,7 @@ export default function AdminDashboard({
                   </div>
                 </div>
 
-                <div className="bg-white border border-neutral-200 p-5 rounded-2xl shadow-sm flex items-center gap-4">
+                <div className="bg-white dark:bg-slate-900 border border-neutral-200 dark:border-slate-700 p-5 rounded-2xl shadow-sm flex items-center gap-4">
                   <div className="w-12 h-12 bg-emerald-50 text-emerald-600 rounded-xl flex items-center justify-center font-bold">
                     {uploadedFiles.filter(f => f.type?.startsWith("image/")).length}
                   </div>
@@ -2056,7 +2058,7 @@ export default function AdminDashboard({
                   </div>
                 </div>
 
-                <div className="bg-white border border-neutral-200 p-5 rounded-2xl shadow-sm flex items-center gap-4">
+                <div className="bg-white dark:bg-slate-900 border border-neutral-200 dark:border-slate-700 p-5 rounded-2xl shadow-sm flex items-center gap-4">
                   <div className="w-12 h-12 bg-amber-50 text-amber-600 rounded-xl flex items-center justify-center font-bold">
                     {uploadedFiles.filter(f => f.type?.startsWith("audio/")).length}
                   </div>
@@ -2066,7 +2068,7 @@ export default function AdminDashboard({
                   </div>
                 </div>
 
-                <div className="bg-white border border-neutral-200 p-5 rounded-2xl shadow-sm flex items-center gap-4">
+                <div className="bg-white dark:bg-slate-900 border border-neutral-200 dark:border-slate-700 p-5 rounded-2xl shadow-sm flex items-center gap-4">
                   <div className="w-12 h-12 bg-sky-50 text-sky-600 rounded-xl flex items-center justify-center font-bold">
                     {uploadedFiles.filter(f => !f.type?.startsWith("image/") && !f.type?.startsWith("audio/")).length}
                   </div>
@@ -2078,7 +2080,7 @@ export default function AdminDashboard({
               </div>
 
               {/* Filters & Search Control Panel */}
-              <div className="bg-white rounded-2xl border border-neutral-200/60 shadow-sm p-6 space-y-5">
+              <div className="bg-white dark:bg-slate-900 rounded-2xl border border-neutral-200/60 shadow-sm p-6 space-y-5">
                 <div className="flex flex-col md:flex-row justify-between items-start md:items-center gap-4">
                   {/* Filter Pills */}
                   <div className="flex flex-wrap gap-2">
@@ -2094,7 +2096,7 @@ export default function AdminDashboard({
                         className={`px-3.5 py-1.5 rounded-xl text-xs font-semibold tracking-wide transition-all cursor-pointer ${
                           fileFilter === pill.key
                             ? "bg-indigo-600 text-white shadow-sm"
-                            : "bg-neutral-50 hover:bg-neutral-100 text-neutral-600 border border-neutral-200"
+                            : "bg-neutral-50 dark:bg-slate-950 hover:bg-neutral-100 dark:bg-slate-800 text-neutral-600 dark:text-slate-400 border border-neutral-200 dark:border-slate-700"
                         }`}
                       >
                         {pill.label}
@@ -2110,7 +2112,7 @@ export default function AdminDashboard({
                       placeholder="Search files by name, sender..."
                       value={fileSearch}
                       onChange={(e) => setFileSearch(e.target.value)}
-                      className="w-full pl-10 pr-4 py-2 bg-white border border-neutral-200 rounded-xl text-xs focus:outline-none focus:border-indigo-500 font-medium"
+                      className="w-full pl-10 pr-4 py-2 bg-white dark:bg-slate-900 border border-neutral-200 dark:border-slate-700 rounded-xl text-xs focus:outline-none focus:border-indigo-500 font-medium"
                     />
                   </div>
                 </div>
@@ -2120,8 +2122,8 @@ export default function AdminDashboard({
                   <div className="py-16 text-center text-neutral-400 space-y-3">
                     <Video className="w-12 h-12 text-neutral-300 mx-auto animate-pulse" />
                     <div>
-                      <p className="font-serif font-semibold text-neutral-700">No client files recorded yet</p>
-                      <p className="text-xs text-neutral-500 max-w-sm mx-auto mt-1">Files shared in the live Ankara video fitting room will register here permanently without limitation storage space.</p>
+                      <p className="font-serif font-semibold text-neutral-700 dark:text-slate-300">No client files recorded yet</p>
+                      <p className="text-xs text-neutral-500 dark:text-slate-400 max-w-sm mx-auto mt-1">Files shared in the live Ankara video fitting room will register here permanently without limitation storage space.</p>
                     </div>
                   </div>
                 ) : (
@@ -2165,7 +2167,7 @@ export default function AdminDashboard({
                             : new Date(file.uploadedAt || Date.now());
 
                           return (
-                            <div key={file.id} className="bg-neutral-50 border border-neutral-200/60 p-4 rounded-2xl flex flex-col justify-between hover:border-indigo-400/50 hover:shadow-md transition-all group relative">
+                            <div key={file.id} className="bg-neutral-50 dark:bg-slate-950 border border-neutral-200/60 p-4 rounded-2xl flex flex-col justify-between hover:border-indigo-400/50 hover:shadow-md transition-all group relative">
                               <button
                                 onClick={async () => {
                                   if (confirm(`Remove permanently from files log: ${file.name}?`)) {
@@ -2177,7 +2179,7 @@ export default function AdminDashboard({
                                     }
                                   }
                                 }}
-                                className="absolute top-3 right-3 p-1.5 bg-white border border-neutral-100 hover:bg-rose-50 hover:border-rose-200 hover:text-rose-600 text-neutral-400 rounded-lg opacity-0 group-hover:opacity-100 transition-opacity z-10 shadow-sm"
+                                className="absolute top-3 right-3 p-1.5 bg-white dark:bg-slate-900 border border-neutral-100 dark:border-slate-800 hover:bg-rose-50 hover:border-rose-200 hover:text-rose-600 text-neutral-400 rounded-lg opacity-0 group-hover:opacity-100 transition-opacity z-10 shadow-sm"
                                 title="Delete from locker logs"
                               >
                                 <Trash2 className="w-3.5 h-3.5" />
@@ -2185,7 +2187,7 @@ export default function AdminDashboard({
 
                               <div className="space-y-3.5">
                                 {/* Visual Thumbnail preview */}
-                                <div className="aspect-video bg-white border border-neutral-150 rounded-xl overflow-hidden relative flex items-center justify-center">
+                                <div className="aspect-video bg-white dark:bg-slate-900 border border-neutral-150 dark:border-slate-800 rounded-xl overflow-hidden relative flex items-center justify-center">
                                   {isImg ? (
                                     <img src={file.url} alt={file.name} className="w-full h-full object-cover" referrerPolicy="no-referrer" />
                                   ) : isAud ? (
@@ -2196,18 +2198,18 @@ export default function AdminDashboard({
                                   ) : (
                                     <div className="text-center space-y-1">
                                       <FileText className="w-10 h-10 text-indigo-400 mx-auto" />
-                                      <span className="text-[8px] px-1.5 py-0.5 bg-neutral-100 rounded text-neutral-500 font-mono uppercase font-black">{file.type?.split('/')?.[1] || "doc"}</span>
+                                      <span className="text-[8px] px-1.5 py-0.5 bg-neutral-100 dark:bg-slate-800 rounded text-neutral-500 dark:text-slate-400 font-mono uppercase font-black">{file.type?.split('/')?.[1] || "doc"}</span>
                                     </div>
                                   )}
                                 </div>
 
                                 {/* Details info block */}
                                 <div className="space-y-1">
-                                  <h4 className="text-xs font-black text-neutral-800 truncate" title={file.name}>{file.name}</h4>
-                                  <div className="space-y-0.5 text-[10px] text-neutral-500 font-medium">
+                                  <h4 className="text-xs font-black text-neutral-800 dark:text-slate-200 truncate" title={file.name}>{file.name}</h4>
+                                  <div className="space-y-0.5 text-[10px] text-neutral-500 dark:text-slate-400 font-medium">
                                     <p className="flex justify-between">
                                       <span className="text-neutral-400">Shared by:</span>
-                                      <span className="font-bold text-neutral-700 truncate max-w-[120px]">{file.sender}</span>
+                                      <span className="font-bold text-neutral-700 dark:text-slate-300 truncate max-w-[120px]">{file.sender}</span>
                                     </p>
                                     <p className="flex justify-between">
                                       <span className="text-neutral-400">Size / Date:</span>
@@ -2234,7 +2236,7 @@ export default function AdminDashboard({
                                       href={file.url}
                                       target="_blank"
                                       rel="noreferrer"
-                                      className="flex-1 text-center py-1.5 border border-neutral-200 hover:bg-neutral-100 text-[10px] font-bold text-neutral-600 rounded-xl transition-all"
+                                      className="flex-1 text-center py-1.5 border border-neutral-200 dark:border-slate-700 hover:bg-neutral-100 dark:bg-slate-800 text-[10px] font-bold text-neutral-600 dark:text-slate-400 rounded-xl transition-all"
                                     >
                                       Full Screen
                                     </a>
@@ -2265,8 +2267,8 @@ export default function AdminDashboard({
             <div className="space-y-6 animate-in fade-in duration-300">
               <div className="flex items-center justify-between border-b border-neutral-250 pb-4">
                 <div>
-                  <h2 className="font-serif text-2xl text-neutral-900 font-medium">Economic State</h2>
-                  <p className="text-xs text-neutral-500">Overview of collections and performance.</p>
+                  <h2 className="font-serif text-2xl text-neutral-900 dark:text-slate-100 font-medium">Economic State</h2>
+                  <p className="text-xs text-neutral-500 dark:text-slate-400">Overview of collections and performance.</p>
                 </div>
                 <button
                   onClick={handlePrintEconomicReport}
@@ -2282,8 +2284,8 @@ export default function AdminDashboard({
                   <h3 className="text-xs font-bold text-indigo-900 uppercase tracking-wider">Total Collected</h3>
                   <p className="text-4xl font-black text-indigo-950 mt-2">₵{revenue.toFixed(2)}</p>
                 </div>
-                <div className="col-span-2 bg-white p-6 rounded-2xl border border-neutral-200/60 shadow-sm">
-                  <h3 className="text-xs font-bold text-neutral-900 uppercase tracking-wider mb-4">Daily Performance</h3>
+                <div className="col-span-2 bg-white dark:bg-slate-900 p-6 rounded-2xl border border-neutral-200/60 shadow-sm">
+                  <h3 className="text-xs font-bold text-neutral-900 dark:text-slate-100 uppercase tracking-wider mb-4">Daily Performance</h3>
                   <div className="h-48">
                     <ResponsiveContainer width="100%" height="100%">
                       <LineChart data={dailyData}>
@@ -2298,7 +2300,7 @@ export default function AdminDashboard({
                 </div>
               </div>
 
-              <div className="bg-white rounded-2xl border border-neutral-200/60 overflow-hidden shadow-sm">
+              <div className="bg-white dark:bg-slate-900 rounded-2xl border border-neutral-200/60 overflow-hidden shadow-sm">
                 <div className="overflow-x-auto">
                   <table className="w-full border-collapse text-left text-xs">
                     <thead>
@@ -2310,8 +2312,8 @@ export default function AdminDashboard({
                     <tbody>
                       {economicData.map(([name, total]) => (
                         <tr key={name} className="hover:bg-neutral-50/50">
-                          <td className="p-4 font-semibold text-neutral-800">{name}</td>
-                          <td className="p-4 font-black font-mono text-neutral-900">₵{total.toFixed(2)}</td>
+                          <td className="p-4 font-semibold text-neutral-800 dark:text-slate-200">{name}</td>
+                          <td className="p-4 font-black font-mono text-neutral-900 dark:text-slate-100">₵{total.toFixed(2)}</td>
                         </tr>
                       ))}
                     </tbody>
@@ -2326,8 +2328,8 @@ export default function AdminDashboard({
             <div className="space-y-6 animate-in fade-in duration-300">
               <div className="border-b border-neutral-250 pb-4 flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4">
                 <div>
-                  <h2 className="font-serif text-2xl text-neutral-900 font-medium">Customer Relationship Management (CRM)</h2>
-                  <p className="text-xs text-neutral-500">Track registration statistics, order frequencies, and lifetime value metrics. Click on any row to view and extract user data.</p>
+                  <h2 className="font-serif text-2xl text-neutral-900 dark:text-slate-100 font-medium">Customer Relationship Management (CRM)</h2>
+                  <p className="text-xs text-neutral-500 dark:text-slate-400">Track registration statistics, order frequencies, and lifetime value metrics. Click on any row to view and extract user data.</p>
                 </div>
                 <div className="flex items-center gap-3 self-end sm:self-auto">
                   {onDeleteCustomersAndActivities && (
@@ -2346,7 +2348,7 @@ export default function AdminDashboard({
 
               <div className="grid grid-cols-1 lg:grid-cols-3 gap-6 items-start">
                 {/* Left Side: Customers Table */}
-                <div className={`${selectedCustomer ? 'lg:col-span-2' : 'lg:col-span-3'} bg-white rounded-2xl border border-neutral-200/60 overflow-hidden shadow-sm transition-all duration-300`}>
+                <div className={`${selectedCustomer ? 'lg:col-span-2' : 'lg:col-span-3'} bg-white dark:bg-slate-900 rounded-2xl border border-neutral-200/60 overflow-hidden shadow-sm transition-all duration-300`}>
                   <div className="overflow-x-auto">
                     <table className="w-full border-collapse text-left text-xs">
                       <thead>
@@ -2377,8 +2379,8 @@ export default function AdminDashboard({
                               }`}
                             >
                               <td className="p-4 font-mono font-bold text-neutral-400">CRM-{customer.id}</td>
-                              <td className="p-4 font-bold text-neutral-800 flex items-center gap-2">
-                                <div className="w-7 h-7 rounded-full overflow-hidden border border-neutral-250 bg-neutral-100 flex items-center justify-center shrink-0 shadow-inner">
+                              <td className="p-4 font-bold text-neutral-800 dark:text-slate-200 flex items-center gap-2">
+                                <div className="w-7 h-7 rounded-full overflow-hidden border border-neutral-250 bg-neutral-100 dark:bg-slate-800 flex items-center justify-center shrink-0 shadow-inner">
                                   {customer.avatarUrl ? (
                                     <img src={customer.avatarUrl} alt={customer.name} className="w-full h-full object-cover" />
                                   ) : (
@@ -2388,11 +2390,11 @@ export default function AdminDashboard({
                                 <span className="truncate max-w-[120px]">{customer.name}</span>
                                 {selectedCustomer?.id === customer.id && <Check className="w-3.5 h-3.5 text-amber-500" />}
                               </td>
-                              <td className="p-4 font-medium text-neutral-600">{customer.email}</td>
-                              <td className="p-4 font-mono font-medium text-neutral-500">{customer.phone}</td>
+                              <td className="p-4 font-medium text-neutral-600 dark:text-slate-400">{customer.email}</td>
+                              <td className="p-4 font-mono font-medium text-neutral-500 dark:text-slate-400">{customer.phone}</td>
                               <td className="p-4 font-medium text-neutral-400">{customer.registrationDate}</td>
-                              <td className="p-4 text-center font-bold font-mono text-neutral-700">{customer.orders} orders</td>
-                              <td className="p-4 font-black font-mono text-neutral-900">₵{customer.totalSpent.toFixed(2)}</td>
+                              <td className="p-4 text-center font-bold font-mono text-neutral-700 dark:text-slate-300">{customer.orders} orders</td>
+                              <td className="p-4 font-black font-mono text-neutral-900 dark:text-slate-100">₵{customer.totalSpent.toFixed(2)}</td>
                             </tr>
                           ))
                         )}
@@ -2403,10 +2405,10 @@ export default function AdminDashboard({
 
                 {/* Right Side: Selected Customer Details Dossier */}
                 {selectedCustomer && (
-                  <div className="bg-white rounded-2xl border border-neutral-200/60 p-6 shadow-sm space-y-6 animate-in slide-in-from-right-4 duration-350">
-                    <div className="flex justify-between items-start border-b border-neutral-150 pb-4">
+                  <div className="bg-white dark:bg-slate-900 rounded-2xl border border-neutral-200/60 p-6 shadow-sm space-y-6 animate-in slide-in-from-right-4 duration-350">
+                    <div className="flex justify-between items-start border-b border-neutral-150 dark:border-slate-800 pb-4">
                       <div className="flex items-center gap-3">
-                        <div className="w-12 h-12 rounded-full overflow-hidden border border-neutral-200 bg-neutral-100 flex items-center justify-center shrink-0 shadow-md">
+                        <div className="w-12 h-12 rounded-full overflow-hidden border border-neutral-200 dark:border-slate-700 bg-neutral-100 dark:bg-slate-800 flex items-center justify-center shrink-0 shadow-md">
                           {selectedCustomer.avatarUrl ? (
                             <img src={selectedCustomer.avatarUrl} alt={selectedCustomer.name} className="w-full h-full object-cover" />
                           ) : (
@@ -2415,27 +2417,27 @@ export default function AdminDashboard({
                         </div>
                         <div>
                           <span className="text-[10px] font-mono font-bold uppercase text-amber-600">Active CRM Profile</span>
-                          <h3 className="font-serif text-md text-neutral-900 font-bold leading-tight">{selectedCustomer.name}</h3>
+                          <h3 className="font-serif text-md text-neutral-900 dark:text-slate-100 font-bold leading-tight">{selectedCustomer.name}</h3>
                           <p className="text-[10px] text-neutral-400">Registered on {selectedCustomer.registrationDate}</p>
                         </div>
                       </div>
                       <button 
                         onClick={() => setSelectedCustomer(null)}
-                        className="text-neutral-400 hover:text-neutral-600 p-1 bg-neutral-100 hover:bg-neutral-200 rounded-full transition-colors cursor-pointer"
+                        className="text-neutral-400 hover:text-neutral-600 dark:text-slate-400 p-1 bg-neutral-100 dark:bg-slate-800 hover:bg-neutral-200 rounded-full transition-colors cursor-pointer"
                       >
                         <X className="w-3.5 h-3.5" />
                       </button>
                     </div>
 
                     {/* Contact Stats */}
-                    <div className="grid grid-cols-2 gap-3 text-xs bg-neutral-50 p-3 rounded-xl border border-neutral-200/30">
+                    <div className="grid grid-cols-2 gap-3 text-xs bg-neutral-50 dark:bg-slate-950 p-3 rounded-xl border border-neutral-200/30">
                       <div>
                         <span className="text-[9px] text-neutral-400 block font-semibold uppercase">Email</span>
-                        <span className="font-medium text-neutral-800 break-all">{selectedCustomer.email}</span>
+                        <span className="font-medium text-neutral-800 dark:text-slate-200 break-all">{selectedCustomer.email}</span>
                       </div>
                       <div>
                         <span className="text-[9px] text-neutral-400 block font-semibold uppercase">Phone Contact</span>
-                        <span className="font-mono font-medium text-neutral-800 break-all">{selectedCustomer.phone}</span>
+                        <span className="font-mono font-medium text-neutral-800 dark:text-slate-200 break-all">{selectedCustomer.phone}</span>
                       </div>
                     </div>
 
@@ -2443,30 +2445,30 @@ export default function AdminDashboard({
                     <div className="grid grid-cols-2 gap-3 text-xs bg-amber-500/5 p-3 rounded-xl border border-amber-500/10">
                       <div>
                         <span className="text-[9px] text-amber-700 block font-bold uppercase">Customer Location</span>
-                        <span className="font-semibold text-neutral-800 flex items-center gap-1">
+                        <span className="font-semibold text-neutral-800 dark:text-slate-200 flex items-center gap-1">
                           <MapPin className="w-3.5 h-3.5 text-amber-600" />
                           <span>{selectedCustomer.location || "Accra, Ghana"}</span>
                         </span>
                       </div>
                       <div>
                         <span className="text-[9px] text-amber-700 block font-bold uppercase">Last Active Time</span>
-                        <span className="font-mono text-[10px] text-neutral-700">
+                        <span className="font-mono text-[10px] text-neutral-700 dark:text-slate-300">
                           {selectedCustomer.lastActive ? new Date(selectedCustomer.lastActive).toLocaleTimeString([], {hour: '2-digit', minute:'2-digit', second: '2-digit'}) : "Recently"}
                         </span>
                       </div>
                       {selectedCustomer.device && (
                         <div className="col-span-2 border-t border-amber-500/5 pt-2 mt-1">
                           <span className="text-[9px] text-amber-700 block font-bold uppercase font-mono">Device / Platform</span>
-                          <span className="text-[10px] text-neutral-500 truncate block font-mono">{selectedCustomer.device}</span>
+                          <span className="text-[10px] text-neutral-500 dark:text-slate-400 truncate block font-mono">{selectedCustomer.device}</span>
                         </div>
                       )}
                     </div>
 
                     {/* Fulfillments Summary */}
                     <div className="space-y-3">
-                      <h4 className="text-[11px] font-bold text-neutral-700 uppercase tracking-wider font-sans border-b border-neutral-100 pb-1.5 flex justify-between items-center">
+                      <h4 className="text-[11px] font-bold text-neutral-700 dark:text-slate-300 uppercase tracking-wider font-sans border-b border-neutral-100 dark:border-slate-800 pb-1.5 flex justify-between items-center">
                         <span>Fulfillment Orders</span>
-                        <span className="font-mono text-[10px] px-2 py-0.5 bg-neutral-100 text-neutral-600 rounded-md font-bold">
+                        <span className="font-mono text-[10px] px-2 py-0.5 bg-neutral-100 dark:bg-slate-800 text-neutral-600 dark:text-slate-400 rounded-md font-bold">
                           {orders.filter(o => (o.customer || '').toLowerCase() === (selectedCustomer?.name || '').toLowerCase()).length}
                         </span>
                       </h4>
@@ -2475,13 +2477,13 @@ export default function AdminDashboard({
                           <p className="text-[11px] text-neutral-400 italic">No checkout orders registered yet.</p>
                         ) : (
                           orders.filter(o => (o.customer || '').toLowerCase() === (selectedCustomer?.name || '').toLowerCase()).map(order => (
-                            <div key={order.id} className="p-2 border border-neutral-150/65 rounded-lg flex justify-between items-center bg-white shadow-sm hover:border-amber-500/30 transition-colors">
+                            <div key={order.id} className="p-2 border border-neutral-150/65 rounded-lg flex justify-between items-center bg-white dark:bg-slate-900 shadow-sm hover:border-amber-500/30 transition-colors">
                               <div>
                                 <span className="font-mono font-bold text-amber-600">{order.id}</span>
                                 <p className="text-[10px] text-neutral-400 font-mono">{order.date}</p>
                               </div>
                               <div className="text-right">
-                                <div className="font-mono font-bold text-neutral-800">₵{order.total.toFixed(2)}</div>
+                                <div className="font-mono font-bold text-neutral-800 dark:text-slate-200">₵{order.total.toFixed(2)}</div>
                                 <span className={`text-[9px] px-1.5 py-0.5 rounded font-black capitalize ${
                                   order.status === 'completed' ? 'bg-green-50 border border-green-200 text-green-600' :
                                   'bg-amber-50 border border-amber-200 text-amber-600'
@@ -2497,13 +2499,13 @@ export default function AdminDashboard({
 
                     {/* Locations Summary */}
                     <div className="space-y-3">
-                      <h4 className="text-[11px] font-bold text-neutral-700 uppercase tracking-wider font-sans border-b border-neutral-100 pb-1.5 flex justify-between items-center">
+                      <h4 className="text-[11px] font-bold text-neutral-700 dark:text-slate-300 uppercase tracking-wider font-sans border-b border-neutral-100 dark:border-slate-800 pb-1.5 flex justify-between items-center">
                         <span>Delivery Addresses</span>
-                        <span className="font-mono text-[10px] px-2 py-0.5 bg-neutral-100 text-neutral-600 rounded-md font-bold">
+                        <span className="font-mono text-[10px] px-2 py-0.5 bg-neutral-100 dark:bg-slate-800 text-neutral-600 dark:text-slate-400 rounded-md font-bold">
                           {locations.filter(l => (l.customerName || '').toLowerCase() === (selectedCustomer?.name || '').toLowerCase()).length}
                         </span>
                       </h4>
-                      <div className="max-h-32 overflow-y-auto space-y-1.5 pr-1 text-[11px] text-neutral-600">
+                      <div className="max-h-32 overflow-y-auto space-y-1.5 pr-1 text-[11px] text-neutral-600 dark:text-slate-400">
                         {locations.filter(l => (l.customerName || '').toLowerCase() === (selectedCustomer?.name || '').toLowerCase()).length === 0 ? (
                           <p className="text-[11px] text-neutral-400 italic">No logistics addresses mapped.</p>
                         ) : (
@@ -2511,7 +2513,7 @@ export default function AdminDashboard({
                             <div key={loc.id} className="p-2 border border-neutral-150/50 rounded-lg flex gap-2 items-start bg-neutral-50/50">
                               <MapPin className="w-3.5 h-3.5 text-amber-600 shrink-0 mt-0.5" />
                               <div>
-                                <p className="font-medium text-neutral-800">{loc.address}</p>
+                                <p className="font-medium text-neutral-800 dark:text-slate-200">{loc.address}</p>
                                 <p className="font-mono text-[9px] text-neutral-400">({loc.lat.toFixed(4)}, {loc.lng.toFixed(4)})</p>
                               </div>
                             </div>
@@ -2522,9 +2524,9 @@ export default function AdminDashboard({
 
                     {/* Activity Logs Summary */}
                     <div className="space-y-3">
-                      <h4 className="text-[11px] font-bold text-neutral-700 uppercase tracking-wider font-sans border-b border-neutral-100 pb-1.5 flex justify-between items-center">
+                      <h4 className="text-[11px] font-bold text-neutral-700 dark:text-slate-300 uppercase tracking-wider font-sans border-b border-neutral-100 dark:border-slate-800 pb-1.5 flex justify-between items-center">
                         <span>Recent Activity Events</span>
-                        <span className="font-mono text-[10px] px-2 py-0.5 bg-neutral-100 text-neutral-600 rounded-md font-bold">
+                        <span className="font-mono text-[10px] px-2 py-0.5 bg-neutral-100 dark:bg-slate-800 text-neutral-600 dark:text-slate-400 rounded-md font-bold">
                           {activityLogs.filter(log => (log.username || '').toLowerCase() === (selectedCustomer?.name || '').toLowerCase()).length}
                         </span>
                       </h4>
@@ -2533,8 +2535,8 @@ export default function AdminDashboard({
                           <p className="text-[11px] text-neutral-400 italic">No activity tracks registered.</p>
                         ) : (
                           activityLogs.filter(log => (log.username || '').toLowerCase() === (selectedCustomer?.name || '').toLowerCase()).slice(0, 10).map((log, idx) => (
-                            <div key={idx} className="p-2 border border-neutral-100 rounded-lg bg-neutral-50/40 text-[11px]">
-                              <p className="font-medium text-neutral-800">{log.description}</p>
+                            <div key={idx} className="p-2 border border-neutral-100 dark:border-slate-800 rounded-lg bg-neutral-50/40 text-[11px]">
+                              <p className="font-medium text-neutral-800 dark:text-slate-200">{log.description}</p>
                               <div className="flex justify-between items-center text-[9px] text-neutral-400 mt-1 font-mono">
                                 <span className="capitalize text-amber-600 font-bold">{log.type}</span>
                                 <span>{new Date(log.timestamp).toLocaleTimeString([], {hour: '2-digit', minute:'2-digit'})}</span>
@@ -2546,7 +2548,7 @@ export default function AdminDashboard({
                     </div>
 
                     {/* Data Extraction Action button */}
-                    <div className="pt-2 border-t border-neutral-150">
+                    <div className="pt-2 border-t border-neutral-150 dark:border-slate-800">
                       <button
                         onClick={() => {
                           const custOrders = orders.filter(o => (o.customer || '').toLowerCase() === (selectedCustomer?.name || '').toLowerCase());
@@ -2574,7 +2576,7 @@ export default function AdminDashboard({
                           onShowToast("Dossier Extracted", `Fully structured profile data for ${selectedCustomer.name} exported successfully.`, "success");
                           onLogActivity(`Exported CRM customer profile dossier for: ${selectedCustomer.name}`, "admin_action");
                         }}
-                        className="w-full bg-neutral-900 hover:bg-amber-500 text-white hover:text-neutral-900 py-3 rounded-xl text-xs font-black transition-all shadow-md flex items-center justify-center gap-2 cursor-pointer"
+                        className="w-full bg-neutral-900 hover:bg-amber-500 text-white hover:text-neutral-900 dark:text-slate-100 py-3 rounded-xl text-xs font-black transition-all shadow-md flex items-center justify-center gap-2 cursor-pointer"
                       >
                         <Download className="w-4 h-4" />
                         Extract User Dossier (JSON)
@@ -2591,8 +2593,8 @@ export default function AdminDashboard({
             <div className="space-y-6 animate-in fade-in duration-300">
               <div className="border-b border-neutral-250 pb-4 flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4">
                 <div>
-                  <h2 className="font-serif text-2xl text-neutral-900 font-medium">Payment Logs and Invoicing</h2>
-                  <p className="text-xs text-neutral-500">Live operational ledger logs for checking and verifying MTN Mobile Money transactions.</p>
+                  <h2 className="font-serif text-2xl text-neutral-900 dark:text-slate-100 font-medium">Payment Logs and Invoicing</h2>
+                  <p className="text-xs text-neutral-500 dark:text-slate-400">Live operational ledger logs for checking and verifying MTN Mobile Money transactions.</p>
                 </div>
                 <div className="flex items-center gap-2">
                   <button
@@ -2614,16 +2616,16 @@ export default function AdminDashboard({
                   { label: "Cash Delivery Receipts", val: payments.filter(p=>p.method==='cash').length, type: 'cash' },
                   { label: "Standard Card Receipts", val: payments.filter(p=>p.method==='card').length, type: 'card' },
                 ].map((st, idx) => (
-                  <div key={idx} className="bg-white p-5 rounded-2xl border border-neutral-200/60 shadow-sm flex items-center justify-between">
+                  <div key={idx} className="bg-white dark:bg-slate-900 p-5 rounded-2xl border border-neutral-200/60 shadow-sm flex items-center justify-between">
                     <div className="space-y-1">
-                      <span className="text-[10px] font-bold tracking-wider text-neutral-500 uppercase">{st.label}</span>
-                      <h4 className="text-xl font-mono font-black text-neutral-900">{st.val}</h4>
+                      <span className="text-[10px] font-bold tracking-wider text-neutral-500 dark:text-slate-400 uppercase">{st.label}</span>
+                      <h4 className="text-xl font-mono font-black text-neutral-900 dark:text-slate-100">{st.val}</h4>
                     </div>
                   </div>
                 ))}
               </div>
 
-              <div className="bg-white rounded-2xl border border-neutral-200/60 overflow-hidden shadow-sm">
+              <div className="bg-white dark:bg-slate-900 rounded-2xl border border-neutral-200/60 overflow-hidden shadow-sm">
                 <div className="overflow-x-auto">
                   <table className="w-full border-collapse text-left text-xs">
                     <thead>
@@ -2640,9 +2642,9 @@ export default function AdminDashboard({
                     <tbody className="divide-y divide-neutral-100">
                       {payments.map(pay => (
                         <tr key={pay.id} className="hover:bg-neutral-50/50">
-                          <td className="p-4 font-mono font-semibold text-neutral-500">{pay.id}</td>
+                          <td className="p-4 font-mono font-semibold text-neutral-500 dark:text-slate-400">{pay.id}</td>
                           <td className="p-4 font-mono font-bold text-amber-600">{pay.orderId}</td>
-                          <td className="p-4 font-bold text-neutral-800">{pay.customer}</td>
+                          <td className="p-4 font-bold text-neutral-800 dark:text-slate-200">{pay.customer}</td>
                           <td className="p-4">
                             <span className={`px-2.5 py-1 rounded-full text-[10px] font-bold tracking-wide capitalize ${
                               pay.method === 'momo' ? 'bg-amber-100 text-amber-800' :
@@ -2652,7 +2654,7 @@ export default function AdminDashboard({
                               {pay.method === 'momo' ? 'MTN MoMo Gateway' : pay.method}
                             </span>
                           </td>
-                          <td className="p-4 font-black font-mono text-neutral-900">₵{pay.amount.toFixed(2)}</td>
+                          <td className="p-4 font-black font-mono text-neutral-900 dark:text-slate-100">₵{pay.amount.toFixed(2)}</td>
                           <td className="p-4 font-medium text-neutral-400">{pay.date}</td>
                           <td className="p-4">
                             <span className="px-2 py-0.5 rounded-full text-[10px] font-bold bg-green-100 text-green-700 capitalize">
@@ -2673,8 +2675,8 @@ export default function AdminDashboard({
             <div className="space-y-6 animate-in fade-in duration-300">
               <div className="border-b border-neutral-250 pb-4 flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4">
                 <div>
-                  <h2 className="font-serif text-2xl text-neutral-900 font-medium">Logistics Location Coordinates</h2>
-                  <p className="text-xs text-neutral-500">Configure logistics mapping, pins, and delivery coordinates for couriers.</p>
+                  <h2 className="font-serif text-2xl text-neutral-900 dark:text-slate-100 font-medium">Logistics Location Coordinates</h2>
+                  <p className="text-xs text-neutral-500 dark:text-slate-400">Configure logistics mapping, pins, and delivery coordinates for couriers.</p>
                 </div>
                 <PageToggleBtn />
               </div>
@@ -2688,16 +2690,16 @@ export default function AdminDashboard({
               {/* Coordinates Forms */}
               <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
                 {/* Form to add */}
-                <div className="bg-white p-5 rounded-2xl border border-neutral-200/60 shadow-sm space-y-4 h-fit">
-                  <h3 className="font-serif text-base text-neutral-900 border-b border-neutral-100 pb-2">Add Delivery Coordinates</h3>
+                <div className="bg-white dark:bg-slate-900 p-5 rounded-2xl border border-neutral-200/60 shadow-sm space-y-4 h-fit">
+                  <h3 className="font-serif text-base text-neutral-900 dark:text-slate-100 border-b border-neutral-100 dark:border-slate-800 pb-2">Add Delivery Coordinates</h3>
                   
                   <form onSubmit={handleAddLocation} className="space-y-3.5">
                     <div className="space-y-1">
-                      <label className="text-xs font-semibold text-neutral-600 block">Select Customer Profile</label>
+                      <label className="text-xs font-semibold text-neutral-600 dark:text-slate-400 block">Select Customer Profile</label>
                       <select
                         value={locCustomerId}
                         onChange={e => setLocCustomerId(e.target.value)}
-                        className="w-full px-4 py-2.5 text-xs border border-neutral-200 rounded-xl focus:outline-none focus:border-amber-500 bg-white"
+                        className="w-full px-4 py-2.5 text-xs border border-neutral-200 dark:border-slate-700 rounded-xl focus:outline-none focus:border-amber-500 bg-white dark:bg-slate-900"
                         required
                       >
                         <option key="default-customer" value="">Select CRM User</option>
@@ -2708,43 +2710,43 @@ export default function AdminDashboard({
                     </div>
 
                     <div className="space-y-1">
-                      <label className="text-xs font-semibold text-neutral-600 block">Delivery Address Details</label>
+                      <label className="text-xs font-semibold text-neutral-600 dark:text-slate-400 block">Delivery Address Details</label>
                       <input
                         type="text"
                         value={locAddress}
                         onChange={e => setLocAddress(e.target.value)}
                         placeholder="e.g. Ashaiman Near market"
-                        className="w-full px-4 py-2.5 text-xs border border-neutral-200 rounded-xl focus:outline-none focus:border-amber-500"
+                        className="w-full px-4 py-2.5 text-xs border border-neutral-200 dark:border-slate-700 rounded-xl focus:outline-none focus:border-amber-500"
                         required
                       />
                     </div>
 
                     <div className="grid grid-cols-2 gap-3.5">
                       <div className="space-y-1">
-                        <label className="text-xs font-semibold text-neutral-600 block">Latitude</label>
+                        <label className="text-xs font-semibold text-neutral-600 dark:text-slate-400 block">Latitude</label>
                         <input
                           type="text"
                           value={locLat}
                           onChange={e => setLocLat(e.target.value)}
                           placeholder="e.g. 5.6037"
-                          className="w-full px-3 py-2 text-xs border border-neutral-200 rounded-xl focus:outline-none focus:border-amber-500 font-mono"
+                          className="w-full px-3 py-2 text-xs border border-neutral-200 dark:border-slate-700 rounded-xl focus:outline-none focus:border-amber-500 font-mono"
                         />
                       </div>
                       <div className="space-y-1">
-                        <label className="text-xs font-semibold text-neutral-600 block">Longitude</label>
+                        <label className="text-xs font-semibold text-neutral-600 dark:text-slate-400 block">Longitude</label>
                         <input
                           type="text"
                           value={locLng}
                           onChange={e => setLocLng(e.target.value)}
                           placeholder="e.g. -0.2270"
-                          className="w-full px-3 py-2 text-xs border border-neutral-200 rounded-xl focus:outline-none focus:border-amber-500 font-mono"
+                          className="w-full px-3 py-2 text-xs border border-neutral-200 dark:border-slate-700 rounded-xl focus:outline-none focus:border-amber-500 font-mono"
                         />
                       </div>
                     </div>
 
                     <button
                       type="submit"
-                      className="w-full bg-neutral-950 text-white hover:bg-amber-500 hover:text-neutral-900 py-3 rounded-xl text-xs font-bold tracking-wider transition-colors shadow"
+                      className="w-full bg-neutral-950 text-white hover:bg-amber-500 hover:text-neutral-900 dark:text-slate-100 py-3 rounded-xl text-xs font-bold tracking-wider transition-colors shadow"
                     >
                       Save Location
                     </button>
@@ -2753,11 +2755,11 @@ export default function AdminDashboard({
 
                 {/* List registered */}
                 <div className="lg:col-span-2 space-y-4">
-                  <h3 className="font-serif text-lg text-neutral-900">Fulfillment Shipping Coordinates</h3>
+                  <h3 className="font-serif text-lg text-neutral-900 dark:text-slate-100">Fulfillment Shipping Coordinates</h3>
                   
                   <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                     {locations.map(loc => (
-                      <div key={loc.id} className="bg-white p-5 rounded-2xl border border-neutral-200/60 shadow-sm space-y-3 relative group hover:border-amber-500/50 transition-colors">
+                      <div key={loc.id} className="bg-white dark:bg-slate-900 p-5 rounded-2xl border border-neutral-200/60 shadow-sm space-y-3 relative group hover:border-amber-500/50 transition-colors">
                         <button
                           onClick={() => handleDeleteLocation(loc.id, loc.customerName)}
                           className="absolute top-4 right-4 text-neutral-400 hover:text-red-500 opacity-0 group-hover:opacity-100 transition-opacity"
@@ -2767,11 +2769,11 @@ export default function AdminDashboard({
                         
                         <div className="space-y-1">
                           <span className="text-[10px] font-bold text-amber-600 uppercase font-mono tracking-wider">CRM Profile ID: {loc.customerId}</span>
-                          <h4 className="font-bold text-neutral-800 text-sm">{loc.customerName}</h4>
-                          <p className="text-xs text-neutral-500">{loc.address}</p>
+                          <h4 className="font-bold text-neutral-800 dark:text-slate-200 text-sm">{loc.customerName}</h4>
+                          <p className="text-xs text-neutral-500 dark:text-slate-400">{loc.address}</p>
                         </div>
 
-                        <div className="flex justify-between items-center bg-neutral-50 p-2.5 rounded-lg border border-neutral-100 text-[10px] font-mono text-neutral-500">
+                        <div className="flex justify-between items-center bg-neutral-50 dark:bg-slate-950 p-2.5 rounded-lg border border-neutral-100 dark:border-slate-800 text-[10px] font-mono text-neutral-500 dark:text-slate-400">
                           <span>Lat: {loc.lat}</span>
                           <span>Lng: {loc.lng}</span>
                         </div>
@@ -2788,15 +2790,15 @@ export default function AdminDashboard({
             <div className="space-y-6 animate-in fade-in duration-300">
               <div className="border-b border-neutral-250 pb-4 flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4">
                 <div>
-                  <h2 className="font-serif text-2xl text-neutral-900 font-medium">Customer Consultation Inquiries</h2>
-                  <p className="text-xs text-neutral-500">Operational inbox responding to style advice, alterations, and custom garment inquiries.</p>
+                  <h2 className="font-serif text-2xl text-neutral-900 dark:text-slate-100 font-medium">Customer Consultation Inquiries</h2>
+                  <p className="text-xs text-neutral-500 dark:text-slate-400">Operational inbox responding to style advice, alterations, and custom garment inquiries.</p>
                 </div>
                 <PageToggleBtn />
               </div>
 
               <div className="space-y-4">
                 {inquiries.map(inq => (
-                  <div key={inq.id} className="bg-white p-6 rounded-2xl border border-neutral-200/60 shadow-sm space-y-4 relative group hover:border-amber-500/40 transition-colors">
+                  <div key={inq.id} className="bg-white dark:bg-slate-900 p-6 rounded-2xl border border-neutral-200/60 shadow-sm space-y-4 relative group hover:border-amber-500/40 transition-colors">
                     <button
                       onClick={() => handleDeleteInquiry(inq.id)}
                       className="absolute top-4 right-4 text-neutral-400 hover:text-red-500 opacity-0 group-hover:opacity-100 transition-opacity"
@@ -2804,13 +2806,13 @@ export default function AdminDashboard({
                       <Trash2 className="w-4 h-4" />
                     </button>
 
-                    <div className="flex justify-between items-start flex-wrap gap-4 border-b border-neutral-100 pb-3">
+                    <div className="flex justify-between items-start flex-wrap gap-4 border-b border-neutral-100 dark:border-slate-800 pb-3">
                       <div>
                         <h4 className="font-serif text-base text-neutral-850 flex items-center gap-1.5 font-semibold">
                           {inq.customerName} 
                           <span className="text-xs font-sans text-neutral-400 font-normal">via {inq.service} Desk</span>
                         </h4>
-                        <p className="text-xs text-neutral-500">{inq.customerEmail} &bull; {inq.customerPhone} &bull; Received on {inq.date}</p>
+                        <p className="text-xs text-neutral-500 dark:text-slate-400">{inq.customerEmail} &bull; {inq.customerPhone} &bull; Received on {inq.date}</p>
                       </div>
 
                       <span className={`px-2.5 py-1 rounded-full text-[10px] font-bold tracking-wide capitalize ${
@@ -2822,7 +2824,7 @@ export default function AdminDashboard({
                       </span>
                     </div>
 
-                    <p className="text-xs text-neutral-600 leading-relaxed font-serif italic">"{inq.message}"</p>
+                    <p className="text-xs text-neutral-600 dark:text-slate-400 leading-relaxed font-serif italic">"{inq.message}"</p>
 
                     <div className="flex gap-2 pt-1.5 text-xs">
                       {inq.status !== 'resolved' && (
@@ -2853,15 +2855,15 @@ export default function AdminDashboard({
             <div className="space-y-6 animate-in fade-in duration-300">
               <div className="border-b border-neutral-250 pb-4 flex justify-between items-center flex-wrap gap-4">
                 <div>
-                  <h2 className="font-serif text-2xl text-neutral-900 font-medium">User Activity & Operational Analytics</h2>
-                  <p className="text-xs text-neutral-500">Live operational auditing and interaction tracking for Ella's Store.</p>
+                  <h2 className="font-serif text-2xl text-neutral-900 dark:text-slate-100 font-medium">User Activity & Operational Analytics</h2>
+                  <p className="text-xs text-neutral-500 dark:text-slate-400">Live operational auditing and interaction tracking for Ella's Store.</p>
                 </div>
                 
                 <div className="flex gap-3 items-center flex-wrap ml-auto">
                   <PageToggleBtn />
                   <button
                     onClick={exportActivityLogs}
-                    className="bg-amber-500 text-neutral-900 px-4 py-2.5 rounded-xl text-xs font-bold tracking-wide transition-all shadow-md flex items-center gap-1.5"
+                    className="bg-amber-500 text-neutral-900 dark:text-slate-100 px-4 py-2.5 rounded-xl text-xs font-bold tracking-wide transition-all shadow-md flex items-center gap-1.5"
                   >
                     <Download className="w-4 h-4" /> Export JSON
                   </button>
@@ -2880,11 +2882,11 @@ export default function AdminDashboard({
               </div>
 
               {/* Filters toolbar */}
-              <div className="bg-white p-4 rounded-2xl border border-neutral-200/60 shadow-sm flex flex-col md:flex-row gap-3.5 items-center">
+              <div className="bg-white dark:bg-slate-900 p-4 rounded-2xl border border-neutral-200/60 shadow-sm flex flex-col md:flex-row gap-3.5 items-center">
                 <select
                   value={activityFilter}
                   onChange={e => setActivityFilter(e.target.value)}
-                  className="px-4 py-2 text-xs border border-neutral-200 rounded-xl focus:outline-none focus:border-amber-500 bg-white min-w-[150px]"
+                  className="px-4 py-2 text-xs border border-neutral-200 dark:border-slate-700 rounded-xl focus:outline-none focus:border-amber-500 bg-white dark:bg-slate-900 min-w-[150px]"
                 >
                   <option value="all">All Interaction Types</option>
                   <option value="login">Profile Logins</option>
@@ -2902,7 +2904,7 @@ export default function AdminDashboard({
                     value={activitySearch}
                     onChange={e => setActivitySearch(e.target.value)}
                     placeholder="Search session logs by username, IP address or action description..."
-                    className="w-full pl-11 pr-4 py-2 text-xs border border-neutral-200 rounded-xl focus:outline-none focus:border-amber-500"
+                    className="w-full pl-11 pr-4 py-2 text-xs border border-neutral-200 dark:border-slate-700 rounded-xl focus:outline-none focus:border-amber-500"
                   />
                 </div>
               </div>
@@ -2918,8 +2920,8 @@ export default function AdminDashboard({
                   <span className="text-[9px] font-mono text-neutral-400">Database fully synced</span>
                 </div>
 
-                <div className="bg-white p-5 rounded-2xl border border-neutral-200/60 shadow flex flex-col justify-between">
-                  <span className="text-[10px] font-bold text-neutral-500 uppercase tracking-widest">Most Active Session</span>
+                <div className="bg-white dark:bg-slate-900 p-5 rounded-2xl border border-neutral-200/60 shadow flex flex-col justify-between">
+                  <span className="text-[10px] font-bold text-neutral-500 dark:text-slate-400 uppercase tracking-widest">Most Active Session</span>
                   <div className="my-2.5">
                     <h3 className="text-lg font-bold text-neutral-850 truncate">{activityStats.mostActiveUser}</h3>
                     <p className="text-[10px] text-neutral-400">Lifetime user activity stats</p>
@@ -2927,8 +2929,8 @@ export default function AdminDashboard({
                   <span className="text-[10px] text-amber-600 font-bold font-mono uppercase">{activityStats.mostActiveCount} actions recorded</span>
                 </div>
 
-                <div className="bg-white p-5 rounded-2xl border border-neutral-200/60 shadow flex flex-col justify-between">
-                  <span className="text-[10px] font-bold text-neutral-500 uppercase tracking-widest">Peak Action Hour</span>
+                <div className="bg-white dark:bg-slate-900 p-5 rounded-2xl border border-neutral-200/60 shadow flex flex-col justify-between">
+                  <span className="text-[10px] font-bold text-neutral-500 dark:text-slate-400 uppercase tracking-widest">Peak Action Hour</span>
                   <div className="my-2.5">
                     <h3 className="text-lg font-bold text-neutral-850">{activityStats.peakHour}</h3>
                     <p className="text-[10px] text-neutral-400">Highest system interaction density</p>
@@ -2936,8 +2938,8 @@ export default function AdminDashboard({
                   <span className="text-[10px] text-amber-600 font-bold font-mono uppercase">{activityStats.peakHourCount} records grouped</span>
                 </div>
 
-                <div className="bg-white p-5 rounded-2xl border border-neutral-200/60 shadow flex flex-col justify-between">
-                  <span className="text-[10px] font-bold text-neutral-500 uppercase tracking-widest">Primary Action Group</span>
+                <div className="bg-white dark:bg-slate-900 p-5 rounded-2xl border border-neutral-200/60 shadow flex flex-col justify-between">
+                  <span className="text-[10px] font-bold text-neutral-500 dark:text-slate-400 uppercase tracking-widest">Primary Action Group</span>
                   <div className="my-2.5">
                     <h3 className="text-lg font-bold text-neutral-850 capitalize">{activityStats.topType}</h3>
                     <p className="text-[10px] text-neutral-400">Most frequent interaction</p>
@@ -2947,12 +2949,12 @@ export default function AdminDashboard({
               </div>
 
               {/* Graphical representation (Simple visual grid representing 24-hr bars) */}
-              <div className="bg-white p-6 rounded-2xl border border-neutral-200/60 shadow-sm space-y-4">
-                <h3 className="font-serif text-base text-neutral-900 border-b border-neutral-100 pb-2 flex items-center gap-1.5">
+              <div className="bg-white dark:bg-slate-900 p-6 rounded-2xl border border-neutral-200/60 shadow-sm space-y-4">
+                <h3 className="font-serif text-base text-neutral-900 dark:text-slate-100 border-b border-neutral-100 dark:border-slate-800 pb-2 flex items-center gap-1.5">
                   <Activity className="w-5 h-5 text-amber-500" />
                   Interaction density timelines (Hourly heatmap)
                 </h3>
-                <div className="flex h-16 items-end gap-1.5 bg-neutral-50 p-3.5 border border-neutral-150 rounded-xl">
+                <div className="flex h-16 items-end gap-1.5 bg-neutral-50 dark:bg-slate-950 p-3.5 border border-neutral-150 dark:border-slate-800 rounded-xl">
                   {activityStats.hourCounts.map((count, hr) => {
                     const maxVal = Math.max(...activityStats.hourCounts) || 1;
                     const fillPct = (count / maxVal) * 100;
@@ -2983,20 +2985,20 @@ export default function AdminDashboard({
                 
                 {/* Leaderboards */}
                 <div className="space-y-4 lg:col-span-1">
-                  <div className="bg-white p-5 rounded-2xl border border-neutral-200/60 shadow-sm space-y-4">
-                    <h4 className="font-serif text-base text-neutral-900 border-b border-neutral-100 pb-1.5 font-bold">Top Users by Density</h4>
+                  <div className="bg-white dark:bg-slate-900 p-5 rounded-2xl border border-neutral-200/60 shadow-sm space-y-4">
+                    <h4 className="font-serif text-base text-neutral-900 dark:text-slate-100 border-b border-neutral-100 dark:border-slate-800 pb-1.5 font-bold">Top Users by Density</h4>
                     <div className="space-y-2">
                       {activityStats.userCounts.map(([user, count], index) => (
-                        <div key={user} className="flex justify-between items-center text-xs p-2.5 bg-neutral-50 rounded-xl border border-neutral-100">
-                          <span className="font-semibold text-neutral-700">{index + 1}. {user}</span>
+                        <div key={user} className="flex justify-between items-center text-xs p-2.5 bg-neutral-50 dark:bg-slate-950 rounded-xl border border-neutral-100 dark:border-slate-800">
+                          <span className="font-semibold text-neutral-700 dark:text-slate-300">{index + 1}. {user}</span>
                           <span className="font-bold text-amber-600 font-mono">{count} clicks</span>
                         </div>
                       ))}
                     </div>
                   </div>
 
-                  <div className="bg-white p-5 rounded-2xl border border-neutral-200/60 shadow-sm space-y-4">
-                    <h4 className="font-serif text-base text-neutral-900 border-b border-neutral-100 pb-1.5 font-bold">Hourly Activity Heatmap</h4>
+                  <div className="bg-white dark:bg-slate-900 p-5 rounded-2xl border border-neutral-200/60 shadow-sm space-y-4">
+                    <h4 className="font-serif text-base text-neutral-900 dark:text-slate-100 border-b border-neutral-100 dark:border-slate-800 pb-1.5 font-bold">Hourly Activity Heatmap</h4>
                     <div className="grid grid-cols-6 gap-2 pt-1">
                       {activityStats.hourCounts.map((count, idx) => {
                         const densityMax = Math.max(...activityStats.hourCounts) || 1;
@@ -3005,7 +3007,7 @@ export default function AdminDashboard({
                           <div 
                             key={idx} 
                             style={{ backgroundColor: `rgba(212, 175, 55, ${opacity})` }}
-                            className="aspect-square rounded flex items-center justify-center font-mono font-black text-[9px] cursor-pointer hover:border hover:border-amber-500 select-none text-neutral-800"
+                            className="aspect-square rounded flex items-center justify-center font-mono font-black text-[9px] cursor-pointer hover:border hover:border-amber-500 select-none text-neutral-800 dark:text-slate-200"
                             title={`${idx}:00 - ${count} activities`}
                           >
                             {idx}h
@@ -3017,7 +3019,7 @@ export default function AdminDashboard({
                 </div>
 
                 {/* Audit Grid Table list */}
-                <div className="lg:col-span-2 bg-white rounded-2xl border border-neutral-200/60 shadow-sm overflow-hidden flex flex-col max-h-[500px]">
+                <div className="lg:col-span-2 bg-white dark:bg-slate-900 rounded-2xl border border-neutral-200/60 shadow-sm overflow-hidden flex flex-col max-h-[500px]">
                   <header className="bg-neutral-950 text-white p-4.5 font-serif text-sm uppercase tracking-wider flex justify-between">
                     <span>Granular Auditing Tracker Logs</span>
                     <span className="font-mono text-xs">{filteredLogs.length} matching</span>
@@ -3032,18 +3034,18 @@ export default function AdminDashboard({
                           <th className="p-3 border-b border-neutral-800">Operational Log Description</th>
                         </tr>
                       </thead>
-                      <tbody className="divide-y divide-neutral-100 font-mono text-[11px] text-neutral-600">
+                      <tbody className="divide-y divide-neutral-100 font-mono text-[11px] text-neutral-600 dark:text-slate-400">
                         {filteredLogs.map(log => (
                           <tr key={log.id} className="hover:bg-neutral-50/50">
                             <td className="p-3 whitespace-nowrap text-neutral-400">
                               {new Date(log.timestamp).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit', second: '2-digit' })}
                             </td>
-                            <td className="p-3 font-semibold text-neutral-800">{log.username}</td>
+                            <td className="p-3 font-semibold text-neutral-800 dark:text-slate-200">{log.username}</td>
                             <td className="p-3">
                               <span className={`px-2 py-0.5 rounded text-[9px] font-black tracking-wide uppercase ${
                                 log.type === 'purchase' ? 'bg-green-150 text-green-700' :
                                 log.type === 'cart_addition' ? 'bg-blue-150 text-blue-700' :
-                                'bg-neutral-200 text-neutral-700'
+                                'bg-neutral-200 text-neutral-700 dark:text-slate-300'
                               }`}>
                                 {log.type}
                               </span>
@@ -3064,36 +3066,36 @@ export default function AdminDashboard({
             <div className="space-y-6 animate-in fade-in duration-300">
               <div className="border-b border-neutral-250 pb-4 flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4">
                 <div>
-                  <h2 className="font-serif text-2xl text-neutral-900 font-medium">Operational Discount Campaigns</h2>
-                  <p className="text-xs text-neutral-500">Inject discount coupon codes with minimum values, expirations, and budget rules.</p>
+                  <h2 className="font-serif text-2xl text-neutral-900 dark:text-slate-100 font-medium">Operational Discount Campaigns</h2>
+                  <p className="text-xs text-neutral-500 dark:text-slate-400">Inject discount coupon codes with minimum values, expirations, and budget rules.</p>
                 </div>
                 <PageToggleBtn />
               </div>
 
               <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
                 {/* Form panels */}
-                <div className="bg-white p-5 rounded-2xl border border-neutral-200/60 shadow-sm space-y-4 h-fit">
-                  <h3 className="font-serif text-base text-neutral-900 border-b border-neutral-100 pb-2">Generate Promo Coupon</h3>
+                <div className="bg-white dark:bg-slate-900 p-5 rounded-2xl border border-neutral-200/60 shadow-sm space-y-4 h-fit">
+                  <h3 className="font-serif text-base text-neutral-900 dark:text-slate-100 border-b border-neutral-100 dark:border-slate-800 pb-2">Generate Promo Coupon</h3>
                   
                   <form onSubmit={handleAddDiscount} className="space-y-3.5">
                     <div className="space-y-1">
-                      <label className="text-xs font-semibold text-neutral-600 block">Promo Code String</label>
+                      <label className="text-xs font-semibold text-neutral-600 dark:text-slate-400 block">Promo Code String</label>
                       <input
                         type="text"
                         value={discCode}
                         onChange={e => setDiscCode(e.target.value)}
                         placeholder="e.g. WELCOME10"
-                        className="w-full px-4 py-2.5 text-xs border border-neutral-200 rounded-xl focus:outline-none focus:border-amber-500 uppercase"
+                        className="w-full px-4 py-2.5 text-xs border border-neutral-200 dark:border-slate-700 rounded-xl focus:outline-none focus:border-amber-500 uppercase"
                         required
                       />
                     </div>
 
                     <div className="space-y-1">
-                      <label className="text-xs font-semibold text-neutral-600 block">Deduction Method</label>
+                      <label className="text-xs font-semibold text-neutral-600 dark:text-slate-400 block">Deduction Method</label>
                       <select
                         value={discType}
                         onChange={e => setDiscType(e.target.value as any)}
-                        className="w-full px-4 py-2.5 text-xs border border-neutral-200 rounded-xl focus:outline-none focus:border-amber-500 bg-white"
+                        className="w-full px-4 py-2.5 text-xs border border-neutral-200 dark:border-slate-700 rounded-xl focus:outline-none focus:border-amber-500 bg-white dark:bg-slate-900"
                         required
                       >
                         <option value="percentage">Percentage Deduction (%)</option>
@@ -3102,52 +3104,52 @@ export default function AdminDashboard({
                     </div>
 
                     <div className="space-y-1">
-                      <label className="text-xs font-semibold text-neutral-600 block">Deduction Value</label>
+                      <label className="text-xs font-semibold text-neutral-600 dark:text-slate-400 block">Deduction Value</label>
                       <input
                         type="number"
                         value={discValue}
                         onChange={e => setDiscValue(e.target.value)}
                         placeholder="Percentage or absolute cash value"
-                        className="w-full px-4 py-2.5 text-xs border border-neutral-200 rounded-xl focus:outline-none focus:border-amber-500"
+                        className="w-full px-4 py-2.5 text-xs border border-neutral-200 dark:border-slate-700 rounded-xl focus:outline-none focus:border-amber-500"
                         required
                       />
                     </div>
 
                     <div className="space-y-1">
-                      <label className="text-xs font-semibold text-neutral-600 block">Minimum Order Subtotal (₵)</label>
+                      <label className="text-xs font-semibold text-neutral-600 dark:text-slate-400 block">Minimum Order Subtotal (₵)</label>
                       <input
                         type="number"
                         value={discMin}
                         onChange={e => setDiscMin(e.target.value)}
                         placeholder="e.g. 50"
-                        className="w-full px-4 py-2.5 text-xs border border-neutral-200 rounded-xl focus:outline-none focus:border-amber-500"
+                        className="w-full px-4 py-2.5 text-xs border border-neutral-200 dark:border-slate-700 rounded-xl focus:outline-none focus:border-amber-500"
                       />
                     </div>
 
                     <div className="space-y-1">
-                      <label className="text-xs font-semibold text-neutral-600 block">Expiry Date</label>
+                      <label className="text-xs font-semibold text-neutral-600 dark:text-slate-400 block">Expiry Date</label>
                       <input
                         type="date"
                         value={discExpiry}
                         onChange={e => setDiscExpiry(e.target.value)}
-                        className="w-full px-4 py-2.5 text-xs border border-neutral-200 rounded-xl focus:outline-none focus:border-amber-500"
+                        className="w-full px-4 py-2.5 text-xs border border-neutral-200 dark:border-slate-700 rounded-xl focus:outline-none focus:border-amber-500"
                       />
                     </div>
 
                     <div className="space-y-1">
-                      <label className="text-xs font-semibold text-neutral-600 block">Global Usage Limit (Times)</label>
+                      <label className="text-xs font-semibold text-neutral-600 dark:text-slate-400 block">Global Usage Limit (Times)</label>
                       <input
                         type="number"
                         value={discUsage}
                         onChange={e => setDiscUsage(e.target.value)}
                         placeholder="Leave blank for infinite"
-                        className="w-full px-4 py-2.5 text-xs border border-neutral-200 rounded-xl focus:outline-none focus:border-amber-500"
+                        className="w-full px-4 py-2.5 text-xs border border-neutral-200 dark:border-slate-700 rounded-xl focus:outline-none focus:border-amber-500"
                       />
                     </div>
 
                     <button
                       type="submit"
-                      className="w-full bg-neutral-950 text-white hover:bg-amber-500 hover:text-neutral-900 py-3 rounded-xl text-xs font-bold tracking-wider transition-colors shadow"
+                      className="w-full bg-neutral-950 text-white hover:bg-amber-500 hover:text-neutral-900 dark:text-slate-100 py-3 rounded-xl text-xs font-bold tracking-wider transition-colors shadow"
                     >
                       Publish Promo Code
                     </button>
@@ -3156,11 +3158,11 @@ export default function AdminDashboard({
 
                 {/* List Coupons */}
                 <div className="lg:col-span-2 space-y-4">
-                  <h3 className="font-serif text-lg text-neutral-900">Active Campaign Coupons</h3>
+                  <h3 className="font-serif text-lg text-neutral-900 dark:text-slate-100">Active Campaign Coupons</h3>
 
                   <div className="grid grid-cols-1 md:grid-cols-2 gap-5">
                     {discountCodes.map(disc => (
-                      <div key={disc.id} className="bg-white p-5 rounded-2xl border border-neutral-200/60 shadow-sm relative group hover:border-amber-500/50 transition-colors flex flex-col justify-between">
+                      <div key={disc.id} className="bg-white dark:bg-slate-900 p-5 rounded-2xl border border-neutral-200/60 shadow-sm relative group hover:border-amber-500/50 transition-colors flex flex-col justify-between">
                         <button
                           onClick={() => handleDeleteDiscount(disc.id, disc.code)}
                           className="absolute top-4 right-4 text-neutral-400 hover:text-red-500 opacity-0 group-hover:opacity-100 transition-opacity"
@@ -3173,7 +3175,7 @@ export default function AdminDashboard({
                             {disc.code}
                           </span>
 
-                          <div className="space-y-1 font-serif text-xs text-neutral-500 pt-2 border-t border-dashed border-neutral-100">
+                          <div className="space-y-1 font-serif text-xs text-neutral-500 dark:text-slate-400 pt-2 border-t border-dashed border-neutral-100 dark:border-slate-800">
                             <p><strong>Deduction Rate:</strong> {disc.type === 'percentage' ? `${disc.value}% off` : `₵${disc.value} cash reduction`}</p>
                             <p><strong>Min subtotal requirement:</strong> ₵{disc.minAmount || 0}</p>
                             <p><strong>Campaign expiry limit:</strong> {disc.expiry || "Continuous campaigns"}</p>
@@ -3198,32 +3200,32 @@ export default function AdminDashboard({
             <div className="space-y-6 animate-in fade-in duration-300">
               <div className="border-b border-neutral-250 pb-4 flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4">
                 <div>
-                  <h2 className="font-serif text-2xl text-neutral-900 font-medium">Broadcast Message Campaigns</h2>
-                  <p className="text-xs text-neutral-500">Draft and send direct broadcast alerts or newsletters to client CRM profiles.</p>
+                  <h2 className="font-serif text-2xl text-neutral-900 dark:text-slate-100 font-medium">Broadcast Message Campaigns</h2>
+                  <p className="text-xs text-neutral-500 dark:text-slate-400">Draft and send direct broadcast alerts or newsletters to client CRM profiles.</p>
                 </div>
                 <PageToggleBtn />
               </div>
 
               <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
                 {/* Campaigns Form */}
-                <div className="bg-white p-5 rounded-2xl border border-neutral-200/60 shadow-sm h-fit space-y-4">
-                  <h3 className="font-serif text-base text-neutral-900 border-b border-neutral-100 pb-2">Draft Campaign alert</h3>
+                <div className="bg-white dark:bg-slate-900 p-5 rounded-2xl border border-neutral-200/60 shadow-sm h-fit space-y-4">
+                  <h3 className="font-serif text-base text-neutral-900 dark:text-slate-100 border-b border-neutral-100 dark:border-slate-800 pb-2">Draft Campaign alert</h3>
 
                   <form onSubmit={handleSendMessageCampaign} className="space-y-4">
                     <div className="space-y-1.5">
-                      <label className="text-xs font-semibold text-neutral-600 block">Campaign Title</label>
+                      <label className="text-xs font-semibold text-neutral-600 dark:text-slate-400 block">Campaign Title</label>
                       <input
                         type="text"
                         value={msgTitle}
                         onChange={e => setMsgTitle(e.target.value)}
                         placeholder="e.g. Summer Traditional designs out!"
-                        className="w-full px-4 py-2.5 text-xs border border-neutral-200 rounded-xl focus:outline-none focus:border-amber-500"
+                        className="w-full px-4 py-2.5 text-xs border border-neutral-200 dark:border-slate-700 rounded-xl focus:outline-none focus:border-amber-500"
                         required
                       />
                     </div>
 
                     <div className="space-y-1.5">
-                      <label className="text-xs font-semibold text-neutral-600 block">Audience Targeting</label>
+                      <label className="text-xs font-semibold text-neutral-600 dark:text-slate-400 block">Audience Targeting</label>
                       <div className="flex gap-4">
                         <label className="flex items-center gap-1.5 text-xs font-medium cursor-pointer">
                           <input
@@ -3248,9 +3250,9 @@ export default function AdminDashboard({
                     </div>
 
                     {!msgSendToAll && (
-                      <div className="space-y-2 border border-neutral-200 p-3 rounded-xl max-h-36 overflow-y-auto">
+                      <div className="space-y-2 border border-neutral-200 dark:border-slate-700 p-3 rounded-xl max-h-36 overflow-y-auto">
                         {customers.filter(c=>c.signedUp).map(c => (
-                          <label key={c.id} className="flex items-center gap-2 text-xs cursor-pointer hover:bg-neutral-50 p-1.5 rounded">
+                          <label key={c.id} className="flex items-center gap-2 text-xs cursor-pointer hover:bg-neutral-50 dark:bg-slate-950 p-1.5 rounded">
                             <input
                               type="checkbox"
                               checked={msgSelectedCustomerIds.includes(c.id)}
@@ -3270,20 +3272,20 @@ export default function AdminDashboard({
                     )}
 
                     <div className="space-y-1.5">
-                      <label className="text-xs font-semibold text-neutral-600 block">Message Body Content</label>
+                      <label className="text-xs font-semibold text-neutral-600 dark:text-slate-400 block">Message Body Content</label>
                       <textarea
                         value={msgContent}
                         onChange={e => setMsgContent(e.target.value)}
                         placeholder="Draft your promotional newsletter body here..."
                         rows={4}
-                        className="w-full px-4 py-2.5 text-xs border border-neutral-200 rounded-xl focus:outline-none focus:border-amber-500"
+                        className="w-full px-4 py-2.5 text-xs border border-neutral-200 dark:border-slate-700 rounded-xl focus:outline-none focus:border-amber-500"
                         required
                       />
                     </div>
 
                     <button
                       type="submit"
-                      className="w-full bg-neutral-950 text-white hover:bg-amber-500 hover:text-neutral-900 py-3 rounded-xl text-xs font-bold tracking-wider transition-colors shadow"
+                      className="w-full bg-neutral-950 text-white hover:bg-amber-500 hover:text-neutral-900 dark:text-slate-100 py-3 rounded-xl text-xs font-bold tracking-wider transition-colors shadow"
                     >
                       Dispatch Broadcast campaign
                     </button>
@@ -3292,21 +3294,21 @@ export default function AdminDashboard({
 
                 {/* Dispatch Archive */}
                 <div className="lg:col-span-2 space-y-4">
-                  <h3 className="font-serif text-lg text-neutral-900">Campaign Dispatch Archive</h3>
+                  <h3 className="font-serif text-lg text-neutral-900 dark:text-slate-100">Campaign Dispatch Archive</h3>
 
                   <div className="space-y-4">
                     {adminMessages.map(msg => (
-                      <div key={msg.id} className="bg-white p-5 rounded-2xl border border-neutral-200/60 shadow-sm space-y-3 relative">
-                        <div className="flex justify-between items-start border-b border-neutral-100 pb-2">
+                      <div key={msg.id} className="bg-white dark:bg-slate-900 p-5 rounded-2xl border border-neutral-200/60 shadow-sm space-y-3 relative">
+                        <div className="flex justify-between items-start border-b border-neutral-100 dark:border-slate-800 pb-2">
                           <div>
-                            <h4 className="font-bold text-neutral-800 text-sm">{msg.title}</h4>
+                            <h4 className="font-bold text-neutral-800 dark:text-slate-200 text-sm">{msg.title}</h4>
                             <p className="text-[10px] text-neutral-400">Broadcasted on {msg.date} by {msg.sentBy}</p>
                           </div>
-                          <span className="text-[10px] bg-neutral-100 text-neutral-700 px-2.5 py-0.5 rounded-full font-bold uppercase tracking-wider">
+                          <span className="text-[10px] bg-neutral-100 dark:bg-slate-800 text-neutral-700 dark:text-slate-300 px-2.5 py-0.5 rounded-full font-bold uppercase tracking-wider">
                             Recipient: {msg.recipients}
                           </span>
                         </div>
-                        <p className="text-xs text-neutral-600 leading-relaxed italic">"{msg.content}"</p>
+                        <p className="text-xs text-neutral-600 dark:text-slate-400 leading-relaxed italic">"{msg.content}"</p>
                       </div>
                     ))}
                   </div>
@@ -3320,24 +3322,24 @@ export default function AdminDashboard({
             <div className="space-y-6 animate-in fade-in duration-300">
               <div className="border-b border-neutral-250 pb-4 flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4">
                 <div>
-                  <h2 className="font-serif text-2xl text-neutral-900 font-medium">Catalogs Media Manager</h2>
-                  <p className="text-xs text-neutral-500">Add digital catalogs, visual brochures, evening gown portfolios, or video clips.</p>
+                  <h2 className="font-serif text-2xl text-neutral-900 dark:text-slate-100 font-medium">Catalogs Media Manager</h2>
+                  <p className="text-xs text-neutral-500 dark:text-slate-400">Add digital catalogs, visual brochures, evening gown portfolios, or video clips.</p>
                 </div>
                 <PageToggleBtn />
               </div>
 
               <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
                 {/* Forms */}
-                <div className="bg-white p-5 rounded-2xl border border-neutral-200/60 shadow-sm h-fit space-y-4">
-                  <h3 className="font-serif text-base text-neutral-900 border-b border-neutral-100 pb-2">Upload Asset</h3>
+                <div className="bg-white dark:bg-slate-900 p-5 rounded-2xl border border-neutral-200/60 shadow-sm h-fit space-y-4">
+                  <h3 className="font-serif text-base text-neutral-900 dark:text-slate-100 border-b border-neutral-100 dark:border-slate-800 pb-2">Upload Asset</h3>
 
                   <form onSubmit={handleUploadMedia} className="space-y-4">
                     <div className="space-y-1.5">
-                      <label className="text-xs font-semibold text-neutral-600 block">Asset Type</label>
+                      <label className="text-xs font-semibold text-neutral-600 dark:text-slate-400 block">Asset Type</label>
                       <select
                         value={mediaType}
                         onChange={e => setMediaType(e.target.value as any)}
-                        className="w-full px-4 py-2.5 text-xs border border-neutral-200 rounded-xl focus:outline-none focus:border-amber-500 bg-white"
+                        className="w-full px-4 py-2.5 text-xs border border-neutral-200 dark:border-slate-700 rounded-xl focus:outline-none focus:border-amber-500 bg-white dark:bg-slate-900"
                       >
                         <option value="image">Portfolio Image</option>
                         <option value="video">Promotional Video</option>
@@ -3346,30 +3348,30 @@ export default function AdminDashboard({
                     </div>
 
                     <div className="space-y-1.5">
-                      <label className="text-xs font-semibold text-neutral-600 block">Asset Title</label>
+                      <label className="text-xs font-semibold text-neutral-600 dark:text-slate-400 block">Asset Title</label>
                       <input
                         type="text"
                         value={mediaTitle}
                         onChange={e => setMediaTitle(e.target.value)}
                         placeholder="e.g. Evening gowns brochure"
-                        className="w-full px-4 py-2.5 text-xs border border-neutral-200 rounded-xl focus:outline-none focus:border-amber-500"
+                        className="w-full px-4 py-2.5 text-xs border border-neutral-200 dark:border-slate-700 rounded-xl focus:outline-none focus:border-amber-500"
                         required
                       />
                     </div>
 
                     <div className="space-y-1.5">
-                      <label className="text-xs font-semibold text-neutral-600 block">Short Description</label>
+                      <label className="text-xs font-semibold text-neutral-600 dark:text-slate-400 block">Short Description</label>
                       <textarea
                         value={mediaDesc}
                         onChange={e => setMediaDescription(e.target.value)}
                         placeholder="e.g. Traditional designs, premium silk..."
                         rows={2.5}
-                        className="w-full px-4 py-2.5 text-xs border border-neutral-200 rounded-xl focus:outline-none focus:border-amber-500"
+                        className="w-full px-4 py-2.5 text-xs border border-neutral-200 dark:border-slate-700 rounded-xl focus:outline-none focus:border-amber-500"
                       />
                     </div>
 
                     <div className="space-y-1.5">
-                      <label className="text-xs font-semibold text-neutral-600 block font-serif">Attach File Asset</label>
+                      <label className="text-xs font-semibold text-neutral-600 dark:text-slate-400 block font-serif">Attach File Asset</label>
                       <div className="border-2 border-dashed border-neutral-250 p-6 rounded-2xl text-center hover:border-amber-500 transition-colors relative cursor-pointer group bg-neutral-50/50">
                         <input 
                           type="file" 
@@ -3378,7 +3380,7 @@ export default function AdminDashboard({
                           className="absolute inset-0 opacity-0 cursor-pointer w-full h-full"
                         />
                         <ImageIcon className="w-8 h-8 mx-auto text-neutral-400 group-hover:text-amber-500 transition-colors mb-2" />
-                        <p className="text-xs text-neutral-600 font-medium">Click to select asset file (Base64 conversion)</p>
+                        <p className="text-xs text-neutral-600 dark:text-slate-400 font-medium">Click to select asset file (Base64 conversion)</p>
                         {mediaUrl && (
                           <p className="text-[10px] text-green-600 mt-2 font-bold">✓ Media asset attached securely</p>
                         )}
@@ -3387,7 +3389,7 @@ export default function AdminDashboard({
 
                     <button
                       type="submit"
-                      className="w-full bg-neutral-950 text-white hover:bg-amber-500 hover:text-neutral-900 py-3 rounded-xl text-xs font-bold tracking-wider transition-colors shadow"
+                      className="w-full bg-neutral-950 text-white hover:bg-amber-500 hover:text-neutral-900 dark:text-slate-100 py-3 rounded-xl text-xs font-bold tracking-wider transition-colors shadow"
                     >
                       Save Catalog Asset
                     </button>
@@ -3396,11 +3398,11 @@ export default function AdminDashboard({
 
                 {/* List registered */}
                 <div className="lg:col-span-2 space-y-4">
-                  <h3 className="font-serif text-lg text-neutral-900 font-medium">Archived Media Catalogs</h3>
+                  <h3 className="font-serif text-lg text-neutral-900 dark:text-slate-100 font-medium">Archived Media Catalogs</h3>
 
                   <div className="grid grid-cols-1 sm:grid-cols-2 gap-5">
                     {mediaFiles.map(media => (
-                      <div key={media.id} className="bg-white p-4.5 rounded-2xl border border-neutral-200/60 shadow-sm relative group hover:border-amber-500/50 transition-colors flex flex-col justify-between">
+                      <div key={media.id} className="bg-white dark:bg-slate-900 p-4.5 rounded-2xl border border-neutral-200/60 shadow-sm relative group hover:border-amber-500/50 transition-colors flex flex-col justify-between">
                         <button
                           onClick={() => handleDeleteMedia(media.id, media.title)}
                           className="absolute top-4 right-4 text-neutral-400 hover:text-red-500 opacity-0 group-hover:opacity-100 transition-opacity"
@@ -3409,7 +3411,7 @@ export default function AdminDashboard({
                         </button>
 
                         <div className="space-y-2">
-                          <div className="aspect-video bg-neutral-100 rounded-xl border border-neutral-150 overflow-hidden relative">
+                          <div className="aspect-video bg-neutral-100 dark:bg-slate-800 rounded-xl border border-neutral-150 dark:border-slate-800 overflow-hidden relative">
                             {media.type === 'image' && (
                               <img src={media.url} alt={media.title} className="w-full h-full object-cover" />
                             )}
@@ -3421,7 +3423,7 @@ export default function AdminDashboard({
                           </div>
 
                           <div className="pt-2">
-                            <h4 className="font-bold text-neutral-800 text-xs">{media.title}</h4>
+                            <h4 className="font-bold text-neutral-800 dark:text-slate-200 text-xs">{media.title}</h4>
                             <p className="text-[10px] text-neutral-400 line-clamp-2 mt-1">{media.description}</p>
                           </div>
                         </div>
@@ -3440,17 +3442,17 @@ export default function AdminDashboard({
             <div className="space-y-6 animate-in fade-in duration-300">
               <div className="border-b border-neutral-250 pb-4 flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4">
                 <div>
-                  <h2 className="font-serif text-2xl text-neutral-900 font-medium">Visual Homepage Architect</h2>
-                  <p className="text-xs text-neutral-500">Customize the design colors, spacing, backgrounds, and layout of the customer store page.</p>
+                  <h2 className="font-serif text-2xl text-neutral-900 dark:text-slate-100 font-medium">Visual Homepage Architect</h2>
+                  <p className="text-xs text-neutral-500 dark:text-slate-400">Customize the design colors, spacing, backgrounds, and layout of the customer store page.</p>
                 </div>
                 <PageToggleBtn />
               </div>
 
-              <div className="bg-white p-6 rounded-2xl border border-neutral-200/60 shadow-sm max-w-3xl space-y-6">
+              <div className="bg-white dark:bg-slate-900 p-6 rounded-2xl border border-neutral-200/60 shadow-sm max-w-3xl space-y-6">
                 
                 {/* 1. Hero Background */}
                 <div className="space-y-2">
-                  <h3 className="font-serif text-base text-neutral-900 border-b border-neutral-100 pb-1.5">1. Hero Section Canvas Image</h3>
+                  <h3 className="font-serif text-base text-neutral-900 dark:text-slate-100 border-b border-neutral-100 dark:border-slate-800 pb-1.5">1. Hero Section Canvas Image</h3>
                   <div className="border-2 border-dashed border-neutral-250 p-6 rounded-2xl text-center hover:border-amber-500 transition-colors relative cursor-pointer group bg-neutral-50/50">
                     <input 
                       type="file" 
@@ -3459,10 +3461,10 @@ export default function AdminDashboard({
                       className="absolute inset-0 opacity-0 cursor-pointer w-full h-full"
                     />
                     <ImageIcon className="w-8 h-8 mx-auto text-neutral-400 group-hover:text-amber-500 transition-colors mb-2" />
-                    <p className="text-xs text-neutral-600 font-medium">Click to select new high-resolution hero background image</p>
+                    <p className="text-xs text-neutral-600 dark:text-slate-400 font-medium">Click to select new high-resolution hero background image</p>
                     {homeHeroBg && (
                       <div className="mt-4 max-w-xs mx-auto">
-                        <img src={homeHeroBg} alt="Base64 preview" className="rounded-xl border border-neutral-200 shadow-sm max-h-32 object-cover mx-auto" />
+                        <img src={homeHeroBg} alt="Base64 preview" className="rounded-xl border border-neutral-200 dark:border-slate-700 shadow-sm max-h-32 object-cover mx-auto" />
                       </div>
                     )}
                   </div>
@@ -3470,7 +3472,7 @@ export default function AdminDashboard({
 
                 {/* 2. Grid Style Arrangement */}
                 <div className="space-y-3">
-                  <h3 className="font-serif text-base text-neutral-900 border-b border-neutral-100 pb-1.5">2. Catalog Layout Alignment</h3>
+                  <h3 className="font-serif text-base text-neutral-900 dark:text-slate-100 border-b border-neutral-100 dark:border-slate-800 pb-1.5">2. Catalog Layout Alignment</h3>
                   <div className="grid grid-cols-2 sm:grid-cols-4 gap-4">
                     {[
                       { id: "grid", label: "Responsive Grid" },
@@ -3485,7 +3487,7 @@ export default function AdminDashboard({
                         className={`p-4 rounded-xl border text-xs font-bold transition-all duration-300 ${
                           homeLayout === lay.id
                             ? "bg-amber-100 border-amber-500 text-amber-950 font-black shadow-inner shadow-amber-200"
-                            : "bg-neutral-50 hover:bg-neutral-100 border-neutral-200 text-neutral-600"
+                            : "bg-neutral-50 dark:bg-slate-950 hover:bg-neutral-100 dark:bg-slate-800 border-neutral-200 dark:border-slate-700 text-neutral-600 dark:text-slate-400"
                         }`}
                       >
                         {lay.label}
@@ -3496,41 +3498,41 @@ export default function AdminDashboard({
 
                 {/* 3. Colors Schema */}
                 <div className="space-y-3">
-                  <h3 className="font-serif text-base text-neutral-900 border-b border-neutral-100 pb-1.5">3. Accent Palette Palette</h3>
+                  <h3 className="font-serif text-base text-neutral-900 dark:text-slate-100 border-b border-neutral-100 dark:border-slate-800 pb-1.5">3. Accent Palette Palette</h3>
                   
                   <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
                     <div className="space-y-1">
-                      <label className="text-xs font-semibold text-neutral-600 block">Primary Brand Color (Gold/Accent)</label>
+                      <label className="text-xs font-semibold text-neutral-600 dark:text-slate-400 block">Primary Brand Color (Gold/Accent)</label>
                       <div className="flex gap-3">
                         <input
                           type="color"
                           value={homePrimary}
                           onChange={e => setHomePrimary(e.target.value)}
-                          className="w-12 h-10 border border-neutral-200 rounded-xl cursor-pointer p-0 bg-transparent shrink-0"
+                          className="w-12 h-10 border border-neutral-200 dark:border-slate-700 rounded-xl cursor-pointer p-0 bg-transparent shrink-0"
                         />
                         <input
                           type="text"
                           value={homePrimary}
                           onChange={e => setHomePrimary(e.target.value)}
-                          className="flex-1 px-4 py-2 border border-neutral-200 rounded-xl text-xs font-mono font-bold focus:outline-none"
+                          className="flex-1 px-4 py-2 border border-neutral-200 dark:border-slate-700 rounded-xl text-xs font-mono font-bold focus:outline-none"
                         />
                       </div>
                     </div>
 
                     <div className="space-y-1">
-                      <label className="text-xs font-semibold text-neutral-600 block">Secondary Dark Canvas Color</label>
+                      <label className="text-xs font-semibold text-neutral-600 dark:text-slate-400 block">Secondary Dark Canvas Color</label>
                       <div className="flex gap-3">
                         <input
                           type="color"
                           value={homeSecondary}
                           onChange={e => setHomeSecondary(e.target.value)}
-                          className="w-12 h-10 border border-neutral-200 rounded-xl cursor-pointer p-0 bg-transparent shrink-0"
+                          className="w-12 h-10 border border-neutral-200 dark:border-slate-700 rounded-xl cursor-pointer p-0 bg-transparent shrink-0"
                         />
                         <input
                           type="text"
                           value={homeSecondary}
                           onChange={e => setHomeSecondary(e.target.value)}
-                          className="flex-1 px-4 py-2 border border-neutral-200 rounded-xl text-xs font-mono font-bold focus:outline-none"
+                          className="flex-1 px-4 py-2 border border-neutral-200 dark:border-slate-700 rounded-xl text-xs font-mono font-bold focus:outline-none"
                         />
                       </div>
                     </div>
@@ -3539,40 +3541,40 @@ export default function AdminDashboard({
 
                 {/* 3.5 Hero Text Content */}
                 <div className="space-y-3">
-                  <h3 className="font-serif text-base text-neutral-900 border-b border-neutral-100 pb-1.5">3.5 Hero Text Content</h3>
+                  <h3 className="font-serif text-base text-neutral-900 dark:text-slate-100 border-b border-neutral-100 dark:border-slate-800 pb-1.5">3.5 Hero Text Content</h3>
                   <div className="space-y-4">
                     <div className="space-y-1">
-                      <label className="text-xs font-semibold text-neutral-600 block">Hero Title</label>
+                      <label className="text-xs font-semibold text-neutral-600 dark:text-slate-400 block">Hero Title</label>
                       <input
                         type="text"
                         value={homeHeroTitle}
                         onChange={e => setHomeHeroTitle(e.target.value)}
-                        className="w-full px-4 py-2 border border-neutral-200 rounded-xl text-xs font-bold focus:outline-none"
+                        className="w-full px-4 py-2 border border-neutral-200 dark:border-slate-700 rounded-xl text-xs font-bold focus:outline-none"
                       />
                     </div>
                     <div className="space-y-1">
-                      <label className="text-xs font-semibold text-neutral-600 block">Hero Description</label>
+                      <label className="text-xs font-semibold text-neutral-600 dark:text-slate-400 block">Hero Description</label>
                       <textarea
                         value={homeHeroDescription}
                         onChange={e => setHomeHeroDescription(e.target.value)}
-                        className="w-full px-4 py-2 border border-neutral-200 rounded-xl text-xs font-bold focus:outline-none h-20"
+                        className="w-full px-4 py-2 border border-neutral-200 dark:border-slate-700 rounded-xl text-xs font-bold focus:outline-none h-20"
                       />
                     </div>
                   </div>
                 </div>
 
                 {/* 4. MTN Mobile Money Gateway Setup */}
-                <div className="space-y-4 pt-2 border-t border-neutral-100">
-                  <h3 className="font-serif text-base text-neutral-900 pb-1.5 flex items-center gap-1.5 border-b border-neutral-100">
+                <div className="space-y-4 pt-2 border-t border-neutral-100 dark:border-slate-800">
+                  <h3 className="font-serif text-base text-neutral-900 dark:text-slate-100 pb-1.5 flex items-center gap-1.5 border-b border-neutral-100 dark:border-slate-800">
                     <span className="w-2.5 h-2.5 rounded-full bg-amber-500 animate-pulse inline-block" />
                     4. MTN Mobile Money Gateway Setup
                   </h3>
 
                   <div className="space-y-4">
                     {/* Gateway status */}
-                    <div className="flex items-center justify-between p-4 bg-neutral-50 rounded-2xl border border-neutral-200/60">
+                    <div className="flex items-center justify-between p-4 bg-neutral-50 dark:bg-slate-950 rounded-2xl border border-neutral-200/60">
                       <div>
-                        <h4 className="text-xs font-bold text-neutral-800">Gateway Online Status</h4>
+                        <h4 className="text-xs font-bold text-neutral-800 dark:text-slate-200">Gateway Online Status</h4>
                         <p className="text-[10px] text-neutral-400">Toggle whether customers can checkout using the MTN MoMo payment option.</p>
                       </div>
                       <button
@@ -3591,31 +3593,31 @@ export default function AdminDashboard({
                     <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
                       {/* Merchant Name */}
                       <div className="space-y-1">
-                        <label className="text-xs font-semibold text-neutral-600 block">Registered Merchant Name</label>
+                        <label className="text-xs font-semibold text-neutral-600 dark:text-slate-400 block">Registered Merchant Name</label>
                         <input
                           type="text"
                           value={momoMerchantName}
                           onChange={e => setMomoMerchantName(e.target.value)}
                           placeholder="e.g. ELLA'S FASHION SHOWROOM"
-                          className="w-full px-4 py-2.5 border border-neutral-200 rounded-xl text-xs font-bold focus:outline-none focus:border-amber-500"
+                          className="w-full px-4 py-2.5 border border-neutral-200 dark:border-slate-700 rounded-xl text-xs font-bold focus:outline-none focus:border-amber-500"
                         />
                       </div>
 
                       {/* Merchant Number */}
                       <div className="space-y-1">
-                        <label className="text-xs font-semibold text-neutral-600 block">MTN Wallet / Merchant Number</label>
+                        <label className="text-xs font-semibold text-neutral-600 dark:text-slate-400 block">MTN Wallet / Merchant Number</label>
                         <input
                           type="tel"
                           value={momoMerchantNumber}
                           onChange={e => setMomoMerchantNumber(e.target.value)}
                           placeholder="e.g. 0244123456"
-                          className="w-full px-4 py-2.5 border border-neutral-200 rounded-xl text-xs font-mono font-bold focus:outline-none focus:border-amber-500"
+                          className="w-full px-4 py-2.5 border border-neutral-200 dark:border-slate-700 rounded-xl text-xs font-mono font-bold focus:outline-none focus:border-amber-500"
                         />
                       </div>
 
                       {/* MoMo Charge Rate */}
                       <div className="space-y-1">
-                        <label className="text-xs font-semibold text-neutral-600 block">Gateway Surcharge Rate (%)</label>
+                        <label className="text-xs font-semibold text-neutral-600 dark:text-slate-400 block">Gateway Surcharge Rate (%)</label>
                         <input
                           type="number"
                           step="0.01"
@@ -3624,7 +3626,7 @@ export default function AdminDashboard({
                           value={momoChargeRate}
                           onChange={e => setMomoChargeRate(Number(e.target.value))}
                           placeholder="e.g. 0.5"
-                          className="w-full px-4 py-2.5 border border-neutral-200 rounded-xl text-xs font-bold focus:outline-none focus:border-amber-500"
+                          className="w-full px-4 py-2.5 border border-neutral-200 dark:border-slate-700 rounded-xl text-xs font-bold focus:outline-none focus:border-amber-500"
                         />
                       </div>
                     </div>
@@ -3632,11 +3634,11 @@ export default function AdminDashboard({
                 </div>
 
                 {/* Save actions */}
-                <div className="pt-4 border-t border-neutral-100">
+                <div className="pt-4 border-t border-neutral-100 dark:border-slate-800">
                   <button
                     type="button"
                     onClick={handleSaveHomepageCustomization}
-                    className="bg-amber-500 hover:bg-amber-600 text-neutral-900 px-6 py-3 rounded-xl text-xs font-black tracking-wider transition-all shadow"
+                    className="bg-amber-500 hover:bg-amber-600 text-neutral-900 dark:text-slate-100 px-6 py-3 rounded-xl text-xs font-black tracking-wider transition-all shadow"
                   >
                     Commit Theme Changes
                   </button>
@@ -3650,8 +3652,8 @@ export default function AdminDashboard({
             <div className="space-y-6 animate-in fade-in duration-300">
               <div className="border-b border-neutral-250 pb-4 flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4">
                 <div>
-                  <h2 className="font-serif text-2xl text-neutral-900 font-medium">Boutique Events Scheduler</h2>
-                  <p className="text-xs text-neutral-500">Create and display promotional showcase dates, Ankara exhibitions, and catalog pop-up sales.</p>
+                  <h2 className="font-serif text-2xl text-neutral-900 dark:text-slate-100 font-medium">Boutique Events Scheduler</h2>
+                  <p className="text-xs text-neutral-500 dark:text-slate-400">Create and display promotional showcase dates, Ankara exhibitions, and catalog pop-up sales.</p>
                 </div>
                 <div className="flex items-center gap-2">
                   <button
@@ -3666,28 +3668,28 @@ export default function AdminDashboard({
               </div>
 
               {showEventForm && (
-                <form onSubmit={handleAddEvent} className="bg-white p-6 rounded-2xl border border-neutral-200/60 shadow-sm max-w-2xl space-y-4">
-                  <h3 className="font-serif text-base text-neutral-900 border-b border-neutral-100 pb-2">Publish a Store Event</h3>
+                <form onSubmit={handleAddEvent} className="bg-white dark:bg-slate-900 p-6 rounded-2xl border border-neutral-200/60 shadow-sm max-w-2xl space-y-4">
+                  <h3 className="font-serif text-base text-neutral-900 dark:text-slate-100 border-b border-neutral-100 dark:border-slate-800 pb-2">Publish a Store Event</h3>
                   
                   <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
                     <div className="space-y-1">
-                      <label className="text-xs font-semibold text-neutral-600">Event Title *</label>
+                      <label className="text-xs font-semibold text-neutral-600 dark:text-slate-400">Event Title *</label>
                       <input
                         type="text"
                         required
                         placeholder="e.g. Ella's Ankara Design Showcase"
                         value={eventTitle}
                         onChange={e => setEventTitle(e.target.value)}
-                        className="w-full px-4 py-2.5 border border-neutral-200 rounded-xl text-xs font-bold focus:outline-none focus:border-amber-500"
+                        className="w-full px-4 py-2.5 border border-neutral-200 dark:border-slate-700 rounded-xl text-xs font-bold focus:outline-none focus:border-amber-500"
                       />
                     </div>
 
                     <div className="space-y-1">
-                      <label className="text-xs font-semibold text-neutral-600">Event Status *</label>
+                      <label className="text-xs font-semibold text-neutral-600 dark:text-slate-400">Event Status *</label>
                       <select
                         value={eventStatus}
                         onChange={e => setEventStatus(e.target.value as any)}
-                        className="w-full px-4 py-2.5 border border-neutral-200 rounded-xl text-xs font-bold focus:outline-none focus:border-amber-500"
+                        className="w-full px-4 py-2.5 border border-neutral-200 dark:border-slate-700 rounded-xl text-xs font-bold focus:outline-none focus:border-amber-500"
                       >
                         <option value="upcoming">Upcoming</option>
                         <option value="ongoing">Ongoing (Happening Now)</option>
@@ -3697,53 +3699,53 @@ export default function AdminDashboard({
                   </div>
 
                   <div className="space-y-1">
-                    <label className="text-xs font-semibold text-neutral-600">Short Description</label>
+                    <label className="text-xs font-semibold text-neutral-600 dark:text-slate-400">Short Description</label>
                     <textarea
                       placeholder="Give a compelling preview of this boutique event, show times, custom styling, or special MoMo discounts..."
                       value={eventDesc}
                       onChange={e => setEventDesc(e.target.value)}
                       rows={3}
-                      className="w-full px-4 py-2.5 border border-neutral-200 rounded-xl text-xs font-medium focus:outline-none focus:border-amber-500"
+                      className="w-full px-4 py-2.5 border border-neutral-200 dark:border-slate-700 rounded-xl text-xs font-medium focus:outline-none focus:border-amber-500"
                     />
                   </div>
 
                   <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
                     <div className="space-y-1">
-                      <label className="text-xs font-semibold text-neutral-600">Event Date *</label>
+                      <label className="text-xs font-semibold text-neutral-600 dark:text-slate-400">Event Date *</label>
                       <input
                         type="date"
                         required
                         value={eventDate}
                         onChange={e => setEventDate(e.target.value)}
-                        className="w-full px-4 py-2.5 border border-neutral-200 rounded-xl text-xs font-mono font-bold focus:outline-none focus:border-amber-500"
+                        className="w-full px-4 py-2.5 border border-neutral-200 dark:border-slate-700 rounded-xl text-xs font-mono font-bold focus:outline-none focus:border-amber-500"
                       />
                     </div>
 
                     <div className="space-y-1">
-                      <label className="text-xs font-semibold text-neutral-600">Event Time (Optional)</label>
+                      <label className="text-xs font-semibold text-neutral-600 dark:text-slate-400">Event Time (Optional)</label>
                       <input
                         type="time"
                         value={eventTime}
                         onChange={e => setEventTime(e.target.value)}
-                        className="w-full px-4 py-2.5 border border-neutral-200 rounded-xl text-xs font-mono font-bold focus:outline-none focus:border-amber-500"
+                        className="w-full px-4 py-2.5 border border-neutral-200 dark:border-slate-700 rounded-xl text-xs font-mono font-bold focus:outline-none focus:border-amber-500"
                       />
                     </div>
 
                     <div className="space-y-1">
-                      <label className="text-xs font-semibold text-neutral-600">Location / Venue *</label>
+                      <label className="text-xs font-semibold text-neutral-600 dark:text-slate-400">Location / Venue *</label>
                       <input
                         type="text"
                         required
                         placeholder="e.g. Ashaiman Showroom, Accra"
                         value={eventLocation}
                         onChange={e => setEventLocation(e.target.value)}
-                        className="w-full px-4 py-2.5 border border-neutral-200 rounded-xl text-xs font-bold focus:outline-none focus:border-amber-500"
+                        className="w-full px-4 py-2.5 border border-neutral-200 dark:border-slate-700 rounded-xl text-xs font-bold focus:outline-none focus:border-amber-500"
                       />
                     </div>
                   </div>
 
                   <div className="space-y-2">
-                    <label className="text-xs font-semibold text-neutral-600 block">Banner Image / Showcase Cover</label>
+                    <label className="text-xs font-semibold text-neutral-600 dark:text-slate-400 block">Banner Image / Showcase Cover</label>
                     <div className="border-2 border-dashed border-neutral-250 p-5 rounded-2xl text-center hover:border-amber-500 transition-colors relative cursor-pointer group bg-neutral-50/50">
                       <input 
                         type="file" 
@@ -3752,10 +3754,10 @@ export default function AdminDashboard({
                         className="absolute inset-0 opacity-0 cursor-pointer w-full h-full"
                       />
                       <ImageIcon className="w-6 h-6 mx-auto text-neutral-400 group-hover:text-amber-500 transition-colors mb-2" />
-                      <p className="text-xs text-neutral-600 font-medium">Click to select new cover or design banner image</p>
+                      <p className="text-xs text-neutral-600 dark:text-slate-400 font-medium">Click to select new cover or design banner image</p>
                       {eventImageUrl && (
                         <div className="mt-3 max-w-xs mx-auto">
-                          <img src={eventImageUrl} alt="Banner preview" className="rounded-xl border border-neutral-200 shadow-sm max-h-24 object-cover mx-auto" />
+                          <img src={eventImageUrl} alt="Banner preview" className="rounded-xl border border-neutral-200 dark:border-slate-700 shadow-sm max-h-24 object-cover mx-auto" />
                         </div>
                       )}
                     </div>
@@ -3765,13 +3767,13 @@ export default function AdminDashboard({
                     <button
                       type="button"
                       onClick={() => setShowEventForm(false)}
-                      className="px-4 py-2.5 rounded-xl text-xs font-bold text-neutral-600 hover:bg-neutral-100 transition-all"
+                      className="px-4 py-2.5 rounded-xl text-xs font-bold text-neutral-600 dark:text-slate-400 hover:bg-neutral-100 dark:bg-slate-800 transition-all"
                     >
                       Cancel
                     </button>
                     <button
                       type="submit"
-                      className="bg-amber-500 hover:bg-amber-600 text-neutral-900 px-5 py-2.5 rounded-xl text-xs font-black tracking-wider transition-all shadow"
+                      className="bg-amber-500 hover:bg-amber-600 text-neutral-900 dark:text-slate-100 px-5 py-2.5 rounded-xl text-xs font-black tracking-wider transition-all shadow"
                     >
                       Publish Live Event
                     </button>
@@ -3780,7 +3782,7 @@ export default function AdminDashboard({
               )}
 
               {/* Events Grid list */}
-              <div className="bg-white rounded-2xl border border-neutral-200/60 shadow-sm p-6">
+              <div className="bg-white dark:bg-slate-900 rounded-2xl border border-neutral-200/60 shadow-sm p-6">
                 {events.length === 0 ? (
                   <div className="text-center py-12 text-neutral-400">
                     <Calendar className="w-12 h-12 mx-auto text-neutral-300 mb-2" />
@@ -3790,10 +3792,10 @@ export default function AdminDashboard({
                 ) : (
                   <div className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-6">
                     {events.map(evt => (
-                      <div key={evt.id} className="border border-neutral-100 rounded-2xl overflow-hidden hover:shadow-md transition-shadow bg-neutral-50/30 flex flex-col justify-between">
+                      <div key={evt.id} className="border border-neutral-100 dark:border-slate-800 rounded-2xl overflow-hidden hover:shadow-md transition-shadow bg-neutral-50/30 flex flex-col justify-between">
                         <div>
                           {/* Event Image Banner */}
-                          <div className="relative h-40 bg-neutral-100 overflow-hidden">
+                          <div className="relative h-40 bg-neutral-100 dark:bg-slate-800 overflow-hidden">
                             <img 
                               src={evt.imageUrl || "https://images.unsplash.com/photo-1511578314322-379afb476865?w=800"} 
                               alt={evt.title} 
@@ -3803,7 +3805,7 @@ export default function AdminDashboard({
                               <span className={`px-2.5 py-1 rounded-full text-[10px] font-black tracking-wider uppercase border shadow ${
                                 evt.status === 'upcoming' ? 'bg-green-100 text-green-700 border-green-200' :
                                 evt.status === 'ongoing' ? 'bg-blue-100 text-blue-700 border-blue-200 animate-pulse' :
-                                'bg-neutral-200 text-neutral-600 border-neutral-300'
+                                'bg-neutral-200 text-neutral-600 dark:text-slate-400 border-neutral-300'
                               }`}>
                                 {evt.status}
                               </span>
@@ -3811,10 +3813,10 @@ export default function AdminDashboard({
                           </div>
 
                           <div className="p-4 space-y-2">
-                            <h4 className="font-serif text-base text-neutral-900 font-bold tracking-tight">{evt.title}</h4>
-                            <p className="text-xs text-neutral-600 line-clamp-2 leading-relaxed">{evt.description}</p>
+                            <h4 className="font-serif text-base text-neutral-900 dark:text-slate-100 font-bold tracking-tight">{evt.title}</h4>
+                            <p className="text-xs text-neutral-600 dark:text-slate-400 line-clamp-2 leading-relaxed">{evt.description}</p>
                             
-                            <div className="space-y-1.5 pt-2 text-[11px] text-neutral-500 font-medium">
+                            <div className="space-y-1.5 pt-2 text-[11px] text-neutral-500 dark:text-slate-400 font-medium">
                               <div className="flex items-center gap-1.5">
                                 <Calendar className="w-3.5 h-3.5 text-neutral-400 shrink-0" />
                                 <span>{evt.date} {evt.time ? `at ${evt.time}` : ""}</span>
@@ -3828,7 +3830,7 @@ export default function AdminDashboard({
                         </div>
 
                         {/* Actions */}
-                        <div className="border-t border-neutral-100 p-4 bg-white flex justify-end">
+                        <div className="border-t border-neutral-100 dark:border-slate-800 p-4 bg-white dark:bg-slate-900 flex justify-end">
                           <button
                             onClick={() => handleDeleteEvent(evt.id, evt.title)}
                             className="text-red-500 hover:bg-red-50 p-2 rounded-xl border border-red-100 hover:border-red-200 transition-colors flex items-center justify-center gap-1.5 text-[10px] font-bold"
@@ -3850,8 +3852,8 @@ export default function AdminDashboard({
             <div className="space-y-6 animate-in fade-in duration-300">
               <div className="border-b border-neutral-250 pb-4 flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4">
                 <div>
-                  <h2 className="font-serif text-2xl text-neutral-900 font-medium">Customer Reviews & Requests</h2>
-                  <p className="text-xs text-neutral-500">View and tally ratings, testimonials, and customized tailoring requests left by visitors.</p>
+                  <h2 className="font-serif text-2xl text-neutral-900 dark:text-slate-100 font-medium">Customer Reviews & Requests</h2>
+                  <p className="text-xs text-neutral-500 dark:text-slate-400">View and tally ratings, testimonials, and customized tailoring requests left by visitors.</p>
                 </div>
                 <div className="flex items-center gap-2">
                   <PageToggleBtn />
@@ -3861,7 +3863,7 @@ export default function AdminDashboard({
               {/* Tallying & Analytics Cards */}
               <div className="grid grid-cols-1 md:grid-cols-4 gap-6">
                 {/* Metric 1: Average Rating */}
-                <div className="bg-white border border-neutral-200 p-5 rounded-2xl shadow-sm space-y-1 text-center">
+                <div className="bg-white dark:bg-slate-900 border border-neutral-200 dark:border-slate-700 p-5 rounded-2xl shadow-sm space-y-1 text-center">
                   <p className="text-[10px] font-bold text-neutral-400 uppercase tracking-widest">Average Score</p>
                   <div className="flex items-center justify-center gap-1">
                     <span className="font-serif text-3xl font-black text-amber-500">
@@ -3869,11 +3871,11 @@ export default function AdminDashboard({
                     </span>
                     <Star className="w-5 h-5 fill-amber-500 text-amber-500" />
                   </div>
-                  <p className="text-[10px] text-neutral-500">Based on {reviews.length} customer reviews</p>
+                  <p className="text-[10px] text-neutral-500 dark:text-slate-400">Based on {reviews.length} customer reviews</p>
                 </div>
 
                 {/* Metric 2: Ratings Tally bar charts */}
-                <div className="bg-white border border-neutral-200 p-4.5 rounded-2xl shadow-sm md:col-span-2 space-y-2">
+                <div className="bg-white dark:bg-slate-900 border border-neutral-200 dark:border-slate-700 p-4.5 rounded-2xl shadow-sm md:col-span-2 space-y-2">
                   <p className="text-[10px] font-bold text-neutral-400 uppercase tracking-widest text-center">Rating Distribution Tally</p>
                   <div className="space-y-1.5">
                     {[5, 4, 3, 2, 1].map(stars => {
@@ -3881,13 +3883,13 @@ export default function AdminDashboard({
                       const percentage = reviews.length > 0 ? (count / reviews.length) * 100 : 0;
                       return (
                         <div key={stars} className="flex items-center gap-3 text-xs">
-                          <span className="w-12 font-mono font-bold text-neutral-600 flex items-center gap-1">
+                          <span className="w-12 font-mono font-bold text-neutral-600 dark:text-slate-400 flex items-center gap-1">
                             {stars} <Star className="w-3.5 h-3.5 fill-amber-500 text-amber-500" />
                           </span>
-                          <div className="flex-1 h-2 bg-neutral-100 rounded-full overflow-hidden">
+                          <div className="flex-1 h-2 bg-neutral-100 dark:bg-slate-800 rounded-full overflow-hidden">
                             <div className="h-full bg-amber-500 rounded-full" style={{ width: `${percentage}%` }} />
                           </div>
-                          <span className="w-8 text-right font-mono font-bold text-neutral-700">{count}</span>
+                          <span className="w-8 text-right font-mono font-bold text-neutral-700 dark:text-slate-300">{count}</span>
                         </div>
                       );
                     })}
@@ -3895,19 +3897,19 @@ export default function AdminDashboard({
                 </div>
 
                 {/* Metric 3: Feature / Design Requests */}
-                <div className="bg-white border border-neutral-200 p-5 rounded-2xl shadow-sm text-center flex flex-col justify-center space-y-1">
+                <div className="bg-white dark:bg-slate-900 border border-neutral-200 dark:border-slate-700 p-5 rounded-2xl shadow-sm text-center flex flex-col justify-center space-y-1">
                   <p className="text-[10px] font-bold text-neutral-400 uppercase tracking-widest">Garment Requests</p>
                   <span className="font-sans text-3xl font-black text-indigo-600">
                     {reviews.filter(r => r.request && r.request.trim() !== "").length}
                   </span>
-                  <p className="text-[10px] text-neutral-500">Custom styling requests lodged</p>
+                  <p className="text-[10px] text-neutral-500 dark:text-slate-400">Custom styling requests lodged</p>
                 </div>
               </div>
 
               {/* Reviews List and Search */}
-              <div className="bg-white rounded-2xl border border-neutral-200/60 shadow-sm p-6 space-y-5">
+              <div className="bg-white dark:bg-slate-900 rounded-2xl border border-neutral-200/60 shadow-sm p-6 space-y-5">
                 <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4">
-                  <h3 className="font-serif text-lg text-neutral-900 font-bold">Feedback Activity Log</h3>
+                  <h3 className="font-serif text-lg text-neutral-900 dark:text-slate-100 font-bold">Feedback Activity Log</h3>
                   <div className="relative w-full sm:w-72">
                     <Search className="w-4 h-4 text-neutral-400 absolute left-3 top-3" />
                     <input
@@ -3915,7 +3917,7 @@ export default function AdminDashboard({
                       placeholder="Search reviews & requests..."
                       value={reviewSearch}
                       onChange={e => setReviewSearch(e.target.value)}
-                      className="w-full pl-9 pr-4 py-2 border border-neutral-200 rounded-xl text-xs font-bold focus:outline-none focus:border-indigo-500"
+                      className="w-full pl-9 pr-4 py-2 border border-neutral-200 dark:border-slate-700 rounded-xl text-xs font-bold focus:outline-none focus:border-indigo-500"
                     />
                   </div>
                 </div>
@@ -3943,7 +3945,7 @@ export default function AdminDashboard({
                           <div className="space-y-3">
                             <div className="flex justify-between items-start">
                               <div>
-                                <h4 className="text-sm font-extrabold text-neutral-900">{rev.customerName}</h4>
+                                <h4 className="text-sm font-extrabold text-neutral-900 dark:text-slate-100">{rev.customerName}</h4>
                                 <span className="text-[10px] text-neutral-400 font-bold block">{rev.customerEmail || "No Email Provided"}</span>
                               </div>
                               <span className="text-[10px] text-neutral-400 font-mono font-medium">{rev.date}</span>
@@ -3960,7 +3962,7 @@ export default function AdminDashboard({
 
                             <div className="space-y-1.5">
                               <p className="text-xs font-bold text-neutral-400 uppercase tracking-widest">Feedback</p>
-                              <p className="text-xs text-neutral-700 font-medium leading-relaxed bg-white border border-neutral-100 p-3 rounded-xl">
+                              <p className="text-xs text-neutral-700 dark:text-slate-300 font-medium leading-relaxed bg-white dark:bg-slate-900 border border-neutral-100 dark:border-slate-800 p-3 rounded-xl">
                                 {rev.feedback}
                               </p>
                             </div>
@@ -3977,7 +3979,7 @@ export default function AdminDashboard({
                             )}
                           </div>
 
-                          <div className="border-t border-neutral-100 pt-3 flex justify-end">
+                          <div className="border-t border-neutral-100 dark:border-slate-800 pt-3 flex justify-end">
                             <button
                               onClick={() => {
                                 if (onDeleteReview) {
@@ -4005,16 +4007,16 @@ export default function AdminDashboard({
             <div className="flex flex-col h-[calc(100vh-100px)] animate-in fade-in duration-300">
               <div className="border-b border-neutral-250 pb-4 flex justify-between items-center mb-6">
                 <div>
-                  <h2 className="font-serif text-2xl text-neutral-900 font-medium">Direct Customer Logistics</h2>
-                  <p className="text-xs text-neutral-500">View real-time customer locations and adjust dynamic delivery pricing.</p>
+                  <h2 className="font-serif text-2xl text-neutral-900 dark:text-slate-100 font-medium">Direct Customer Logistics</h2>
+                  <p className="text-xs text-neutral-500 dark:text-slate-400">View real-time customer locations and adjust dynamic delivery pricing.</p>
                 </div>
                 <PageToggleBtn />
               </div>
               
               <div className="flex flex-col lg:flex-row gap-6 flex-1 overflow-hidden">
-                <div className="flex-1 bg-white p-4 rounded-2xl border border-neutral-200/60 shadow-sm flex flex-col">
+                <div className="flex-1 bg-white dark:bg-slate-900 p-4 rounded-2xl border border-neutral-200/60 shadow-sm flex flex-col">
                   <div className="flex justify-between items-center mb-4">
-                    <h3 className="font-serif text-lg font-medium text-neutral-900">Map & Location View</h3>
+                    <h3 className="font-serif text-lg font-medium text-neutral-900 dark:text-slate-100">Map & Location View</h3>
                     <button
                       onClick={() => {
                         onShowToast("Geolocation", "Geolocation is disabled.", "info");
@@ -4024,25 +4026,25 @@ export default function AdminDashboard({
                       Location Unavailable
                     </button>
                   </div>
-                  <div className="flex-1 rounded-xl overflow-hidden border border-neutral-200">
+                  <div className="flex-1 rounded-xl overflow-hidden border border-neutral-200 dark:border-slate-700">
                     <CustomerLiveMap locations={locations} onShowToast={onShowToast} />
                   </div>
                 </div>
                 
-                <div className="w-full lg:w-96 bg-neutral-50 p-6 rounded-2xl border border-neutral-200 space-y-4">
-                  <h3 className="font-serif text-lg font-medium text-neutral-900">Dynamic Delivery Price Editor</h3>
+                <div className="w-full lg:w-96 bg-neutral-50 dark:bg-slate-950 p-6 rounded-2xl border border-neutral-200 dark:border-slate-700 space-y-4">
+                  <h3 className="font-serif text-lg font-medium text-neutral-900 dark:text-slate-100">Dynamic Delivery Price Editor</h3>
                   <div className="grid grid-cols-1 gap-4">
                     <div>
-                      <label className="block text-xs font-bold text-neutral-600 uppercase mb-1">Base Price (₵)</label>
-                      <input type="number" className="w-full px-4 py-2 rounded-xl border border-neutral-200 text-xs" />
+                      <label className="block text-xs font-bold text-neutral-600 dark:text-slate-400 uppercase mb-1">Base Price (₵)</label>
+                      <input type="number" className="w-full px-4 py-2 rounded-xl border border-neutral-200 dark:border-slate-700 text-xs" />
                     </div>
                     <div>
-                      <label className="block text-xs font-bold text-neutral-600 uppercase mb-1">Fuel Surcharge (₵/km)</label>
-                      <input type="number" className="w-full px-4 py-2 rounded-xl border border-neutral-200 text-xs" />
+                      <label className="block text-xs font-bold text-neutral-600 dark:text-slate-400 uppercase mb-1">Fuel Surcharge (₵/km)</label>
+                      <input type="number" className="w-full px-4 py-2 rounded-xl border border-neutral-200 dark:border-slate-700 text-xs" />
                     </div>
                     <div>
-                      <label className="block text-xs font-bold text-neutral-600 uppercase mb-1">Workmanship Fee (₵)</label>
-                      <input type="number" className="w-full px-4 py-2 rounded-xl border border-neutral-200 text-xs" />
+                      <label className="block text-xs font-bold text-neutral-600 dark:text-slate-400 uppercase mb-1">Workmanship Fee (₵)</label>
+                      <input type="number" className="w-full px-4 py-2 rounded-xl border border-neutral-200 dark:border-slate-700 text-xs" />
                     </div>
                   </div>
                   <button className="w-full bg-neutral-900 hover:bg-neutral-800 text-white px-6 py-3 rounded-xl text-xs font-bold cursor-pointer">
@@ -4071,8 +4073,8 @@ export default function AdminDashboard({
             <div className="space-y-6 animate-in fade-in duration-300">
               <div className="border-b border-neutral-250 pb-4 flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4">
                 <div>
-                  <h2 className="font-serif text-2xl text-neutral-900 font-medium">Boutique Delivery Logistics</h2>
-                  <p className="text-xs text-neutral-500">Track and dispatch customer shipments, manage riders, and send real-time delivery alerts.</p>
+                  <h2 className="font-serif text-2xl text-neutral-900 dark:text-slate-100 font-medium">Boutique Delivery Logistics</h2>
+                  <p className="text-xs text-neutral-500 dark:text-slate-400">Track and dispatch customer shipments, manage riders, and send real-time delivery alerts.</p>
                 </div>
                 <button
                   onClick={() => setShowCreateDeliveryForm(!showCreateDeliveryForm)}
@@ -4090,14 +4092,14 @@ export default function AdminDashboard({
                />
 
                {/* Delivery List */}
-               <div className="bg-white p-6 rounded-2xl border border-neutral-200">
+               <div className="bg-white dark:bg-slate-900 p-6 rounded-2xl border border-neutral-200 dark:border-slate-700">
                  <h3 className="text-lg font-bold mb-4">Active Shipments</h3>
                  <div className="space-y-2">
                    {deliveries.map(d => (
-                     <div key={d.id} className="p-3 bg-neutral-50 rounded-xl flex justify-between items-center text-sm border border-neutral-100">
+                     <div key={d.id} className="p-3 bg-neutral-50 dark:bg-slate-950 rounded-xl flex justify-between items-center text-sm border border-neutral-100 dark:border-slate-800">
                        <div>
                          <p className="font-bold">{d.customerName}</p>
-                         <p className="text-xs text-neutral-500">{d.address} - Status: <span className="text-indigo-600">{d.status}</span></p>
+                         <p className="text-xs text-neutral-500 dark:text-slate-400">{d.address} - Status: <span className="text-indigo-600">{d.status}</span></p>
                        </div>
                        <button onClick={() => onUpdateDelivery(d.id, { status: d.status === 'delivered' ? 'dispatched' : 'delivered' })} className="text-xs bg-neutral-900 text-white px-3 py-1 rounded-lg">
                          Toggle Status
@@ -4109,47 +4111,47 @@ export default function AdminDashboard({
 
               {/* Delivery KPI Metrics */}
               <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-5">
-                <div className="bg-white border border-neutral-200 p-5 rounded-2xl shadow-sm flex items-center gap-4">
+                <div className="bg-white dark:bg-slate-900 border border-neutral-200 dark:border-slate-700 p-5 rounded-2xl shadow-sm flex items-center gap-4">
                   <div className="w-12 h-12 bg-indigo-50 text-indigo-600 rounded-xl flex items-center justify-center">
                     <Truck className="w-6 h-6" />
                   </div>
                   <div>
                     <span className="text-[10px] font-bold text-neutral-400 uppercase tracking-wider block">Total Tracked</span>
-                    <span className="text-2xl font-serif font-bold text-neutral-900">{deliveries?.length || 0}</span>
+                    <span className="text-2xl font-serif font-bold text-neutral-900 dark:text-slate-100">{deliveries?.length || 0}</span>
                   </div>
                 </div>
 
-                <div className="bg-white border border-neutral-200 p-5 rounded-2xl shadow-sm flex items-center gap-4">
+                <div className="bg-white dark:bg-slate-900 border border-neutral-200 dark:border-slate-700 p-5 rounded-2xl shadow-sm flex items-center gap-4">
                   <div className="w-12 h-12 bg-amber-50 text-amber-600 rounded-xl flex items-center justify-center animate-pulse">
                     <Activity className="w-6 h-6" />
                   </div>
                   <div>
                     <span className="text-[10px] font-bold text-neutral-400 uppercase tracking-wider block">En Route Shipments</span>
-                    <span className="text-2xl font-serif font-bold text-neutral-900">
+                    <span className="text-2xl font-serif font-bold text-neutral-900 dark:text-slate-100">
                       {deliveries?.filter(d => d.status === 'dispatched' || d.status === 'in_transit' || d.status === 'ordered').length || 0}
                     </span>
                   </div>
                 </div>
 
-                <div className="bg-white border border-neutral-200 p-5 rounded-2xl shadow-sm flex items-center gap-4">
+                <div className="bg-white dark:bg-slate-900 border border-neutral-200 dark:border-slate-700 p-5 rounded-2xl shadow-sm flex items-center gap-4">
                   <div className="w-12 h-12 bg-emerald-50 text-emerald-600 rounded-xl flex items-center justify-center">
                     <CheckCircle className="w-6 h-6" />
                   </div>
                   <div>
                     <span className="text-[10px] font-bold text-neutral-400 uppercase tracking-wider block">Completed Deliveries</span>
-                    <span className="text-2xl font-serif font-bold text-neutral-900">
+                    <span className="text-2xl font-serif font-bold text-neutral-900 dark:text-slate-100">
                       {deliveries?.filter(d => d.status === 'delivered').length || 0}
                     </span>
                   </div>
                 </div>
 
-                <div className="bg-white border border-neutral-200 p-5 rounded-2xl shadow-sm flex items-center gap-4">
+                <div className="bg-white dark:bg-slate-900 border border-neutral-200 dark:border-slate-700 p-5 rounded-2xl shadow-sm flex items-center gap-4">
                   <div className="w-12 h-12 bg-rose-50 text-rose-600 rounded-xl flex items-center justify-center">
                     <AlertTriangle className="w-6 h-6" />
                   </div>
                   <div>
                     <span className="text-[10px] font-bold text-neutral-400 uppercase tracking-wider block">Failed / Exceptions</span>
-                    <span className="text-2xl font-serif font-bold text-neutral-900">
+                    <span className="text-2xl font-serif font-bold text-neutral-900 dark:text-slate-100">
                       {deliveries?.filter(d => d.status === 'failed').length || 0}
                     </span>
                   </div>
@@ -4158,16 +4160,16 @@ export default function AdminDashboard({
 
               {/* DISPATCH NEW SHIPMENT FORM */}
               {showCreateDeliveryForm && (
-                <div className="bg-white border border-neutral-200 p-6 rounded-2xl shadow-md space-y-6 animate-in slide-in-from-top duration-300">
-                  <div className="border-b border-neutral-100 pb-3">
-                    <h3 className="font-serif text-lg text-neutral-900 font-semibold">Initiate Logistics Delivery Tracker</h3>
-                    <p className="text-xs text-neutral-500">Select an unfulfilled customer order to automatically pre-populate contact details and items.</p>
+                <div className="bg-white dark:bg-slate-900 border border-neutral-200 dark:border-slate-700 p-6 rounded-2xl shadow-md space-y-6 animate-in slide-in-from-top duration-300">
+                  <div className="border-b border-neutral-100 dark:border-slate-800 pb-3">
+                    <h3 className="font-serif text-lg text-neutral-900 dark:text-slate-100 font-semibold">Initiate Logistics Delivery Tracker</h3>
+                    <p className="text-xs text-neutral-500 dark:text-slate-400">Select an unfulfilled customer order to automatically pre-populate contact details and items.</p>
                   </div>
 
                   <div className="grid grid-cols-1 md:grid-cols-3 gap-5">
                     {/* Order selector */}
                     <div>
-                      <label className="block text-xs font-bold text-neutral-600 uppercase mb-2">Select Customer Order</label>
+                      <label className="block text-xs font-bold text-neutral-600 dark:text-slate-400 uppercase mb-2">Select Customer Order</label>
                       <select
                         value={newDeliveryOrderId}
                         onChange={(e) => {
@@ -4184,7 +4186,7 @@ export default function AdminDashboard({
                             setNewDeliveryAddress(loc?.address || "");
                           }
                         }}
-                        className="w-full px-4 py-2.5 bg-neutral-50 border border-neutral-200 rounded-xl text-xs focus:outline-none focus:border-indigo-500"
+                        className="w-full px-4 py-2.5 bg-neutral-50 dark:bg-slate-950 border border-neutral-200 dark:border-slate-700 rounded-xl text-xs focus:outline-none focus:border-indigo-500"
                       >
                         <option key="default-order" value="">-- Choose Order ID --</option>
                         {(orders || []).map((o, idx) => (
@@ -4196,98 +4198,98 @@ export default function AdminDashboard({
                     </div>
 
                     <div>
-                      <label className="block text-xs font-bold text-neutral-600 uppercase mb-2">Customer Name</label>
+                      <label className="block text-xs font-bold text-neutral-600 dark:text-slate-400 uppercase mb-2">Customer Name</label>
                       <input
                         type="text"
                         placeholder="e.g. Gifty Ga"
                         value={newDeliveryName}
                         onChange={(e) => setNewDeliveryName(e.target.value)}
-                        className="w-full px-4 py-2.5 bg-neutral-50 border border-neutral-200 rounded-xl text-xs focus:outline-none focus:border-indigo-500"
+                        className="w-full px-4 py-2.5 bg-neutral-50 dark:bg-slate-950 border border-neutral-200 dark:border-slate-700 rounded-xl text-xs focus:outline-none focus:border-indigo-500"
                       />
                     </div>
 
                     <div>
-                      <label className="block text-xs font-bold text-neutral-600 uppercase mb-2">Customer Email</label>
+                      <label className="block text-xs font-bold text-neutral-600 dark:text-slate-400 uppercase mb-2">Customer Email</label>
                       <input
                         type="email"
                         placeholder="e.g. customer@example.com"
                         value={newDeliveryEmail}
                         onChange={(e) => setNewDeliveryEmail(e.target.value)}
-                        className="w-full px-4 py-2.5 bg-neutral-50 border border-neutral-200 rounded-xl text-xs focus:outline-none focus:border-indigo-500"
+                        className="w-full px-4 py-2.5 bg-neutral-50 dark:bg-slate-950 border border-neutral-200 dark:border-slate-700 rounded-xl text-xs focus:outline-none focus:border-indigo-500"
                       />
                     </div>
 
                     <div>
-                      <label className="block text-xs font-bold text-neutral-600 uppercase mb-2">Customer Phone</label>
+                      <label className="block text-xs font-bold text-neutral-600 dark:text-slate-400 uppercase mb-2">Customer Phone</label>
                       <input
                         type="text"
                         placeholder="e.g. +233 55 123 4567"
                         value={newDeliveryPhone}
                         onChange={(e) => setNewDeliveryPhone(e.target.value)}
-                        className="w-full px-4 py-2.5 bg-neutral-50 border border-neutral-200 rounded-xl text-xs focus:outline-none focus:border-indigo-500"
+                        className="w-full px-4 py-2.5 bg-neutral-50 dark:bg-slate-950 border border-neutral-200 dark:border-slate-700 rounded-xl text-xs focus:outline-none focus:border-indigo-500"
                       />
                     </div>
 
                     <div className="md:col-span-2">
-                      <label className="block text-xs font-bold text-neutral-600 uppercase mb-2">Delivery Shipping Address</label>
+                      <label className="block text-xs font-bold text-neutral-600 dark:text-slate-400 uppercase mb-2">Delivery Shipping Address</label>
                       <input
                         type="text"
                         placeholder="e.g. House No. 42, Spintex Road, Accra"
                         value={newDeliveryAddress}
                         onChange={(e) => setNewDeliveryAddress(e.target.value)}
-                        className="w-full px-4 py-2.5 bg-neutral-50 border border-neutral-200 rounded-xl text-xs focus:outline-none focus:border-indigo-500"
+                        className="w-full px-4 py-2.5 bg-neutral-50 dark:bg-slate-950 border border-neutral-200 dark:border-slate-700 rounded-xl text-xs focus:outline-none focus:border-indigo-500"
                       />
                     </div>
 
                     <div>
-                      <label className="block text-xs font-bold text-neutral-600 uppercase mb-2">Dispatch Rider Name</label>
+                      <label className="block text-xs font-bold text-neutral-600 dark:text-slate-400 uppercase mb-2">Dispatch Rider Name</label>
                       <input
                         type="text"
                         placeholder="e.g. Kwame Mensah"
                         value={newDeliveryRider}
                         onChange={(e) => setNewDeliveryRider(e.target.value)}
-                        className="w-full px-4 py-2.5 bg-neutral-50 border border-neutral-200 rounded-xl text-xs focus:outline-none focus:border-indigo-500"
+                        className="w-full px-4 py-2.5 bg-neutral-50 dark:bg-slate-950 border border-neutral-200 dark:border-slate-700 rounded-xl text-xs focus:outline-none focus:border-indigo-500"
                       />
                     </div>
 
                     <div>
-                      <label className="block text-xs font-bold text-neutral-600 uppercase mb-2">Rider Contact Phone</label>
+                      <label className="block text-xs font-bold text-neutral-600 dark:text-slate-400 uppercase mb-2">Rider Contact Phone</label>
                       <input
                         type="text"
                         placeholder="e.g. +233 24 999 8888"
                         value={newDeliveryRiderPhone}
                         onChange={(e) => setNewDeliveryRiderPhone(e.target.value)}
-                        className="w-full px-4 py-2.5 bg-neutral-50 border border-neutral-200 rounded-xl text-xs focus:outline-none focus:border-indigo-500"
+                        className="w-full px-4 py-2.5 bg-neutral-50 dark:bg-slate-950 border border-neutral-200 dark:border-slate-700 rounded-xl text-xs focus:outline-none focus:border-indigo-500"
                       />
                     </div>
 
                     <div>
-                      <label className="block text-xs font-bold text-neutral-600 uppercase mb-2">Est. Delivery Date</label>
+                      <label className="block text-xs font-bold text-neutral-600 dark:text-slate-400 uppercase mb-2">Est. Delivery Date</label>
                       <input
                         type="text"
                         placeholder="e.g. Jul 3, 2026"
                         value={newDeliveryEstDate}
                         onChange={(e) => setNewDeliveryEstDate(e.target.value)}
-                        className="w-full px-4 py-2.5 bg-neutral-50 border border-neutral-200 rounded-xl text-xs focus:outline-none focus:border-indigo-500"
+                        className="w-full px-4 py-2.5 bg-neutral-50 dark:bg-slate-950 border border-neutral-200 dark:border-slate-700 rounded-xl text-xs focus:outline-none focus:border-indigo-500"
                       />
                     </div>
 
                     <div className="md:col-span-3">
-                      <label className="block text-xs font-bold text-neutral-600 uppercase mb-2">Logistics Shipping Notes / Instructions</label>
+                      <label className="block text-xs font-bold text-neutral-600 dark:text-slate-400 uppercase mb-2">Logistics Shipping Notes / Instructions</label>
                       <input
                         type="text"
                         placeholder="e.g. Leave package with front desk if customer is away, call before arriving..."
                         value={newDeliveryNotes}
                         onChange={(e) => setNewDeliveryNotes(e.target.value)}
-                        className="w-full px-4 py-2.5 bg-neutral-50 border border-neutral-200 rounded-xl text-xs focus:outline-none focus:border-indigo-500"
+                        className="w-full px-4 py-2.5 bg-neutral-50 dark:bg-slate-950 border border-neutral-200 dark:border-slate-700 rounded-xl text-xs focus:outline-none focus:border-indigo-500"
                       />
                     </div>
                   </div>
 
-                  <div className="flex justify-end gap-3 pt-3 border-t border-neutral-100">
+                  <div className="flex justify-end gap-3 pt-3 border-t border-neutral-100 dark:border-slate-800">
                     <button
                       onClick={() => setShowCreateDeliveryForm(false)}
-                      className="px-5 py-2.5 rounded-xl border border-neutral-200 text-neutral-700 hover:bg-neutral-50 transition-colors text-xs font-bold cursor-pointer"
+                      className="px-5 py-2.5 rounded-xl border border-neutral-200 dark:border-slate-700 text-neutral-700 dark:text-slate-300 hover:bg-neutral-50 dark:bg-slate-950 transition-colors text-xs font-bold cursor-pointer"
                     >
                       Cancel
                     </button>
@@ -4338,8 +4340,8 @@ export default function AdminDashboard({
               )}
 
               {/* Delivery Logistics Table / Filter Interface */}
-              <div className="bg-white border border-neutral-200 rounded-2xl shadow-sm overflow-hidden">
-                <div className="p-5 border-b border-neutral-150 flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4 bg-neutral-50/40">
+              <div className="bg-white dark:bg-slate-900 border border-neutral-200 dark:border-slate-700 rounded-2xl shadow-sm overflow-hidden">
+                <div className="p-5 border-b border-neutral-150 dark:border-slate-800 flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4 bg-neutral-50/40">
                   <div className="flex flex-wrap gap-1.5">
                     {['all', 'ordered', 'dispatched', 'in_transit', 'delivered', 'failed'].map(statusVal => (
                       <button
@@ -4348,7 +4350,7 @@ export default function AdminDashboard({
                         className={`px-3 py-1.5 rounded-xl text-xs font-semibold tracking-wide transition-all cursor-pointer capitalize ${
                           deliveryFilter === statusVal
                             ? "bg-indigo-600 text-white shadow-sm"
-                            : "bg-white border border-neutral-200 text-neutral-600 hover:bg-neutral-50"
+                            : "bg-white dark:bg-slate-900 border border-neutral-200 dark:border-slate-700 text-neutral-600 dark:text-slate-400 hover:bg-neutral-50 dark:bg-slate-950"
                         }`}
                       >
                         {(statusVal || "").replace('_', ' ')}
@@ -4363,7 +4365,7 @@ export default function AdminDashboard({
                       placeholder="Search deliveries, address, riders..."
                       value={deliverySearch}
                       onChange={(e) => setDeliverySearch(e.target.value)}
-                      className="w-full pl-10 pr-4 py-2 bg-white border border-neutral-200 rounded-xl text-xs focus:outline-none focus:border-indigo-500"
+                      className="w-full pl-10 pr-4 py-2 bg-white dark:bg-slate-900 border border-neutral-200 dark:border-slate-700 rounded-xl text-xs focus:outline-none focus:border-indigo-500"
                     />
                   </div>
                 </div>
@@ -4415,22 +4417,22 @@ export default function AdminDashboard({
                                 </span>
                               </div>
 
-                              <h4 className="text-sm font-extrabold text-neutral-900">{del.customerName}</h4>
-                              <p className="text-xs text-neutral-500 font-medium flex items-center gap-1.5">
+                              <h4 className="text-sm font-extrabold text-neutral-900 dark:text-slate-100">{del.customerName}</h4>
+                              <p className="text-xs text-neutral-500 dark:text-slate-400 font-medium flex items-center gap-1.5">
                                 <MapPin className="w-3.5 h-3.5 text-indigo-500 shrink-0" />
-                                <span className="font-semibold text-neutral-700">Address:</span> {del.address}
+                                <span className="font-semibold text-neutral-700 dark:text-slate-300">Address:</span> {del.address}
                               </p>
                               {del.customerPhone && (
-                                <p className="text-xs text-neutral-500 font-medium">
-                                  <span className="font-semibold text-neutral-700">Customer Phone:</span> {del.customerPhone} | {del.customerEmail}
+                                <p className="text-xs text-neutral-500 dark:text-slate-400 font-medium">
+                                  <span className="font-semibold text-neutral-700 dark:text-slate-300">Customer Phone:</span> {del.customerPhone} | {del.customerEmail}
                                 </p>
                               )}
                               {del.items && del.items.length > 0 && (
-                                <div className="text-[11px] text-neutral-600 bg-neutral-50 border border-neutral-100/60 px-3.5 py-2 rounded-xl inline-block mt-2">
-                                  <span className="font-black text-neutral-700 uppercase tracking-wide mr-1.5 block mb-1">Shipping Items:</span>
+                                <div className="text-[11px] text-neutral-600 dark:text-slate-400 bg-neutral-50 dark:bg-slate-950 border border-neutral-100/60 px-3.5 py-2 rounded-xl inline-block mt-2">
+                                  <span className="font-black text-neutral-700 dark:text-slate-300 uppercase tracking-wide mr-1.5 block mb-1">Shipping Items:</span>
                                   <div className="flex flex-wrap gap-1">
                                     {del.items.map((it, i) => (
-                                      <span key={i} className="bg-white border border-neutral-200 px-2 py-0.5 rounded text-neutral-700 font-medium">
+                                      <span key={i} className="bg-white dark:bg-slate-900 border border-neutral-200 dark:border-slate-700 px-2 py-0.5 rounded text-neutral-700 dark:text-slate-300 font-medium">
                                         {it}
                                       </span>
                                     ))}
@@ -4442,11 +4444,11 @@ export default function AdminDashboard({
                             {/* Middle Logistics columns */}
                             <div className="lg:w-80 space-y-1.5 bg-neutral-50/50 border border-neutral-150/40 p-4 rounded-2xl">
                               <p className="text-[10px] font-black text-neutral-400 uppercase tracking-widest">Rider Logistics Details</p>
-                              <div className="text-xs space-y-1 text-neutral-700">
-                                <p><span className="font-semibold text-neutral-500">Courier:</span> {del.dispatchRiderName || "Not assigned"}</p>
-                                <p><span className="font-semibold text-neutral-500">Rider Contact:</span> {del.dispatchRiderPhone || "Not assigned"}</p>
-                                <p><span className="font-semibold text-neutral-500">Est. Date:</span> {del.estimatedDeliveryDate || "Not assigned"}</p>
-                                {del.notes && <p className="italic text-neutral-500 mt-1">"{del.notes}"</p>}
+                              <div className="text-xs space-y-1 text-neutral-700 dark:text-slate-300">
+                                <p><span className="font-semibold text-neutral-500 dark:text-slate-400">Courier:</span> {del.dispatchRiderName || "Not assigned"}</p>
+                                <p><span className="font-semibold text-neutral-500 dark:text-slate-400">Rider Contact:</span> {del.dispatchRiderPhone || "Not assigned"}</p>
+                                <p><span className="font-semibold text-neutral-500 dark:text-slate-400">Est. Date:</span> {del.estimatedDeliveryDate || "Not assigned"}</p>
+                                {del.notes && <p className="italic text-neutral-500 dark:text-slate-400 mt-1">"{del.notes}"</p>}
                               </div>
                             </div>
                           </div>
@@ -4476,14 +4478,14 @@ export default function AdminDashboard({
                                         ? 'bg-indigo-600 border-indigo-600 text-white scale-110 shadow'
                                         : isDone
                                         ? 'bg-indigo-100 border-indigo-500 text-indigo-700'
-                                        : 'bg-white border-neutral-300 text-neutral-400'
+                                        : 'bg-white dark:bg-slate-900 border-neutral-300 text-neutral-400'
                                     }`}>
                                       {isFailed && idx === statusTimeline.length - 1 ? "✕" : isDone && idx < currentStatusIdx ? "✓" : idx + 1}
                                     </div>
                                     <span className={`text-[10px] font-bold tracking-wide ${
                                       isFailed && idx === statusTimeline.length - 1 ? 'text-rose-500' :
                                       isCurrent ? 'text-indigo-600 font-extrabold' :
-                                      isDone ? 'text-neutral-800' : 'text-neutral-400'
+                                      isDone ? 'text-neutral-800 dark:text-slate-200' : 'text-neutral-400'
                                     }`}>
                                       {isFailed && idx === statusTimeline.length - 1 ? "Failed" : step.label}
                                     </span>
@@ -4494,11 +4496,11 @@ export default function AdminDashboard({
                           </div>
 
                           {/* Quick Actions Control Bar */}
-                          <div className="border-t border-neutral-100 pt-4.5 flex flex-wrap gap-2.5 justify-end">
+                          <div className="border-t border-neutral-100 dark:border-slate-800 pt-4.5 flex flex-wrap gap-2.5 justify-end">
                             <button
                               onClick={() => onUpdateDelivery(del.id, { status: 'dispatched' })}
                               disabled={del.status === 'dispatched'}
-                              className="px-3.5 py-1.5 border border-neutral-200 text-neutral-600 hover:bg-neutral-50 rounded-xl text-xs font-bold transition-all cursor-pointer disabled:opacity-40 disabled:cursor-not-allowed"
+                              className="px-3.5 py-1.5 border border-neutral-200 dark:border-slate-700 text-neutral-600 dark:text-slate-400 hover:bg-neutral-50 dark:bg-slate-950 rounded-xl text-xs font-bold transition-all cursor-pointer disabled:opacity-40 disabled:cursor-not-allowed"
                             >
                               Dispatch Order
                             </button>
@@ -4533,8 +4535,8 @@ export default function AdminDashboard({
                     <div className="p-12 text-center text-neutral-400 space-y-3">
                       <Truck className="w-12 h-12 text-neutral-300 mx-auto" />
                       <div>
-                        <p className="font-serif font-semibold text-neutral-700">No deliveries registered yet</p>
-                        <p className="text-xs text-neutral-500 mt-1">Click "Dispatch New Shipment" to track your first customer product dispatch.</p>
+                        <p className="font-serif font-semibold text-neutral-700 dark:text-slate-300">No deliveries registered yet</p>
+                        <p className="text-xs text-neutral-500 dark:text-slate-400 mt-1">Click "Dispatch New Shipment" to track your first customer product dispatch.</p>
                       </div>
                     </div>
                   )}
@@ -4548,13 +4550,13 @@ export default function AdminDashboard({
             <div className="space-y-8 animate-in fade-in duration-300">
               <div className="border-b border-neutral-250 pb-4 flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4">
                 <div>
-                  <h2 className="font-serif text-2xl text-neutral-900 font-medium">AR Virtual Try-On Assets Studio</h2>
-                  <p className="text-xs text-neutral-500">Add, edit, or configure virtual background models and transparent dress try-on overlays.</p>
+                  <h2 className="font-serif text-2xl text-neutral-900 dark:text-slate-100 font-medium">AR Virtual Try-On Assets Studio</h2>
+                  <p className="text-xs text-neutral-500 dark:text-slate-400">Add, edit, or configure virtual background models and transparent dress try-on overlays.</p>
                 </div>
                 <div className="flex gap-3">
                   <button
                     onClick={seedArTryOnDefaults}
-                    className="px-4 py-2 bg-amber-500 hover:bg-amber-600 text-neutral-900 rounded-xl text-xs font-bold tracking-wide transition-all duration-300 shadow flex items-center gap-1.5 cursor-pointer"
+                    className="px-4 py-2 bg-amber-500 hover:bg-amber-600 text-neutral-900 dark:text-slate-100 rounded-xl text-xs font-bold tracking-wide transition-all duration-300 shadow flex items-center gap-1.5 cursor-pointer"
                   >
                     <Sparkles className="w-3.5 h-3.5 animate-pulse" />
                     Seed Sample AR Assets
@@ -4563,13 +4565,13 @@ export default function AdminDashboard({
               </div>
 
               {/* Subtab Buttons */}
-              <div className="flex gap-2.5 border-b border-neutral-200 pb-px">
+              <div className="flex gap-2.5 border-b border-neutral-200 dark:border-slate-700 pb-px">
                 <button
                   onClick={() => setArActiveSubTab("models")}
                   className={`px-5 py-3 border-b-2 text-xs font-bold tracking-wide transition-all duration-300 flex items-center gap-2 cursor-pointer ${
                     arActiveSubTab === "models"
                       ? "border-amber-500 text-amber-600 animate-in border-b-2"
-                      : "border-transparent text-neutral-500 hover:text-neutral-800"
+                      : "border-transparent text-neutral-500 dark:text-slate-400 hover:text-neutral-800 dark:text-slate-200"
                   }`}
                 >
                   <User className="w-4 h-4" />
@@ -4580,7 +4582,7 @@ export default function AdminDashboard({
                   className={`px-5 py-3 border-b-2 text-xs font-bold tracking-wide transition-all duration-300 flex items-center gap-2 cursor-pointer ${
                     arActiveSubTab === "dresses"
                       ? "border-amber-500 text-amber-600 animate-in border-b-2"
-                      : "border-transparent text-neutral-500 hover:text-neutral-800"
+                      : "border-transparent text-neutral-500 dark:text-slate-400 hover:text-neutral-800 dark:text-slate-200"
                   }`}
                 >
                   <Shirt className="w-4 h-4" />
@@ -4609,15 +4611,15 @@ export default function AdminDashboard({
                       </button>
                     </div>
                   ) : (
-                    <form onSubmit={handleMannequinSubmit} className="bg-white border border-neutral-200 rounded-3xl p-6 shadow-md space-y-4 max-w-2xl">
-                      <div className="flex justify-between items-center pb-3 border-b border-neutral-100">
-                        <h3 className="font-serif text-sm font-bold text-neutral-900">
+                    <form onSubmit={handleMannequinSubmit} className="bg-white dark:bg-slate-900 border border-neutral-200 dark:border-slate-700 rounded-3xl p-6 shadow-md space-y-4 max-w-2xl">
+                      <div className="flex justify-between items-center pb-3 border-b border-neutral-100 dark:border-slate-800">
+                        <h3 className="font-serif text-sm font-bold text-neutral-900 dark:text-slate-100">
                           {editingMannequinId ? "✏️ Edit virtual Backdrop Model" : "✨ Create virtual Backdrop Model"}
                         </h3>
                         <button
                           type="button"
                           onClick={() => setShowMannequinForm(false)}
-                          className="text-neutral-400 hover:text-neutral-600 cursor-pointer"
+                          className="text-neutral-400 hover:text-neutral-600 dark:text-slate-400 cursor-pointer"
                         >
                           <X className="w-4 h-4" />
                         </button>
@@ -4625,23 +4627,23 @@ export default function AdminDashboard({
 
                       <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
                         <div className="space-y-1.5">
-                          <label className="text-xs font-bold text-neutral-600 uppercase">Model / Backdrop Name</label>
+                          <label className="text-xs font-bold text-neutral-600 dark:text-slate-400 uppercase">Model / Backdrop Name</label>
                           <input
                             type="text"
                             value={mannequinName}
                             onChange={(e) => setMannequinName(e.target.value)}
                             placeholder="e.g. Amara (Graceful pose)"
-                            className="w-full px-4 py-2.5 bg-neutral-50 border border-neutral-200 rounded-xl text-xs focus:outline-none focus:border-indigo-500"
+                            className="w-full px-4 py-2.5 bg-neutral-50 dark:bg-slate-950 border border-neutral-200 dark:border-slate-700 rounded-xl text-xs focus:outline-none focus:border-indigo-500"
                             required
                           />
                         </div>
 
                         <div className="space-y-1.5">
-                          <label className="text-xs font-bold text-neutral-600 uppercase">Silhouette / Structure Type</label>
+                          <label className="text-xs font-bold text-neutral-600 dark:text-slate-400 uppercase">Silhouette / Structure Type</label>
                           <select
                             value={mannequinStyle}
                             onChange={(e) => setMannequinStyle(e.target.value)}
-                            className="w-full px-4 py-2.5 bg-neutral-50 border border-neutral-200 rounded-xl text-xs focus:outline-none focus:border-indigo-500"
+                            className="w-full px-4 py-2.5 bg-neutral-50 dark:bg-slate-950 border border-neutral-200 dark:border-slate-700 rounded-xl text-xs focus:outline-none focus:border-indigo-500"
                           >
                             <option value="Petite/Standard Structure">Petite/Standard Structure</option>
                             <option value="Athletic/Tall Structure">Athletic/Tall Structure</option>
@@ -4651,13 +4653,13 @@ export default function AdminDashboard({
                       </div>
 
                       <div className="space-y-1.5">
-                        <label className="text-xs font-bold text-neutral-600 uppercase">Backdrop Image URL (Full portrait on clean bg)</label>
+                        <label className="text-xs font-bold text-neutral-600 dark:text-slate-400 uppercase">Backdrop Image URL (Full portrait on clean bg)</label>
                         <input
                           type="url"
                           value={mannequinImage}
                           onChange={(e) => setMannequinImage(e.target.value)}
                           placeholder="https://images.unsplash.com/photo-..."
-                          className="w-full px-4 py-2.5 bg-neutral-50 border border-neutral-200 rounded-xl text-xs focus:outline-none focus:border-indigo-500"
+                          className="w-full px-4 py-2.5 bg-neutral-50 dark:bg-slate-950 border border-neutral-200 dark:border-slate-700 rounded-xl text-xs focus:outline-none focus:border-indigo-500"
                           required
                         />
                       </div>
@@ -4667,31 +4669,31 @@ export default function AdminDashboard({
                         <button
                           type="button"
                           onClick={() => setMannequinImage("https://images.unsplash.com/photo-1515886657613-9f3515b0c78f?w=600&auto=format&fit=crop")}
-                          className="px-2 py-1 bg-neutral-100 hover:bg-neutral-200 rounded text-[10px] text-neutral-600 font-mono transition cursor-pointer"
+                          className="px-2 py-1 bg-neutral-100 dark:bg-slate-800 hover:bg-neutral-200 rounded text-[10px] text-neutral-600 dark:text-slate-400 font-mono transition cursor-pointer"
                         >
                           Preset Model A
                         </button>
                         <button
                           type="button"
                           onClick={() => setMannequinImage("https://images.unsplash.com/photo-1524504388940-b1c1722653e1?w=600&auto=format&fit=crop")}
-                          className="px-2 py-1 bg-neutral-100 hover:bg-neutral-200 rounded text-[10px] text-neutral-600 font-mono transition cursor-pointer"
+                          className="px-2 py-1 bg-neutral-100 dark:bg-slate-800 hover:bg-neutral-200 rounded text-[10px] text-neutral-600 dark:text-slate-400 font-mono transition cursor-pointer"
                         >
                           Preset Model B
                         </button>
                         <button
                           type="button"
                           onClick={() => setMannequinImage("https://images.unsplash.com/photo-1534528741775-53994a69daeb?w=600&auto=format&fit=crop")}
-                          className="px-2 py-1 bg-neutral-100 hover:bg-neutral-200 rounded text-[10px] text-neutral-600 font-mono transition cursor-pointer"
+                          className="px-2 py-1 bg-neutral-100 dark:bg-slate-800 hover:bg-neutral-200 rounded text-[10px] text-neutral-600 dark:text-slate-400 font-mono transition cursor-pointer"
                         >
                           Preset Model C
                         </button>
                       </div>
 
-                      <div className="flex justify-end gap-3 pt-3 border-t border-neutral-100">
+                      <div className="flex justify-end gap-3 pt-3 border-t border-neutral-100 dark:border-slate-800">
                         <button
                           type="button"
                           onClick={() => setShowMannequinForm(false)}
-                          className="px-4 py-2 border border-neutral-200 rounded-xl text-neutral-600 hover:bg-neutral-50 text-xs font-bold transition cursor-pointer"
+                          className="px-4 py-2 border border-neutral-200 dark:border-slate-700 rounded-xl text-neutral-600 dark:text-slate-400 hover:bg-neutral-50 dark:bg-slate-950 text-xs font-bold transition cursor-pointer"
                         >
                           Cancel
                         </button>
@@ -4708,8 +4710,8 @@ export default function AdminDashboard({
                   {/* Mannequin grid */}
                   <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
                     {arMannequins.map((man) => (
-                      <div key={man.id} className="bg-white rounded-3xl border border-neutral-200 shadow-sm overflow-hidden flex flex-col hover:border-amber-500/30 transition duration-300">
-                        <div className="aspect-[3/4] relative bg-neutral-100 overflow-hidden">
+                      <div key={man.id} className="bg-white dark:bg-slate-900 rounded-3xl border border-neutral-200 dark:border-slate-700 shadow-sm overflow-hidden flex flex-col hover:border-amber-500/30 transition duration-300">
+                        <div className="aspect-[3/4] relative bg-neutral-100 dark:bg-slate-800 overflow-hidden">
                           <img src={man.image} alt={man.name} className="w-full h-full object-cover animate-fade-in" referrerPolicy="no-referrer" />
                           <span className="absolute bottom-3 left-3 bg-neutral-900/85 backdrop-blur-sm text-amber-500 text-[10px] font-bold font-mono px-2.5 py-1 rounded-full uppercase">
                             {man.style}
@@ -4717,10 +4719,10 @@ export default function AdminDashboard({
                         </div>
                         <div className="p-5 flex-1 flex flex-col justify-between space-y-3">
                           <div>
-                            <h4 className="font-serif text-sm font-bold text-neutral-900">{man.name}</h4>
+                            <h4 className="font-serif text-sm font-bold text-neutral-900 dark:text-slate-100">{man.name}</h4>
                             <p className="text-[10px] text-neutral-400 font-mono mt-0.5">Asset ID: {man.id}</p>
                           </div>
-                          <div className="flex gap-2 pt-2 border-t border-neutral-100">
+                          <div className="flex gap-2 pt-2 border-t border-neutral-100 dark:border-slate-800">
                             <button
                               onClick={() => {
                                 setEditingMannequinId(man.id);
@@ -4729,9 +4731,9 @@ export default function AdminDashboard({
                                 setMannequinStyle(man.style);
                                 setShowMannequinForm(true);
                               }}
-                              className="flex-1 py-1.5 bg-neutral-50 hover:bg-neutral-100 text-neutral-700 rounded-xl border border-neutral-200 text-[10px] font-bold transition flex items-center justify-center gap-1 cursor-pointer"
+                              className="flex-1 py-1.5 bg-neutral-50 dark:bg-slate-950 hover:bg-neutral-100 dark:bg-slate-800 text-neutral-700 dark:text-slate-300 rounded-xl border border-neutral-200 dark:border-slate-700 text-[10px] font-bold transition flex items-center justify-center gap-1 cursor-pointer"
                             >
-                              <Edit className="w-3 h-3 text-neutral-500" />
+                              <Edit className="w-3 h-3 text-neutral-500 dark:text-slate-400" />
                               Edit
                             </button>
                             <button
@@ -4746,10 +4748,10 @@ export default function AdminDashboard({
                     ))}
 
                     {arMannequins.length === 0 && (
-                      <div className="col-span-full bg-neutral-50 border border-neutral-200 rounded-3xl p-10 text-center space-y-4">
+                      <div className="col-span-full bg-neutral-50 dark:bg-slate-950 border border-neutral-200 dark:border-slate-700 rounded-3xl p-10 text-center space-y-4">
                         <User className="w-12 h-12 text-neutral-300 mx-auto" />
                         <div>
-                          <p className="font-serif text-sm font-bold text-neutral-700">No AR Backdrop Models Added</p>
+                          <p className="font-serif text-sm font-bold text-neutral-700 dark:text-slate-300">No AR Backdrop Models Added</p>
                           <p className="text-xs text-neutral-400 mt-1">Tap "Seed Sample AR Assets" above or "Add virtual Backdrop Mannequin" to start.</p>
                         </div>
                       </div>
@@ -4780,15 +4782,15 @@ export default function AdminDashboard({
                       </button>
                     </div>
                   ) : (
-                    <form onSubmit={handleDressSubmit} className="bg-white border border-neutral-200 rounded-3xl p-6 shadow-md space-y-4 max-w-2xl">
-                      <div className="flex justify-between items-center pb-3 border-b border-neutral-100">
-                        <h3 className="font-serif text-sm font-bold text-neutral-900">
+                    <form onSubmit={handleDressSubmit} className="bg-white dark:bg-slate-900 border border-neutral-200 dark:border-slate-700 rounded-3xl p-6 shadow-md space-y-4 max-w-2xl">
+                      <div className="flex justify-between items-center pb-3 border-b border-neutral-100 dark:border-slate-800">
+                        <h3 className="font-serif text-sm font-bold text-neutral-900 dark:text-slate-100">
                           {editingDressId ? "✏️ Edit Transparent Dress Overlay" : "✨ Create Transparent Dress Overlay"}
                         </h3>
                         <button
                           type="button"
                           onClick={() => setShowDressForm(false)}
-                          className="text-neutral-400 hover:text-neutral-600 cursor-pointer"
+                          className="text-neutral-400 hover:text-neutral-600 dark:text-slate-400 cursor-pointer"
                         >
                           <X className="w-4 h-4" />
                         </button>
@@ -4796,23 +4798,23 @@ export default function AdminDashboard({
 
                       <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
                         <div className="space-y-1.5">
-                          <label className="text-xs font-bold text-neutral-600 uppercase">Dress Name</label>
+                          <label className="text-xs font-bold text-neutral-600 dark:text-slate-400 uppercase">Dress Name</label>
                           <input
                             type="text"
                             value={dressName}
                             onChange={(e) => setDressName(e.target.value)}
                             placeholder="e.g. Ella Kente Ceremony Dress"
-                            className="w-full px-4 py-2.5 bg-neutral-50 border border-neutral-200 rounded-xl text-xs focus:outline-none focus:border-indigo-500"
+                            className="w-full px-4 py-2.5 bg-neutral-50 dark:bg-slate-950 border border-neutral-200 dark:border-slate-700 rounded-xl text-xs focus:outline-none focus:border-indigo-500"
                             required
                           />
                         </div>
 
                         <div className="space-y-1.5">
-                          <label className="text-xs font-bold text-neutral-600 uppercase">Category</label>
+                          <label className="text-xs font-bold text-neutral-600 dark:text-slate-400 uppercase">Category</label>
                           <select
                             value={dressCategory}
                             onChange={(e) => setDressCategory(e.target.value)}
-                            className="w-full px-4 py-2.5 bg-neutral-50 border border-neutral-200 rounded-xl text-xs focus:outline-none focus:border-indigo-500 font-medium"
+                            className="w-full px-4 py-2.5 bg-neutral-50 dark:bg-slate-950 border border-neutral-200 dark:border-slate-700 rounded-xl text-xs focus:outline-none focus:border-indigo-500 font-medium"
                           >
                             <option value="dresses">Dresses</option>
                             <option value="accessories">Accessories</option>
@@ -4822,7 +4824,7 @@ export default function AdminDashboard({
                       </div>
 
                       <div className="space-y-1.5">
-                        <label className="text-xs font-bold text-neutral-600 uppercase">Gown Photo & Garment Background Extractor</label>
+                        <label className="text-xs font-bold text-neutral-600 dark:text-slate-400 uppercase">Gown Photo & Garment Background Extractor</label>
                         <GarmentExtractor
                           value={dressImage}
                           onChange={(val) => setDressImage(val)}
@@ -4835,42 +4837,42 @@ export default function AdminDashboard({
                         <button
                           type="button"
                           onClick={() => setDressImage("https://pngimg.com/uploads/dress/dress_PNG20.png")}
-                          className="px-2 py-1 bg-neutral-100 hover:bg-neutral-200 rounded text-[10px] text-neutral-600 font-mono transition cursor-pointer"
+                          className="px-2 py-1 bg-neutral-100 dark:bg-slate-800 hover:bg-neutral-200 rounded text-[10px] text-neutral-600 dark:text-slate-400 font-mono transition cursor-pointer"
                         >
                           Preset Dress A
                         </button>
                         <button
                           type="button"
                           onClick={() => setDressImage("https://pngimg.com/uploads/dress/dress_PNG16.png")}
-                          className="px-2 py-1 bg-neutral-100 hover:bg-neutral-200 rounded text-[10px] text-neutral-600 font-mono transition cursor-pointer"
+                          className="px-2 py-1 bg-neutral-100 dark:bg-slate-800 hover:bg-neutral-200 rounded text-[10px] text-neutral-600 dark:text-slate-400 font-mono transition cursor-pointer"
                         >
                           Preset Dress B
                         </button>
                         <button
                           type="button"
                           onClick={() => setDressImage("https://pngimg.com/uploads/dress/dress_PNG22.png")}
-                          className="px-2 py-1 bg-neutral-100 hover:bg-neutral-200 rounded text-[10px] text-neutral-600 font-mono transition cursor-pointer"
+                          className="px-2 py-1 bg-neutral-100 dark:bg-slate-800 hover:bg-neutral-200 rounded text-[10px] text-neutral-600 dark:text-slate-400 font-mono transition cursor-pointer"
                         >
                           Preset Dress C
                         </button>
                       </div>
 
                       <div className="space-y-1.5">
-                        <label className="text-xs font-bold text-neutral-600 uppercase">Description / Fitting Guide</label>
+                        <label className="text-xs font-bold text-neutral-600 dark:text-slate-400 uppercase">Description / Fitting Guide</label>
                         <textarea
                           value={dressDescription}
                           onChange={(e) => setDressDescription(e.target.value)}
                           placeholder="Write fabric notes or size/position tips..."
                           rows={2}
-                          className="w-full px-4 py-2.5 bg-neutral-50 border border-neutral-200 rounded-xl text-xs focus:outline-none focus:border-indigo-500"
+                          className="w-full px-4 py-2.5 bg-neutral-50 dark:bg-slate-950 border border-neutral-200 dark:border-slate-700 rounded-xl text-xs focus:outline-none focus:border-indigo-500"
                         />
                       </div>
 
-                      <div className="flex justify-end gap-3 pt-3 border-t border-neutral-100">
+                      <div className="flex justify-end gap-3 pt-3 border-t border-neutral-100 dark:border-slate-800">
                         <button
                           type="button"
                           onClick={() => setShowDressForm(false)}
-                          className="px-4 py-2 border border-neutral-200 rounded-xl text-neutral-600 hover:bg-neutral-50 text-xs font-bold transition cursor-pointer"
+                          className="px-4 py-2 border border-neutral-200 dark:border-slate-700 rounded-xl text-neutral-600 dark:text-slate-400 hover:bg-neutral-50 dark:bg-slate-950 text-xs font-bold transition cursor-pointer"
                         >
                           Cancel
                         </button>
@@ -4887,9 +4889,9 @@ export default function AdminDashboard({
                   {/* Dress grid */}
                   <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
                     {arDresses.map((dress) => (
-                      <div key={dress.id} className="bg-white rounded-3xl border border-neutral-200 shadow-sm overflow-hidden flex flex-col hover:border-amber-500/30 transition duration-300">
+                      <div key={dress.id} className="bg-white dark:bg-slate-900 rounded-3xl border border-neutral-200 dark:border-slate-700 shadow-sm overflow-hidden flex flex-col hover:border-amber-500/30 transition duration-300">
                         {/* Checkerboard Pattern for transparent backdrop */}
-                        <div className="aspect-[3/4] relative bg-neutral-100 overflow-hidden flex items-center justify-center p-4 bg-[radial-gradient(#e5e7eb_1px,transparent_1px)] [background-size:16px_16px]">
+                        <div className="aspect-[3/4] relative bg-neutral-100 dark:bg-slate-800 overflow-hidden flex items-center justify-center p-4 bg-[radial-gradient(#e5e7eb_1px,transparent_1px)] [background-size:16px_16px]">
                           <img src={dress.image} alt={dress.name} className="max-h-full max-w-full object-contain filter drop-shadow-md animate-fade-in" referrerPolicy="no-referrer" />
                           <span className="absolute bottom-3 left-3 bg-neutral-900/85 backdrop-blur-sm text-amber-500 text-[10px] font-bold font-mono px-2.5 py-1 rounded-full uppercase">
                             {dress.category || "Dresses"}
@@ -4897,13 +4899,13 @@ export default function AdminDashboard({
                         </div>
                         <div className="p-5 flex-1 flex flex-col justify-between space-y-3">
                           <div>
-                            <h4 className="font-serif text-sm font-bold text-neutral-900 line-clamp-1">{dress.name}</h4>
+                            <h4 className="font-serif text-sm font-bold text-neutral-900 dark:text-slate-100 line-clamp-1">{dress.name}</h4>
                             {dress.description && (
-                              <p className="text-xs text-neutral-500 line-clamp-2 mt-1">{dress.description}</p>
+                              <p className="text-xs text-neutral-500 dark:text-slate-400 line-clamp-2 mt-1">{dress.description}</p>
                             )}
                             <p className="text-[10px] text-neutral-400 font-mono mt-1">Asset ID: {dress.id}</p>
                           </div>
-                          <div className="flex gap-2 pt-2 border-t border-neutral-100">
+                          <div className="flex gap-2 pt-2 border-t border-neutral-100 dark:border-slate-800">
                             <button
                               onClick={() => {
                                 setEditingDressId(dress.id);
@@ -4913,9 +4915,9 @@ export default function AdminDashboard({
                                 setDressDescription(dress.description || "");
                                 setShowDressForm(true);
                               }}
-                              className="flex-1 py-1.5 bg-neutral-50 hover:bg-neutral-100 text-neutral-700 rounded-xl border border-neutral-200 text-[10px] font-bold transition flex items-center justify-center gap-1 cursor-pointer"
+                              className="flex-1 py-1.5 bg-neutral-50 dark:bg-slate-950 hover:bg-neutral-100 dark:bg-slate-800 text-neutral-700 dark:text-slate-300 rounded-xl border border-neutral-200 dark:border-slate-700 text-[10px] font-bold transition flex items-center justify-center gap-1 cursor-pointer"
                             >
-                              <Edit className="w-3 h-3 text-neutral-500" />
+                              <Edit className="w-3 h-3 text-neutral-500 dark:text-slate-400" />
                               Edit
                             </button>
                             <button
@@ -4930,10 +4932,10 @@ export default function AdminDashboard({
                     ))}
 
                     {arDresses.length === 0 && (
-                      <div className="col-span-full bg-neutral-50 border border-neutral-200 rounded-3xl p-10 text-center space-y-4">
+                      <div className="col-span-full bg-neutral-50 dark:bg-slate-950 border border-neutral-200 dark:border-slate-700 rounded-3xl p-10 text-center space-y-4">
                         <Shirt className="w-12 h-12 text-neutral-300 mx-auto" />
                         <div>
-                          <p className="font-serif text-sm font-bold text-neutral-700">No AR Gown Overlays Added</p>
+                          <p className="font-serif text-sm font-bold text-neutral-700 dark:text-slate-300">No AR Gown Overlays Added</p>
                           <p className="text-xs text-neutral-400 mt-1">Tap "Seed Sample AR Assets" above or "Add Transparent Dress Overlay" to start.</p>
                         </div>
                       </div>
@@ -4945,7 +4947,7 @@ export default function AdminDashboard({
           )}
 
           {/* Persistent Footer - Clear All Data */}
-          <div className="mt-12 pt-6 border-t border-neutral-200 flex justify-end">
+          <div className="mt-12 pt-6 border-t border-neutral-200 dark:border-slate-700 flex justify-end">
             <button
               type="button"
               onClick={onClearAllData}
@@ -4963,18 +4965,18 @@ export default function AdminDashboard({
     {/* Custom Account Deletion Confirmation Modal */}
     {showDeleteConfirm && (
       <div className="fixed inset-0 bg-slate-950/85 backdrop-blur-md z-[150] flex items-center justify-center p-4">
-        <div className="bg-white rounded-3xl p-6 max-w-md w-full shadow-2xl border border-neutral-150 space-y-6 text-center animate-in zoom-in-95 duration-200">
+        <div className="bg-white dark:bg-slate-900 rounded-3xl p-6 max-w-md w-full shadow-2xl border border-neutral-150 dark:border-slate-800 space-y-6 text-center animate-in zoom-in-95 duration-200">
           <div className="w-12 h-12 rounded-full bg-rose-50 text-rose-600 flex items-center justify-center mx-auto border border-rose-100">
             <Trash2 className="w-6 h-6 animate-pulse" />
           </div>
           <div className="space-y-2">
-            <h3 className="text-base font-bold text-neutral-900 tracking-tight">
+            <h3 className="text-base font-bold text-neutral-900 dark:text-slate-100 tracking-tight">
               Confirm Account Purge
             </h3>
-            <p className="text-xs text-neutral-500 leading-relaxed">
+            <p className="text-xs text-neutral-500 dark:text-slate-400 leading-relaxed">
               You are about to delete <span className="font-bold text-rose-600">all customer accounts</span> and <span className="font-bold text-rose-600">all activity logs</span> in Ella's database. This will also log out any currently active clients, forcing them to re-register.
             </p>
-            <p className="text-[10px] text-neutral-400 font-mono bg-neutral-50 p-2.5 rounded-xl border border-neutral-100 leading-normal">
+            <p className="text-[10px] text-neutral-400 font-mono bg-neutral-50 dark:bg-slate-950 p-2.5 rounded-xl border border-neutral-100 dark:border-slate-800 leading-normal">
               Warning: This action is permanent and cannot be undone. Product data, orders, and charity files will remain untouched.
             </p>
           </div>
@@ -4982,7 +4984,7 @@ export default function AdminDashboard({
             <button
               type="button; cursor-pointer"
               onClick={() => setShowDeleteConfirm(false)}
-              className="flex-1 px-4 py-2.5 bg-neutral-100 hover:bg-neutral-200 text-neutral-700 rounded-xl text-xs font-bold transition-colors cursor-pointer"
+              className="flex-1 px-4 py-2.5 bg-neutral-100 dark:bg-slate-800 hover:bg-neutral-200 text-neutral-700 dark:text-slate-300 rounded-xl text-xs font-bold transition-colors cursor-pointer"
             >
               Cancel
             </button>

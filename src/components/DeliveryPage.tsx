@@ -1,6 +1,7 @@
 import React, { useState } from 'react';
 import { DeliveryRate, DeliveryPersonnel } from '../types';
 import { MapPin, DollarSign, Truck, User, Plus, Trash2 } from 'lucide-react';
+import DeliveryMap from './DeliveryMap';
 
 interface DeliveryPageProps {
   rates: DeliveryRate[];
@@ -26,13 +27,13 @@ export default function DeliveryPage({ rates, personnel, onSetRates, onSetPerson
 
   return (
     <div className="space-y-6">
-      <div className="flex gap-4 border-b border-neutral-200">
+      <div className="flex gap-4 border-b border-neutral-200 dark:border-slate-700">
         <button className={`pb-2 ${activeTab === 'rates' ? 'border-b-2 border-indigo-600 font-bold' : ''}`} onClick={() => setActiveTab('rates')}>Delivery Rates & Zones</button>
         <button className={`pb-2 ${activeTab === 'personnel' ? 'border-b-2 border-indigo-600 font-bold' : ''}`} onClick={() => setActiveTab('personnel')}>Delivery Personnel</button>
       </div>
 
       {activeTab === 'rates' && (
-        <div className="bg-white p-6 rounded-2xl border border-neutral-200">
+        <div className="bg-white dark:bg-slate-900 p-6 rounded-2xl border border-neutral-200 dark:border-slate-700">
           <h3 className="text-lg font-bold mb-4 flex items-center gap-2"><DollarSign className="w-5 h-5 text-indigo-600"/> Delivery Rates</h3>
           <div className="grid grid-cols-1 md:grid-cols-3 gap-2 mb-4">
             <input type="text" placeholder="Zone/Location Name" value={newRate.locationName} onChange={e => setNewRate({...newRate, locationName: e.target.value})} className="p-2 border rounded"/>
@@ -42,7 +43,7 @@ export default function DeliveryPage({ rates, personnel, onSetRates, onSetPerson
           </div>
           <ul className="space-y-2">
             {rates.map(rate => (
-              <li key={rate.id} className="p-3 bg-neutral-50 rounded flex justify-between text-sm border border-neutral-100">
+              <li key={rate.id} className="p-3 bg-neutral-50 dark:bg-slate-950 rounded flex justify-between text-sm border border-neutral-100 dark:border-slate-800">
                 <span><strong>{rate.locationName}</strong> - {rate.distanceKm} km</span>
                 <span className="font-bold">₵{rate.price}</span>
               </li>
@@ -52,7 +53,7 @@ export default function DeliveryPage({ rates, personnel, onSetRates, onSetPerson
       )}
 
       {activeTab === 'personnel' && (
-        <div className="bg-white p-6 rounded-2xl border border-neutral-200">
+        <div className="bg-white dark:bg-slate-900 p-6 rounded-2xl border border-neutral-200 dark:border-slate-700">
           <h3 className="text-lg font-bold mb-4 flex items-center gap-2"><User className="w-5 h-5 text-indigo-600"/> Delivery Personnel Management</h3>
           <div className="grid grid-cols-1 md:grid-cols-3 gap-2 mb-4">
             <input type="text" placeholder="Name" value={newPersonnel.name} onChange={e => setNewPersonnel({...newPersonnel, name: e.target.value})} className="p-2 border rounded"/>
@@ -66,7 +67,7 @@ export default function DeliveryPage({ rates, personnel, onSetRates, onSetPerson
           </div>
           <ul className="space-y-2">
             {personnel.map(p => (
-              <li key={p.id} className="p-3 bg-neutral-50 rounded flex justify-between text-sm border border-neutral-100">
+              <li key={p.id} className="p-3 bg-neutral-50 dark:bg-slate-950 rounded flex justify-between text-sm border border-neutral-100 dark:border-slate-800">
                 <span>{p.name} ({p.phone}) - <span className="font-mono text-xs">{p.currentLat.toFixed(4)}, {p.currentLng.toFixed(4)}</span></span>
                 <span className={`font-bold ${p.status === 'available' ? 'text-green-600' : 'text-amber-600'}`}>{(p.status || '').toUpperCase()}</span>
               </li>
@@ -76,10 +77,10 @@ export default function DeliveryPage({ rates, personnel, onSetRates, onSetPerson
       )}
       
       {/* Map Placeholder */}
-      <div className="bg-white p-6 rounded-2xl border border-neutral-200">
+      <div className="bg-white dark:bg-slate-900 p-6 rounded-2xl border border-neutral-200 dark:border-slate-700">
         <h3 className="text-lg font-bold mb-4 flex items-center gap-2"><MapPin className="w-5 h-5 text-indigo-600"/> Live Delivery Fleet Map</h3>
-        <div className="h-64 bg-neutral-100 rounded-xl flex items-center justify-center border-2 border-dashed border-neutral-200 text-neutral-500">
-            [Live Map View: Tracking {personnel.length} active personnel & pending deliveries]
+        <div className="h-[400px] bg-neutral-100 dark:bg-slate-800 rounded-xl flex items-center justify-center overflow-hidden border border-neutral-200 dark:border-slate-700">
+            <DeliveryMap personnel={personnel} />
         </div>
       </div>
     </div>

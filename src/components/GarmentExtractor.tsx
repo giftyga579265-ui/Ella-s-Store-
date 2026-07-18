@@ -424,7 +424,7 @@ export default function GarmentExtractor({ value, onChange, onShowToast }: Garme
         // Dropzone Mode
         <div 
           onClick={() => fileInputRef.current?.click()}
-          className="group relative border-2 border-dashed border-neutral-300 hover:border-indigo-500 rounded-2xl p-8 text-center cursor-pointer bg-white transition duration-300 shadow-sm flex flex-col items-center justify-center min-h-[220px]"
+          className="group relative border-2 border-dashed border-neutral-300 hover:border-indigo-500 rounded-2xl p-8 text-center cursor-pointer bg-white dark:bg-slate-900 transition duration-300 shadow-sm flex flex-col items-center justify-center min-h-[220px]"
           id="garment-upload-dropzone"
         >
           <input 
@@ -434,11 +434,11 @@ export default function GarmentExtractor({ value, onChange, onShowToast }: Garme
             accept="image/*"
             className="hidden"
           />
-          <div className="w-12 h-12 rounded-full bg-neutral-50 group-hover:bg-indigo-50 flex items-center justify-center text-neutral-400 group-hover:text-indigo-600 transition duration-300 mb-3 border border-neutral-100">
+          <div className="w-12 h-12 rounded-full bg-neutral-50 dark:bg-slate-950 group-hover:bg-indigo-50 flex items-center justify-center text-neutral-400 group-hover:text-indigo-600 transition duration-300 mb-3 border border-neutral-100 dark:border-slate-800">
             <Upload className="w-5 h-5 animate-pulse" />
           </div>
-          <p className="text-xs font-bold text-neutral-800 uppercase tracking-wide">Select Garment Photo</p>
-          <p className="text-[11px] text-neutral-500 max-w-[280px] mt-1.5 leading-relaxed">
+          <p className="text-xs font-bold text-neutral-800 dark:text-slate-200 uppercase tracking-wide">Select Garment Photo</p>
+          <p className="text-[11px] text-neutral-500 dark:text-slate-400 max-w-[280px] mt-1.5 leading-relaxed">
             Upload a solid background photo (flat lay or mannequin). The software will extract just the dress/clothing.
           </p>
           <span className="mt-4 px-3 py-1.5 bg-indigo-50 hover:bg-indigo-100/80 text-indigo-700 text-[10px] font-black uppercase tracking-wider rounded-lg border border-indigo-200/50 transition duration-200">
@@ -449,18 +449,18 @@ export default function GarmentExtractor({ value, onChange, onShowToast }: Garme
         // Workbench Editor Mode
         <div className="grid grid-cols-1 md:grid-cols-12 gap-5">
           {/* Canvas Preview Column */}
-          <div className="md:col-span-7 flex flex-col items-center justify-center bg-white p-4 border border-neutral-200 rounded-2xl relative shadow-inner min-h-[350px]">
+          <div className="md:col-span-7 flex flex-col items-center justify-center bg-white dark:bg-slate-900 p-4 border border-neutral-200 dark:border-slate-700 rounded-2xl relative shadow-inner min-h-[350px]">
             {isProcessing && (
               <div className="absolute inset-0 bg-white/70 backdrop-blur-sm z-20 flex flex-col items-center justify-center">
                 <RefreshCw className="w-8 h-8 text-indigo-600 animate-spin" />
-                <span className="text-[10px] font-black uppercase tracking-widest text-neutral-600 mt-2">Extracting Garment...</span>
+                <span className="text-[10px] font-black uppercase tracking-widest text-neutral-600 dark:text-slate-400 mt-2">Extracting Garment...</span>
               </div>
             )}
             
             {/* Checkerboard Backdrop wrapper */}
             <div 
               ref={containerRef}
-              className="max-h-[480px] max-w-full overflow-auto rounded-xl border border-neutral-200 shadow-sm relative bg-[radial-gradient(#d1d5db_1px,transparent_1px)] [background-size:12px_12px] bg-neutral-50"
+              className="max-h-[480px] max-w-full overflow-auto rounded-xl border border-neutral-200 dark:border-slate-700 shadow-sm relative bg-[radial-gradient(#d1d5db_1px,transparent_1px)] [background-size:12px_12px] bg-neutral-50 dark:bg-slate-950"
               style={{
                 cursor: tool === "wand" ? "crosshair" : "none"
               }}
@@ -498,8 +498,8 @@ export default function GarmentExtractor({ value, onChange, onShowToast }: Garme
           <div className="md:col-span-5 bg-neutral-100/60 rounded-2xl p-4 border border-neutral-200/80 space-y-5 flex flex-col justify-between">
             <div className="space-y-4">
               <div>
-                <h4 className="text-xs font-black text-neutral-800 uppercase tracking-wider">Garment Extraction Toolkit</h4>
-                <p className="text-[10px] text-neutral-500 mt-0.5">Remove shadows, hangers, and backdrops instantly.</p>
+                <h4 className="text-xs font-black text-neutral-800 dark:text-slate-200 uppercase tracking-wider">Garment Extraction Toolkit</h4>
+                <p className="text-[10px] text-neutral-500 dark:text-slate-400 mt-0.5">Remove shadows, hangers, and backdrops instantly.</p>
               </div>
 
               {/* Auto Action */}
@@ -513,8 +513,8 @@ export default function GarmentExtractor({ value, onChange, onShowToast }: Garme
                 ✨ Auto-Extract Background
               </button>
 
-              <div className="border-t border-neutral-200 my-2 pt-3 space-y-3">
-                <span className="text-[10px] font-bold text-neutral-500 block uppercase tracking-wider">Manual Adjustment Tools:</span>
+              <div className="border-t border-neutral-200 dark:border-slate-700 my-2 pt-3 space-y-3">
+                <span className="text-[10px] font-bold text-neutral-500 dark:text-slate-400 block uppercase tracking-wider">Manual Adjustment Tools:</span>
                 
                 {/* Tool Selector Buttons */}
                 <div className="grid grid-cols-2 gap-2">
@@ -524,7 +524,7 @@ export default function GarmentExtractor({ value, onChange, onShowToast }: Garme
                     className={`px-3 py-2 rounded-xl text-xs font-bold flex items-center justify-center gap-1.5 border transition cursor-pointer ${
                       tool === "wand"
                         ? "bg-indigo-50 border-indigo-300 text-indigo-700"
-                        : "bg-white border-neutral-200 text-neutral-600 hover:bg-neutral-50"
+                        : "bg-white dark:bg-slate-900 border-neutral-200 dark:border-slate-700 text-neutral-600 dark:text-slate-400 hover:bg-neutral-50 dark:bg-slate-950"
                     }`}
                   >
                     <Wand2 className="w-3.5 h-3.5" />
@@ -536,7 +536,7 @@ export default function GarmentExtractor({ value, onChange, onShowToast }: Garme
                     className={`px-3 py-2 rounded-xl text-xs font-bold flex items-center justify-center gap-1.5 border transition cursor-pointer ${
                       tool === "eraser"
                         ? "bg-indigo-50 border-indigo-300 text-indigo-700"
-                        : "bg-white border-neutral-200 text-neutral-600 hover:bg-neutral-50"
+                        : "bg-white dark:bg-slate-900 border-neutral-200 dark:border-slate-700 text-neutral-600 dark:text-slate-400 hover:bg-neutral-50 dark:bg-slate-950"
                     }`}
                   >
                     <Eraser className="w-3.5 h-3.5" />
@@ -546,10 +546,10 @@ export default function GarmentExtractor({ value, onChange, onShowToast }: Garme
 
                 {/* Tolerance slider (for Magic Wand / Auto-Extract) */}
                 {tool === "wand" && (
-                  <div className="space-y-1 bg-white p-2.5 rounded-xl border border-neutral-200/80">
-                    <div className="flex justify-between items-center text-[10px] font-bold text-neutral-500">
+                  <div className="space-y-1 bg-white dark:bg-slate-900 p-2.5 rounded-xl border border-neutral-200/80">
+                    <div className="flex justify-between items-center text-[10px] font-bold text-neutral-500 dark:text-slate-400">
                       <span className="flex items-center gap-1"><Sliders className="w-3 h-3 text-indigo-500" /> Color Tolerance</span>
-                      <span className="text-neutral-700">{tolerance}</span>
+                      <span className="text-neutral-700 dark:text-slate-300">{tolerance}</span>
                     </div>
                     <input
                       type="range"
@@ -565,10 +565,10 @@ export default function GarmentExtractor({ value, onChange, onShowToast }: Garme
 
                 {/* Brush size slider (for Eraser) */}
                 {tool === "eraser" && (
-                  <div className="space-y-1 bg-white p-2.5 rounded-xl border border-neutral-200/80">
-                    <div className="flex justify-between items-center text-[10px] font-bold text-neutral-500">
+                  <div className="space-y-1 bg-white dark:bg-slate-900 p-2.5 rounded-xl border border-neutral-200/80">
+                    <div className="flex justify-between items-center text-[10px] font-bold text-neutral-500 dark:text-slate-400">
                       <span>Brush Size</span>
-                      <span className="text-neutral-700">{brushSize}px</span>
+                      <span className="text-neutral-700 dark:text-slate-300">{brushSize}px</span>
                     </div>
                     <input
                       type="range"
@@ -585,23 +585,23 @@ export default function GarmentExtractor({ value, onChange, onShowToast }: Garme
             </div>
 
             {/* Editing and Reset Utilities */}
-            <div className="space-y-2 border-t border-neutral-200 pt-3">
+            <div className="space-y-2 border-t border-neutral-200 dark:border-slate-700 pt-3">
               <div className="flex gap-2">
                 <button
                   type="button"
                   onClick={handleUndo}
                   disabled={undoStack.length <= 1}
-                  className="flex-1 py-2 bg-white hover:bg-neutral-50 border border-neutral-200 text-neutral-700 rounded-xl text-xs font-bold transition flex items-center justify-center gap-1 disabled:opacity-40 cursor-pointer"
+                  className="flex-1 py-2 bg-white dark:bg-slate-900 hover:bg-neutral-50 dark:bg-slate-950 border border-neutral-200 dark:border-slate-700 text-neutral-700 dark:text-slate-300 rounded-xl text-xs font-bold transition flex items-center justify-center gap-1 disabled:opacity-40 cursor-pointer"
                 >
-                  <Undo className="w-3.5 h-3.5 text-neutral-500" />
+                  <Undo className="w-3.5 h-3.5 text-neutral-500 dark:text-slate-400" />
                   Undo
                 </button>
                 <button
                   type="button"
                   onClick={handleReset}
-                  className="flex-1 py-2 bg-white hover:bg-neutral-50 border border-neutral-200 text-neutral-700 rounded-xl text-xs font-bold transition flex items-center justify-center gap-1 cursor-pointer"
+                  className="flex-1 py-2 bg-white dark:bg-slate-900 hover:bg-neutral-50 dark:bg-slate-950 border border-neutral-200 dark:border-slate-700 text-neutral-700 dark:text-slate-300 rounded-xl text-xs font-bold transition flex items-center justify-center gap-1 cursor-pointer"
                 >
-                  <RefreshCw className="w-3.5 h-3.5 text-neutral-500" />
+                  <RefreshCw className="w-3.5 h-3.5 text-neutral-500 dark:text-slate-400" />
                   Original
                 </button>
               </div>

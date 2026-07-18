@@ -249,7 +249,7 @@ export default function CustomerLiveMap({ locations, onShowToast }: CustomerLive
                   onCloseClick={() => setSelectedPin(null)}
                 >
                   <div className="p-2.5 text-slate-900 space-y-1.5 max-w-xs font-sans">
-                    <div className="flex items-center gap-1.5 border-b border-neutral-100 pb-1">
+                    <div className="flex items-center gap-1.5 border-b border-neutral-100 dark:border-slate-800 pb-1">
                       <MapPin className="w-4 h-4 text-indigo-600 shrink-0" />
                       <strong className="text-xs font-black text-slate-800 uppercase tracking-tight">
                         {selectedPin.customerName}
