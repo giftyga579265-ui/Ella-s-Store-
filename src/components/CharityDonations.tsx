@@ -458,7 +458,7 @@ export default function CharityDonations({
                     <div className="flex justify-between items-end">
                       <div>
                         <p className="text-[9px] text-neutral-600 dark:text-slate-400 font-bold uppercase">Sponsorship Amount</p>
-                        <p className="text-xl font-black text-neutral-900 dark:text-slate-100 font-mono">GHS {parseFloat(donationAmount).toFixed(2)}</p>
+                        <p className="text-xl font-black text-neutral-900 dark:text-slate-100 font-mono">GHS {(parseFloat(donationAmount) || 0).toFixed(2)}</p>
                       </div>
                       <div className="text-right text-[10px] text-neutral-600 dark:text-slate-400 font-bold">
                         <p>No Fees Applied</p>
@@ -644,7 +644,7 @@ export default function CharityDonations({
                         <div className="w-full bg-neutral-900 border border-neutral-800 rounded-2xl p-4 text-center space-y-4 shadow-2xl">
                           <p className="text-[10px] font-extrabold text-neutral-200 leading-normal font-mono text-left">
                             Y'ello!<br />
-                            Authorize payment of GHS {parseFloat(donationAmount).toFixed(2)} to ELLA'S COUTURE?<br />
+                            Authorize payment of GHS {(parseFloat(donationAmount) || 0).toFixed(2)} to ELLA'S COUTURE?<br />
                             Enter your Wallet PIN to approve.
                           </p>
                           
@@ -722,7 +722,7 @@ export default function CharityDonations({
                     <div className="space-y-2">
                       <h4 className="text-base font-black text-white">Sponsorship Completed!</h4>
                       <p className="text-xs text-neutral-400 leading-relaxed">
-                        GHS <span className="text-emerald-400 font-bold font-mono">{parseFloat(donationAmount).toFixed(2)}</span> has been securely deducted from wallet <span className="text-neutral-200 font-mono">{momoPhone}</span> and synchronized into the community foundation database.
+                        GHS <span className="text-emerald-400 font-bold font-mono">{(parseFloat(donationAmount) || 0).toFixed(2)}</span> has been securely deducted from wallet <span className="text-neutral-200 font-mono">{momoPhone}</span> and synchronized into the community foundation database.
                       </p>
                     </div>
                     <button 

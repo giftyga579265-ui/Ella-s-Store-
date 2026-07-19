@@ -978,13 +978,13 @@ export default function AdminDashboard({
 
     autoTable(doc, {
       head: [['Item']],
-      body: order.items.map(item => [item]),
+      body: (order.items || []).map(item => [item]),
       startY: 70,
     });
 
     // @ts-ignore
     const finalY = (doc as any).lastAutoTable.finalY || 80;
-    doc.text(`Total: ₵${order.total.toFixed(2)}`, 14, finalY + 10);
+    doc.text(`Total: ₵${(order.total || 0).toFixed(2)}`, 14, finalY + 10);
     
     doc.save(`Order_Report_${order.id}.pdf`);
     onShowToast("Report Generated", `Order report for ${order.id} downloaded.`, "success");
@@ -1199,12 +1199,12 @@ export default function AdminDashboard({
               <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6">
                 {[
                   { label: "Pending Orders Pipeline", val: orders.filter(o=>o.status==='pending').length, desc: `${orders.length} total orders registered`, icon: ShoppingCart },
-                  { label: "Estimated Gross Revenue", val: `₵${revenue.toFixed(2)}`, desc: "Accumulated checkout totals", icon: DollarSign },
+                  { label: "Estimated Gross Revenue", val: `₵${(revenue || 0).toFixed(2)}`, desc: "Accumulated checkout totals", icon: DollarSign },
                   { label: "Products in Catalog", val: products.length, desc: "Across active style listings", icon: Shirt },
                   { label: "Active CRM Accounts", val: activeCustomers, desc: "Registered customer logins", icon: Users },
                   { label: "Completed Payments", val: payments.filter(p=>p.status==='completed').length, desc: `Across MTN MoMo, cash, card, GPay`, icon: CreditCard },
                   { label: "Gourmet Food Orders", val: foodOrders.length, desc: `${foodProducts.length} active menu items`, icon: Utensils },
-                  { label: "Food Sales Revenue", val: `₵${foodRevenue.toFixed(2)}`, desc: "Gourmet kitchen sales", icon: DollarSign },
+                  { label: "Food Sales Revenue", val: `₵${(foodRevenue || 0).toFixed(2)}`, desc: "Gourmet kitchen sales", icon: DollarSign },
                   { label: "Google Pay Payments", val: payments.filter(p=>p.method==='googlepay').length, desc: "Completed via GPay sandbox", icon: CreditCard },
                   { label: "Pending Consultations", val: pendingInquiries, desc: "Customer form inquiry tickets", icon: HelpCircle },
                   { label: "Live System Actions (24h)", val: activityLogs.length, desc: "Granular session records", icon: Activity },
@@ -1317,8 +1317,8 @@ export default function AdminDashboard({
                         <tr key={order.id} className="hover:bg-neutral-50/50">
                           <td className="p-4 font-mono font-bold text-amber-600">{order.id}</td>
                           <td className="p-4 font-semibold text-neutral-800 dark:text-slate-200">{order.customer}</td>
-                          <td className="p-4 font-medium text-neutral-600 dark:text-slate-400">{order.items.join(", ")}</td>
-                          <td className="p-4 font-black font-mono text-neutral-900 dark:text-slate-100">₵{order.total.toFixed(2)}</td>
+                          <td className="p-4 font-medium text-neutral-600 dark:text-slate-400">{(order.items || []).join(", ")}</td>
+                          <td className="p-4 font-black font-mono text-neutral-900 dark:text-slate-100">₵{(order.total || 0).toFixed(2)}</td>
                           <td className="p-4 font-medium text-neutral-500 dark:text-slate-400">{order.date}</td>
                           <td className="p-4">
                             <span className={`px-2.5 py-1 rounded-full text-[10px] font-bold tracking-wide capitalize ${
@@ -1669,7 +1669,7 @@ export default function AdminDashboard({
                             </div>
                           </td>
                           <td className="p-4 font-semibold text-neutral-600 dark:text-slate-400 capitalize">{prod.category}</td>
-                          <td className="p-4 font-black font-mono text-neutral-900 dark:text-slate-100">₵{prod.price.toFixed(2)}</td>
+                          <td className="p-4 font-black font-mono text-neutral-900 dark:text-slate-100">₵{(prod.price || 0).toFixed(2)}</td>
                           <td className="p-4">
                             <span className={`px-2.5 py-1 rounded-full text-[10px] font-bold tracking-wide ${
                               prod.stock === 0 ? 'bg-red-100 text-red-700' :
@@ -2282,7 +2282,7 @@ export default function AdminDashboard({
               <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
                 <div className="bg-indigo-50 p-6 rounded-2xl border border-indigo-100 shadow-sm">
                   <h3 className="text-xs font-bold text-indigo-900 uppercase tracking-wider">Total Collected</h3>
-                  <p className="text-4xl font-black text-indigo-950 mt-2">₵{revenue.toFixed(2)}</p>
+                  <p className="text-4xl font-black text-indigo-950 mt-2">₵{(revenue || 0).toFixed(2)}</p>
                 </div>
                 <div className="col-span-2 bg-white dark:bg-slate-900 p-6 rounded-2xl border border-neutral-200/60 shadow-sm">
                   <h3 className="text-xs font-bold text-neutral-900 dark:text-slate-100 uppercase tracking-wider mb-4">Daily Performance</h3>
@@ -2313,7 +2313,7 @@ export default function AdminDashboard({
                       {economicData.map(([name, total]) => (
                         <tr key={name} className="hover:bg-neutral-50/50">
                           <td className="p-4 font-semibold text-neutral-800 dark:text-slate-200">{name}</td>
-                          <td className="p-4 font-black font-mono text-neutral-900 dark:text-slate-100">₵{total.toFixed(2)}</td>
+                          <td className="p-4 font-black font-mono text-neutral-900 dark:text-slate-100">₵{(total || 0).toFixed(2)}</td>
                         </tr>
                       ))}
                     </tbody>
@@ -2394,7 +2394,7 @@ export default function AdminDashboard({
                               <td className="p-4 font-mono font-medium text-neutral-500 dark:text-slate-400">{customer.phone}</td>
                               <td className="p-4 font-medium text-neutral-400">{customer.registrationDate}</td>
                               <td className="p-4 text-center font-bold font-mono text-neutral-700 dark:text-slate-300">{customer.orders} orders</td>
-                              <td className="p-4 font-black font-mono text-neutral-900 dark:text-slate-100">₵{customer.totalSpent.toFixed(2)}</td>
+                              <td className="p-4 font-black font-mono text-neutral-900 dark:text-slate-100">₵{(customer.totalSpent || 0).toFixed(2)}</td>
                             </tr>
                           ))
                         )}
@@ -2483,7 +2483,7 @@ export default function AdminDashboard({
                                 <p className="text-[10px] text-neutral-400 font-mono">{order.date}</p>
                               </div>
                               <div className="text-right">
-                                <div className="font-mono font-bold text-neutral-800 dark:text-slate-200">₵{order.total.toFixed(2)}</div>
+                                <div className="font-mono font-bold text-neutral-800 dark:text-slate-200">₵{(order.total || 0).toFixed(2)}</div>
                                 <span className={`text-[9px] px-1.5 py-0.5 rounded font-black capitalize ${
                                   order.status === 'completed' ? 'bg-green-50 border border-green-200 text-green-600' :
                                   'bg-amber-50 border border-amber-200 text-amber-600'
@@ -2514,7 +2514,7 @@ export default function AdminDashboard({
                               <MapPin className="w-3.5 h-3.5 text-amber-600 shrink-0 mt-0.5" />
                               <div>
                                 <p className="font-medium text-neutral-800 dark:text-slate-200">{loc.address}</p>
-                                <p className="font-mono text-[9px] text-neutral-400">({loc.lat.toFixed(4)}, {loc.lng.toFixed(4)})</p>
+                                <p className="font-mono text-[9px] text-neutral-400">({(loc.lat || 0).toFixed(4)}, {(loc.lng || 0).toFixed(4)})</p>
                               </div>
                             </div>
                           ))
@@ -2654,7 +2654,7 @@ export default function AdminDashboard({
                               {pay.method === 'momo' ? 'MTN MoMo Gateway' : pay.method}
                             </span>
                           </td>
-                          <td className="p-4 font-black font-mono text-neutral-900 dark:text-slate-100">₵{pay.amount.toFixed(2)}</td>
+                          <td className="p-4 font-black font-mono text-neutral-900 dark:text-slate-100">₵{(pay.amount || 0).toFixed(2)}</td>
                           <td className="p-4 font-medium text-neutral-400">{pay.date}</td>
                           <td className="p-4">
                             <span className="px-2 py-0.5 rounded-full text-[10px] font-bold bg-green-100 text-green-700 capitalize">

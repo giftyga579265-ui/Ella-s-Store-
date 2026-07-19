@@ -67,7 +67,7 @@ export default function OrderHistory({
       
       autoTable(doc, {
         head: [['Item']],
-        body: order.items.map(item => [item]),
+        body: (order.items || []).map(item => [item]),
         startY: 50,
       });
 
@@ -120,7 +120,7 @@ export default function OrderHistory({
 
     autoTable(doc, {
       head: [['Item']],
-      body: order.items.map(item => [item]),
+      body: (order.items || []).map(item => [item]),
       startY: 60,
     });
 
@@ -175,7 +175,7 @@ export default function OrderHistory({
     iframe.style.border = 'none';
     document.body.appendChild(iframe);
 
-    const itemsHtml = order.items.map(item => `
+    const itemsHtml = (order.items || []).map(item => `
       <tr style="border-bottom: 1px solid #e5e7eb;">
         <td style="padding: 12px 0; font-size: 14px; color: #374151;">${item}</td>
         <td style="padding: 12px 0; font-size: 14px; color: #111827; text-align: right; font-weight: bold;">Included</td>
@@ -766,7 +766,7 @@ export default function OrderHistory({
                         <div className="space-y-1.5 py-1">
                           <p className="text-[10px] font-bold text-neutral-400 uppercase tracking-wider">Purchased Styles</p>
                           <ul className="space-y-1">
-                            {order.items.map((item, idx) => (
+                            {(order.items || []).map((item, idx) => (
                               <li key={idx} className="text-xs font-semibold text-neutral-800 dark:text-slate-200 flex items-center gap-1.5">
                                 <span className="text-indigo-500">✦</span>
                                 <span>{item}</span>

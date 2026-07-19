@@ -213,8 +213,8 @@ export default function CustomerLiveMap({ locations, onShowToast }: CustomerLive
                   </div>
                   <p className="text-xs text-slate-300 leading-relaxed font-sans font-medium">{selectedPin.address}</p>
                   <div className="flex flex-wrap gap-x-4 gap-y-1 text-[9px] font-mono text-slate-500 pt-1.5 border-t border-slate-900">
-                    <span>LAT: {selectedPin.lat.toFixed(4)}°N</span>
-                    <span>LNG: {selectedPin.lng.toFixed(4)}°W</span>
+                    <span>LAT: {(selectedPin.lat || 0).toFixed(4)}°N</span>
+                    <span>LNG: {(selectedPin.lng || 0).toFixed(4)}°W</span>
                     <span>STATUS: Active Dispatch Route</span>
                   </div>
                 </div>
@@ -259,7 +259,7 @@ export default function CustomerLiveMap({ locations, onShowToast }: CustomerLive
                       {selectedPin.address}
                     </p>
                     <div className="flex justify-between items-center text-[8px] font-mono text-slate-400 pt-1">
-                      <span>{selectedPin.lat.toFixed(4)}°N, {selectedPin.lng.toFixed(4)}°W</span>
+                      <span>{(selectedPin.lat || 0).toFixed(4)}°N, {(selectedPin.lng || 0).toFixed(4)}°W</span>
                     </div>
                   </div>
                 </InfoWindow>

@@ -79,7 +79,7 @@ export default function ProductCard({ product, allProducts = [], onAddToCart, is
                     <img src={comp.image} alt={comp.name} className="w-7 h-7 rounded-lg object-cover shrink-0 border border-neutral-200 dark:border-slate-700" />
                     <div className="max-w-[70px] overflow-hidden">
                       <p className="text-[9px] font-bold text-neutral-800 dark:text-slate-200 truncate leading-none">{comp.name}</p>
-                      <p className="text-[8px] font-mono font-bold text-indigo-600">₵{comp.price.toFixed(0)}</p>
+                      <p className="text-[8px] font-mono font-bold text-indigo-600">₵{(comp.price || 0).toFixed(0)}</p>
                     </div>
                   </div>
                 ))}
@@ -89,7 +89,7 @@ export default function ProductCard({ product, allProducts = [], onAddToCart, is
         </div>
         <div className="flex items-center gap-6 shrink-0 w-full sm:w-auto">
           <div className="flex flex-col items-end">
-            <span className="text-lg font-mono font-black tracking-tight text-neutral-900 dark:text-slate-100">₵{product.price.toFixed(2)}</span>
+            <span className="text-lg font-mono font-black tracking-tight text-neutral-900 dark:text-slate-100">₵{(product.price || 0).toFixed(2)}</span>
             {isFood && <span className="text-[10px] text-neutral-400 font-medium tracking-wide">Hot & Ready</span>}
           </div>
           {product.stock === 0 ? (
@@ -156,7 +156,7 @@ export default function ProductCard({ product, allProducts = [], onAddToCart, is
         </div>
 
         <div className="pt-3.5 border-t border-neutral-100 dark:border-slate-800 flex items-center justify-between">
-          <span className="text-xl font-mono font-black text-black dark:text-white">₵{product.price.toFixed(2)}</span>
+          <span className="text-xl font-mono font-black text-black dark:text-white">₵{(product.price || 0).toFixed(2)}</span>
           {product.stock === 0 ? (
             <button
               onClick={(e) => { e.stopPropagation(); onNotifyMe?.(product); }}

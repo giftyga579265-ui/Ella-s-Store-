@@ -1482,7 +1482,7 @@ export default function App() {
       
       await addNotification(
         "Order Placed Successfully! 🎉",
-        `Your invoice #${shortOrderId} for ₵${order.total.toFixed(2)} is authorized via ${paymentModeStr}. We are packaging your items for express delivery!`,
+        `Your invoice #${shortOrderId} for ₵${(order.total || 0).toFixed(2)} is authorized via ${paymentModeStr}. We are packaging your items for express delivery!`,
         "success",
         order.email || order.customerEmail || "all"
       );
@@ -2173,7 +2173,7 @@ export default function App() {
                                   {prod.name}
                                 </h4>
                                 <span className="text-[9px] font-mono text-neutral-400">
-                                  {prod.category} • ₵{prod.price.toFixed(2)}
+                                  {prod.category} • ₵{(prod.price || 0).toFixed(2)}
                                 </span>
                               </div>
                             </div>

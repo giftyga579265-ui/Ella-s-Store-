@@ -138,7 +138,7 @@ export default function CheckoutModal({
     }
 
     setAppliedDiscount(discount);
-    onShowToast("Coupon Applied", `You saved ₵${discountAmount.toFixed(2)} with code ${discount.code}`, "success");
+    onShowToast("Coupon Applied", `You saved ₵${(discountAmount || 0).toFixed(2)} with code ${discount.code}`, "success");
     onLogActivity(`Applied coupon code: ${discount.code}`, "user_action");
   };
 
@@ -179,7 +179,7 @@ export default function CheckoutModal({
     }
 
     setIsProcessing(true);
-    onLogActivity(`Authorizing MoMo payment for ₵${total.toFixed(2)}`, "user_action");
+    onLogActivity(`Authorizing MoMo payment for ₵${(total || 0).toFixed(2)}`, "user_action");
 
     setTimeout(() => {
       const orderId = `ELLA-2026-${Math.floor(1000 + Math.random() * 9000)}`;
@@ -223,13 +223,13 @@ export default function CheckoutModal({
       setStep('success');
       onClearCart();
       onShowToast("Payment Successful!", `Order ${orderId} has been placed.`, "success");
-      onLogActivity(`Successfully purchased order ${orderId} for ₵${total.toFixed(2)}`, "purchase");
+      onLogActivity(`Successfully purchased order ${orderId} for ₵${(total || 0).toFixed(2)}`, "purchase");
     }, 3000);
   };
 
   const handleGooglePayPayment = () => {
     setGpayIsAuthorizing(true);
-    onLogActivity(`Simulating Google Pay authentication for ₵${total.toFixed(2)}`, "user_action");
+    onLogActivity(`Simulating Google Pay authentication for ₵${(total || 0).toFixed(2)}`, "user_action");
 
     setTimeout(() => {
       const orderId = `ELLA-GP-${Math.floor(1000 + Math.random() * 9000)}`;
@@ -275,7 +275,7 @@ export default function CheckoutModal({
       setStep('success');
       onClearCart();
       onShowToast("Google Pay Success!", `Order ${orderId} has been successfully authorized via Google Pay.`, "success");
-      onLogActivity(`Successfully purchased order ${orderId} for ₵${total.toFixed(2)} via Google Pay`, "purchase");
+      onLogActivity(`Successfully purchased order ${orderId} for ₵${(total || 0).toFixed(2)} via Google Pay`, "purchase");
     }, 2500);
   };
 
@@ -448,33 +448,33 @@ export default function CheckoutModal({
                   <div className="border-t border-neutral-150 dark:border-slate-800 pt-4 space-y-2 text-sm">
                     <div className="flex justify-between text-neutral-600 dark:text-slate-400">
                       <span>Bag Subtotal</span>
-                      <span>₵{subtotal.toFixed(2)}</span>
+                      <span>₵{(subtotal || 0).toFixed(2)}</span>
                     </div>
                     <div className="flex justify-between text-neutral-600 dark:text-slate-400">
                       <span>Ashaiman Delivery Fee</span>
-                      <span>₵{delivery.toFixed(2)}</span>
+                      <span>₵{(delivery || 0).toFixed(2)}</span>
                     </div>
                     {appliedDiscount && (
                       <div className="flex justify-between text-green-600 font-medium">
                         <span>Discount Coupon ({appliedDiscount.code})</span>
-                        <span>-₵{discountAmount.toFixed(2)}</span>
+                        <span>-₵{(discountAmount || 0).toFixed(2)}</span>
                       </div>
                     )}
                     {redeemPoints && (
                       <div className="flex justify-between text-amber-600 font-medium">
                         <span>Loyalty Points Discount (30% Off)</span>
-                        <span>-₵{pointsDiscountAmount.toFixed(2)}</span>
+                        <span>-₵{(pointsDiscountAmount || 0).toFixed(2)}</span>
                       </div>
                     )}
                     {momoFee > 0 && (
                       <div className="flex justify-between text-neutral-600 dark:text-slate-400">
                         <span>MTN MoMo Gateway Fee ({momoChargeRate}%)</span>
-                        <span>₵{momoFee.toFixed(2)}</span>
+                        <span>₵{(momoFee || 0).toFixed(2)}</span>
                       </div>
                     )}
                     <div className="flex justify-between font-serif text-lg text-neutral-900 dark:text-slate-100 border-t border-dashed border-neutral-250 pt-3">
                       <span>Amount to Pay</span>
-                      <span className="text-amber-500 font-bold text-xl">₵{total.toFixed(2)}</span>
+                      <span className="text-amber-500 font-bold text-xl">₵{(total || 0).toFixed(2)}</span>
                     </div>
                   </div>
 
@@ -606,7 +606,7 @@ export default function CheckoutModal({
                   <div className="bg-amber-50 border-l-4 border-amber-500 p-4 rounded-r-2xl space-y-2">
                     <h5 className="font-bold text-neutral-900 dark:text-slate-100 text-xs">MTN MoMo Authorization Guide:</h5>
                     <ol className="list-decimal pl-4 text-xs text-neutral-700 dark:text-slate-300 space-y-1">
-                      <li>Ensure your MTN wallet has at least ₵{total.toFixed(2)}.</li>
+                      <li>Ensure your MTN wallet has at least ₵{(total || 0).toFixed(2)}.</li>
                       <li>Funds will be routed securely to <strong>{momoMerchantName}</strong> ({momoMerchantNumber}).</li>
                       <li>Confirm your MTN number and enter your 4-digit PIN to authorize.</li>
                     </ol>
@@ -671,7 +671,7 @@ export default function CheckoutModal({
 
               <div className="bg-neutral-50 dark:bg-slate-950 p-4 rounded-xl border border-neutral-100 dark:border-slate-800 flex justify-between items-center">
                 <span className="text-sm font-semibold text-neutral-600 dark:text-slate-400">Grand Total to Pay:</span>
-                <span className="text-lg font-extrabold text-neutral-900 dark:text-slate-100 font-mono">₵{total.toFixed(2)}</span>
+                <span className="text-lg font-extrabold text-neutral-900 dark:text-slate-100 font-mono">₵{(total || 0).toFixed(2)}</span>
               </div>
 
               <div className="flex gap-3 mt-6 pt-4 border-t border-neutral-100 dark:border-slate-800">
@@ -781,7 +781,7 @@ export default function CheckoutModal({
                   <div className="border-t border-dashed border-neutral-250 pt-3 space-y-1.5 text-xs">
                     <div className="flex justify-between text-neutral-600 dark:text-slate-400">
                       <span>Store Checkout Total</span>
-                      <span>₵{total.toFixed(2)}</span>
+                      <span>₵{(total || 0).toFixed(2)}</span>
                     </div>
                     <div className="flex justify-between text-neutral-600 dark:text-slate-400">
                       <span>GPay Processing Fee</span>
@@ -789,7 +789,7 @@ export default function CheckoutModal({
                     </div>
                     <div className="flex justify-between text-sm font-bold text-neutral-900 dark:text-slate-100 pt-2 border-t border-neutral-200 dark:border-slate-700">
                       <span>Total Charge</span>
-                      <span>₵{total.toFixed(2)}</span>
+                      <span>₵{(total || 0).toFixed(2)}</span>
                     </div>
                   </div>
                 </div>
@@ -807,7 +807,7 @@ export default function CheckoutModal({
                     </>
                   ) : (
                     <>
-                      <span>PAY ₵{total.toFixed(2)} NOW</span>
+                      <span>PAY ₵{(total || 0).toFixed(2)} NOW</span>
                     </>
                   )}
                 </button>
@@ -835,7 +835,7 @@ export default function CheckoutModal({
                 </div>
                 <div className="space-y-1 text-neutral-700 dark:text-slate-300">
                   <p><strong>Customer Name:</strong> {finalOrderDetails.name}</p>
-                  <p><strong>Amount Paid:</strong> ₵{finalOrderDetails.total.toFixed(2)}</p>
+                  <p><strong>Amount Paid:</strong> ₵{(finalOrderDetails.total || 0).toFixed(2)}</p>
                   <p><strong>Payment Mode:</strong> {finalOrderDetails.isGooglePay ? "Google Pay (Secure Card)" : "MTN Mobile Money"}</p>
                   <p><strong>Gateway Ref:</strong> {finalOrderDetails.paymentId}</p>
                   <p className="line-clamp-2"><strong>Delivery Location:</strong> {finalOrderDetails.address}</p>

@@ -1085,7 +1085,7 @@ export default function ProductDetailModal({
 
                 <div className="flex items-baseline gap-3">
                   <span className="text-2xl md:text-3xl font-mono font-black text-indigo-600">
-                    ₵{product.price.toFixed(2)}
+                    ₵{(product.price || 0).toFixed(2)}
                   </span>
                   <span className="text-[10px] text-neutral-400 font-mono font-bold uppercase">
                     Vat inclusive
@@ -1224,7 +1224,7 @@ export default function ProductDetailModal({
                     {/* Footer price & action button */}
                     <div className="pt-3 mt-3 border-t border-neutral-100 dark:border-slate-800 flex items-center justify-between px-1">
                       <span className="text-xs font-mono font-black text-neutral-900 dark:text-slate-100">
-                        ₵{item.price.toFixed(0)}
+                        ₵{(item.price || 0).toFixed(0)}
                       </span>
                       <button
                         onClick={(e) => {

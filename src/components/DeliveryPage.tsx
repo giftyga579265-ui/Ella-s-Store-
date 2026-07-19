@@ -68,7 +68,7 @@ export default function DeliveryPage({ rates, personnel, onSetRates, onSetPerson
           <ul className="space-y-2">
             {personnel.map(p => (
               <li key={p.id} className="p-3 bg-neutral-50 dark:bg-slate-950 rounded flex justify-between text-sm border border-neutral-100 dark:border-slate-800">
-                <span>{p.name} ({p.phone}) - <span className="font-mono text-xs">{p.currentLat.toFixed(4)}, {p.currentLng.toFixed(4)}</span></span>
+                <span>{p.name} ({p.phone}) - <span className="font-mono text-xs">{(p.currentLat || 0).toFixed(4)}, {(p.currentLng || 0).toFixed(4)}</span></span>
                 <span className={`font-bold ${p.status === 'available' ? 'text-green-600' : 'text-amber-600'}`}>{(p.status || '').toUpperCase()}</span>
               </li>
             ))}
