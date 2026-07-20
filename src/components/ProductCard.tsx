@@ -1,6 +1,6 @@
 import React from "react";
 import { Product } from "../types";
-import { ShoppingBag, Star, Plus, Sparkles, Bell } from "lucide-react";
+import { ShoppingBag, Star, Plus, Sparkles, Bell , Heart } from "lucide-react";
 
 interface ProductCardProps {
   key?: any;
@@ -12,9 +12,11 @@ interface ProductCardProps {
   onNotifyMe?: (product: Product) => void;
   layout: 'grid' | 'list' | 'carousel' | 'masonry';
   onViewDetail?: (product: Product, initialTab?: 'classic' | 'spin360' | 'video' | 'tryon') => void;
+  isWishlisted?: boolean;
+  onToggleWishlist?: (product: Product) => void;
 }
 
-export default function ProductCard({ product, allProducts = [], onAddToCart, isLoggedIn, onShowLogin, onNotifyMe, layout, onViewDetail }: ProductCardProps) {
+export default function ProductCard({ product, allProducts = [], onAddToCart, isLoggedIn, onShowLogin, onNotifyMe, layout, onViewDetail, isWishlisted, onToggleWishlist }: ProductCardProps) {
   const isFood = product.category === "food" || product.category === "kitchen";
   
   const handleAddClick = (e: React.MouseEvent) => {
@@ -88,6 +90,12 @@ export default function ProductCard({ product, allProducts = [], onAddToCart, is
           )}
         </div>
         <div className="flex items-center gap-6 shrink-0 w-full sm:w-auto">
+          <button
+            onClick={(e) => { e.stopPropagation(); onToggleWishlist?.(product); }}
+            className={`w-9 h-9 rounded-full flex items-center justify-center border transition-all duration-300 cursor-pointer ${isWishlisted ? 'bg-rose-50 border-rose-200 text-rose-500' : 'bg-neutral-50 border-neutral-200 text-neutral-400 hover:bg-rose-50 hover:text-rose-400 hover:border-rose-200'}`}
+          >
+            <Heart className={`w-4.5 h-4.5 ${isWishlisted ? 'fill-rose-500' : ''}`} />
+          </button>
           <div className="flex flex-col items-end">
             <span className="text-lg font-mono font-black tracking-tight text-neutral-900 dark:text-slate-100">₵{(product.price || 0).toFixed(2)}</span>
             {isFood && <span className="text-[10px] text-neutral-400 font-medium tracking-wide">Hot & Ready</span>}
@@ -124,6 +132,13 @@ export default function ProductCard({ product, allProducts = [], onAddToCart, is
         <img src={product.image} alt={product.name} className="w-full h-full object-cover transition-transform duration-700 group-hover:scale-105" loading="lazy" />
         <div className="absolute inset-0 bg-gradient-to-t from-black/60 via-black/0 to-black/10 opacity-0 group-hover:opacity-100 transition-opacity duration-300 pointer-events-none" />
         
+        <button
+          onClick={(e) => { e.stopPropagation(); onToggleWishlist?.(product); }}
+          className={`absolute top-4.5 right-4.5 z-20 w-8 h-8 rounded-full flex items-center justify-center backdrop-blur-md border transition-all duration-300 cursor-pointer ${isWishlisted ? 'bg-rose-50 border-rose-200 text-rose-500' : 'bg-white/50 border-white/40 text-neutral-600 hover:bg-white/90 hover:text-rose-500'}`}
+        >
+          <Heart className={`w-4 h-4 ${isWishlisted ? 'fill-rose-500' : ''}`} />
+        </button>
+
         {/* Badges */}
         <div className="absolute top-4.5 left-4.5 flex flex-col gap-1.5 z-10">
           <span className="bg-white/90 text-indigo-600 text-[9px] px-2.5 py-1 rounded-full font-bold tracking-widest font-mono uppercase shadow-md backdrop-blur-md border border-indigo-200">

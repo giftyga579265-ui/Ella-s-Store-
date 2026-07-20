@@ -482,6 +482,7 @@ export default function App() {
 
   // Client session state
   const [cart, setCart] = useState<any[]>([]);
+  const [isCartBumping, setIsCartBumping] = useState(false);
   const [activeCategory, setActiveCategory] = useState<string>("all");
   const [searchQuery, setSearchQuery] = useState<string>("");
   const [isLoggedIn, setIsLoggedIn] = useState(() => {
@@ -1626,6 +1627,35 @@ export default function App() {
 
   // Shopping cart handlers
   
+  const toggleWishlist = async (product: Product) => {
+    if (!isLoggedIn) {
+      showToast("Login Required", "Please log in to save items to your wishlist.", "info");
+      setShowLogin(true);
+      return;
+    }
+    const customer = customers.find(c => (c.email || '').toLowerCase() === (currentUserEmail || '').toLowerCase());
+    if (!customer) return;
+
+    const currentWishlist = customer.wishlist || [];
+    const isWishlisted = currentWishlist.includes(product.id);
+    let newWishlist;
+    if (isWishlisted) {
+      newWishlist = currentWishlist.filter(id => id !== product.id);
+      showToast("Removed from Wishlist", `${product.name} removed from your saved items.`, "info");
+    } else {
+      newWishlist = [...currentWishlist, product.id];
+      showToast("Added to Wishlist", `${product.name} saved to your wishlist.`, "success");
+    }
+
+    const updatedCustomer = { ...customer, wishlist: newWishlist };
+    try {
+      await setDoc(doc(db, "customers", String(customer.id)), updatedCustomer);
+      logActivity(`Toggled wishlist for ${product.name}`, "user_action");
+    } catch (err) {
+      console.error("Error updating wishlist:", err);
+    }
+  };
+
   const handleNotifyMe = async (product: Product) => {
     if (!isLoggedIn) {
       showToast("Login Required", "Please log in to receive stock alerts.", "info");
@@ -1656,6 +1686,8 @@ export default function App() {
   };
 
   const addToCart = (product: Product) => {
+    setIsCartBumping(true);
+    setTimeout(() => setIsCartBumping(false), 400);
     setCart(prev => {
       const existing = prev.find(item => item.id === product.id);
       if (existing) {
@@ -2335,9 +2367,13 @@ export default function App() {
                 }
                 setShowCheckout(true);
               }}
-              className="relative w-9 h-9 rounded-full border border-neutral-200 dark:border-slate-700 flex items-center justify-center text-neutral-600 dark:text-slate-400 hover:border-indigo-500 hover:text-indigo-600 bg-white dark:bg-slate-900 transition-colors cursor-pointer"
+              className={`relative w-9 h-9 rounded-full border flex items-center justify-center cursor-pointer transition-all duration-300 ${
+                isCartBumping 
+                  ? 'border-indigo-500 bg-indigo-50 dark:bg-indigo-900/30 text-indigo-600 scale-110 shadow-lg shadow-indigo-500/20' 
+                  : 'border-neutral-200 dark:border-slate-700 text-neutral-600 dark:text-slate-400 hover:border-indigo-500 hover:text-indigo-600 bg-white dark:bg-slate-900'
+              }`}
             >
-              <ShoppingBag className="w-4 h-4" />
+              <ShoppingBag className={`w-4 h-4 ${isCartBumping ? 'animate-pulse scale-110' : ''}`} />
               {cart.length > 0 && (
                 <span className="absolute -top-1 -right-1 w-4 h-4 bg-indigo-600 text-white font-bold rounded-full flex items-center justify-center text-[9px]">
                   {cart.reduce((sum, item) => sum + item.quantity, 0)}
@@ -2987,6 +3023,8 @@ export default function App() {
                       onShowLogin={() => setShowLogin(true)}
                       layout={homepageSettings.productLayout as any}
                       onViewDetail={handleViewDetail}
+                      isWishlisted={customers.find(c => (c.email || '').toLowerCase() === (currentUserEmail || '').toLowerCase())?.wishlist?.includes(prod.id)}
+                      onToggleWishlist={toggleWishlist}
                     />
                   </motion.div>
                 ))}

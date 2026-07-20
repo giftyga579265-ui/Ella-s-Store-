@@ -1248,30 +1248,7 @@ export default function AdminDashboard({
                   <p className="text-xs text-neutral-500 dark:text-slate-400">Ella's store starts as a clean slate for real products. Click below to either purge all live collections or re-seed high-fidelity sample collections.</p>
                 </div>
                 <div className="flex flex-wrap gap-3 pt-1">
-                  <button
-                    type="button"
-                    onClick={onClearAllData}
-                    className="px-4 py-2.5 rounded-xl text-xs font-bold bg-rose-50 text-rose-600 border border-rose-200 hover:bg-rose-100 transition-colors cursor-pointer"
-                  >
-                    Clear All Firestore Collections
-                  </button>
-                  {onDeleteCustomersAndActivities && (
-                    <button
-                      type="button"
-                      onClick={() => setShowDeleteConfirm(true)}
-                      className="px-4 py-2.5 rounded-xl text-xs font-bold bg-rose-50 text-rose-600 border border-rose-200 hover:bg-rose-100 transition-colors cursor-pointer flex items-center gap-1.5"
-                    >
-                      <Users className="w-3.5 h-3.5 text-rose-500" />
-                      Delete All Customers & Activities
-                    </button>
-                  )}
-                  <button
-                    type="button"
-                    onClick={onSeedDemoData}
-                    className="px-4 py-2.5 rounded-xl text-xs font-bold bg-amber-500 text-neutral-900 dark:text-slate-100 hover:bg-neutral-900 hover:text-white transition-all shadow cursor-pointer"
-                  >
-                    Seed Elegant Boutique Demo Data
-                  </button>
+                  {/* Danger Zone functions removed to ensure data permanence */}
                   
                   <a
                     href="https://console.firebase.google.com/project/teak-technique-g71nt/firestore/databases/ai-studio-ellasstore-6673b3a5-ee4c-4237-b264-769d13c47377/data"

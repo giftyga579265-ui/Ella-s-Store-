@@ -53,6 +53,7 @@ export interface Customer {
   ip?: string;
   ipDetails?: string;
   loyaltyPoints: number;
+  wishlist?: string[];
 }
 
 export interface Order {
